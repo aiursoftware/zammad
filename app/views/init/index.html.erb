@@ -29,8 +29,14 @@
   })(document)
 <% end -%>
 <div id="app"></div>
+<style>
+  .splash { flex-direction: column; gap: 18px; }
+  .splash-title { letter-spacing: 0.02em; animation: splash-title-fade 1.6s ease-in-out infinite; }
+  @keyframes splash-title-fade { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+  @media (prefers-reduced-motion: reduce) { .splash-title { animation: none; } }
+</style>
 <div class="splash">
-  <svg class="icon icon-logo"><use xlink:href="<%= icons_url %>#icon-logo" /></svg>
+  <%= render partial: 'init/logo_loader' %>
   <div class="splash-title"><%= Translation.translate(local_assigns[:locale], 'Loading…') %></div>
   <noscript>
     <style>
