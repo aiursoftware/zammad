@@ -78,9 +78,12 @@ class App.SearchableSelect extends Spine.Controller
 
       else
         for value in @attribute.value
-          values.push({ name: value, value: value })
+          # WCL: show the option's name, as picking it from the list does, not its raw value
+          #   (e. g. an agent's name rather than their id).
+          name = @getDisplayName(value, @attribute.options) ? @getName(value, @attribute.options) ? value
+          values.push({ name: name, value: value })
           tokens += App.view('generic/token')(
-            @prepareTokenContent({ name: value, value, disabled })
+            @prepareTokenContent({ name, value, disabled })
           )
 
       @attribute.value = values

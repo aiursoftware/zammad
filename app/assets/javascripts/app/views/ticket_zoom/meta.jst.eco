@@ -10,6 +10,20 @@
   <% end %>
 </small>
 
+<% if @requester && !@isCustomer: %>
+  <small class="task-subline ticket-meta-requester">
+    <% if @requester.customer: %>
+      <span class="ticket-meta-requester-item"><%- @Icon('user', 'ticket-meta-requester-icon') %><span class="ticket-meta-highlighted"><%= @requester.customer %></span></span>
+    <% end %>
+    <% if @requester.department: %>
+      <span class="ticket-meta-requester-item"><%- @Icon('group', 'ticket-meta-requester-icon') %><%= @requester.department %></span>
+    <% end %>
+    <% if @requester.organization: %>
+      <span class="ticket-meta-requester-item"><%- @Icon('organization', 'ticket-meta-requester-icon') %><span class="ticket-meta-highlighted"><%= @requester.organization %></span><% if @requester.members: %> · <%- @T('%s people', @requester.members) %><% end %></span>
+    <% end %>
+  </small>
+<% end %>
+
 <% if @checklistState || @checklistReferences: %>
   <small class="task-subline ticket-meta-checklist-details">
     <% if @checklistState: %>

@@ -11,6 +11,8 @@ class App.TicketZoomMeta extends App.ControllerObserver
     created_at: true
     updated_at: true
     escalation_at: true
+    customer_id: true
+    organization_id: true
 
   render: (ticket) =>
     @last_ticket = ticket
@@ -22,6 +24,7 @@ class App.TicketZoomMeta extends App.ControllerObserver
     @html App.view('ticket_zoom/meta')(
       ticket:              ticket
       isCustomer:          ticket.currentView() is 'customer'
+      requester:           @requester(ticket)
       checklistState:      @checklistState
       checklistReferences: @checklistReferences
     )
@@ -31,6 +34,19 @@ class App.TicketZoomMeta extends App.ControllerObserver
 
     @controllerUnbind('ui::ticket::all::loaded', @updateOnTicketAllLoaded)
     @controllerBind('ui::ticket::all::loaded', @updateOnTicketAllLoaded)
+
+  # WCL: who the ticket is from, shown under the title rather than only in the avatar popovers.
+  requester: (ticket) ->
+    customer     = App.User.findNative(ticket.customer_id) if ticket.customer_id
+    organization = App.Organization.findNative(ticket.organization_id) if ticket.organization_id
+    return if !customer && !organization
+
+    {
+      customer:     customer?.displayName()
+      department:   customer?.department
+      organization: organization?.displayName()
+      members:      organization?.member_ids?.length
+    }
 
   updateOnTicketAllLoaded: (data) =>
     return if data.ticket_id.toString() isnt @last_ticket.id.toString()

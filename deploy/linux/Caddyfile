@@ -1,0 +1,13 @@
+{$ZAMMAD_FQDN} {
+	encode zstd gzip
+
+	# Zammad's own nginx (inside the stack) serves the app and its websocket.
+	reverse_proxy zammad-nginx:8080 {
+		header_up X-Forwarded-Proto https
+	}
+
+	# Large enough for the attachments the HR app allows (see the Zammad setting).
+	request_body {
+		max_size 50MB
+	}
+}

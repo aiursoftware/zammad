@@ -1,0 +1,154 @@
+# WCL Zammad on a Linux server: Zammad (built from this repository, with the WCL changes),
+# PostgreSQL, Redis, Memcached, Elasticsearch, and Caddy for HTTPS (Let's Encrypt).
+#
+#   cp .env.example .env    # then fill it in
+#   ./build.sh
+#   docker compose up -d
+#
+# See README.md.
+
+x-zammad: &zammad
+  image: ${IMAGE:-wcl/zammad:latest}
+  restart: unless-stopped
+  environment: &zammad-env
+    POSTGRESQL_DB: zammad_production
+    POSTGRESQL_HOST: zammad-postgresql
+    POSTGRESQL_PORT: 5432
+    POSTGRESQL_USER: zammad
+    POSTGRESQL_PASS: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+    POSTGRESQL_OPTIONS: ?pool=50
+    REDIS_URL: redis://zammad-redis:6379
+    MEMCACHE_SERVERS: zammad-memcached:11211
+    ELASTICSEARCH_ENABLED: "true"
+    ELASTICSEARCH_HOST: zammad-elasticsearch
+    ELASTICSEARCH_PORT: 9200
+    ZAMMAD_FQDN: ${ZAMMAD_FQDN:?set ZAMMAD_FQDN in .env}
+    ZAMMAD_HTTP_TYPE: https
+    # Caddy terminates HTTPS and talks to Zammad's nginx over the internal network.
+    NGINX_SERVER_SCHEME: https
+    NGINX_SERVER_NAME: ${ZAMMAD_FQDN}
+    NGINX_CLIENT_MAX_BODY_SIZE: 50M
+    RAILS_TRUSTED_PROXIES: 127.0.0.1,::1,172.16.0.0/12,10.0.0.0/8,192.168.0.0/16
+    TZ: ${TZ:-Asia/Ho_Chi_Minh}
+    WEB_CONCURRENCY: ${WEB_CONCURRENCY:-2}
+    ZAMMAD_SESSION_JOBS_CONCURRENT: ${ZAMMAD_SESSION_JOBS_CONCURRENT:-2}
+  volumes:
+    - zammad-storage:/opt/zammad/storage
+  depends_on:
+    - zammad-postgresql
+    - zammad-redis
+    - zammad-memcached
+
+services:
+  # Builds the image from this repository (two folders up): ./build.sh
+  zammad-image:
+    image: ${IMAGE:-wcl/zammad:latest}
+    build:
+      context: ../..
+      dockerfile: Dockerfile
+      args:
+        # Stamped into Zammad's version; build.sh sets it from git.
+        COMMIT_SHA: ${COMMIT_SHA:-}
+        BUILD_LABEL: wcl
+    command: ["true"]
+    restart: "no"
+    profiles: ["build"]
+
+  zammad-init:
+    <<: *zammad
+    command: ["zammad-init"]
+    restart: on-failure
+    depends_on:
+      - zammad-postgresql
+      - zammad-redis
+      - zammad-memcached
+      - zammad-elasticsearch
+
+  zammad-railsserver:
+    <<: *zammad
+    command: ["zammad-railsserver"]
+
+  zammad-scheduler:
+    <<: *zammad
+    command: ["zammad-scheduler"]
+
+  zammad-websocket:
+    <<: *zammad
+    command: ["zammad-websocket"]
+
+  zammad-nginx:
+    <<: *zammad
+    command: ["zammad-nginx"]
+    depends_on:
+      - zammad-railsserver
+      - zammad-websocket
+
+  zammad-backup:
+    <<: *zammad
+    command: ["zammad-backup"]
+    environment:
+      <<: *zammad-env
+      BACKUP_TIME: "03:00"
+      HOLD_DAYS: "14"
+    volumes:
+      - zammad-storage:/opt/zammad/storage:ro
+      - ./backup:/var/tmp/zammad
+
+  zammad-postgresql:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: zammad_production
+      POSTGRES_USER: zammad
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgresql-data:/var/lib/postgresql/data
+
+  zammad-redis:
+    image: redis:7.4-alpine
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+
+  zammad-memcached:
+    image: memcached:1.6-alpine
+    restart: unless-stopped
+    command: ["memcached", "-m", "256M"]
+
+  # Search, including inside attachments (the attachment processor is built in; Zammad supports 8.15 up to 9.x).
+  zammad-elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.5.5
+    restart: unless-stopped
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: -Xms${ES_HEAP:-1g} -Xmx${ES_HEAP:-1g}
+    ulimits:
+      memlock: { soft: -1, hard: -1 }
+      nofile: { soft: 65536, hard: 65536 }
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+
+  # HTTPS with an automatic Let's Encrypt certificate for ZAMMAD_FQDN; websockets pass through.
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    environment:
+      ZAMMAD_FQDN: ${ZAMMAD_FQDN}
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - zammad-nginx
+
+volumes:
+  zammad-storage:
+  postgresql-data:
+  redis-data:
+  elasticsearch-data:
+  caddy-data:
+  caddy-config:

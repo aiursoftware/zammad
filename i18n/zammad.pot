@@ -322,7 +322,7 @@ msgid "%s object(s) will be updated."
 msgstr ""
 
 #: app/assets/javascripts/app/views/popover/ticket_overview.jst.eco:8
-#: app/assets/javascripts/app/views/ticket_zoom/meta.jst.eco:19
+#: app/assets/javascripts/app/views/ticket_zoom/meta.jst.eco:33
 #: app/frontend/apps/desktop/components/Ticket/TicketPopoverWithTrigger/TicketContentPopover.vue:50
 #: app/frontend/apps/desktop/pages/guided-setup/views/GuidedSetupImport/GuidedSetupImportSource/GuidedSetupImportSourceStatus.vue:208
 #: app/frontend/apps/desktop/pages/ticket/components/TicketDetailView/TicketDetailTopBar/components/TicketInformationFull/TicketInformationBadgeList/ChecklistBadgeList.vue:44
@@ -338,6 +338,7 @@ msgid "%s of my tickets escalated"
 msgstr ""
 
 #: app/assets/javascripts/app/views/ticket_overview/batch_overlay_user_group.jst.eco:11
+#: app/assets/javascripts/app/views/ticket_zoom/meta.jst.eco:22
 #: app/graphql/gql/queries/autocomplete_search/generic.rb:73
 msgid "%s people"
 msgstr ""
@@ -391,7 +392,7 @@ msgstr ""
 msgid "%s ticket(s) selected, selection limit reached"
 msgstr ""
 
-#: app/assets/javascripts/app/views/ticket_zoom/meta.jst.eco:30
+#: app/assets/javascripts/app/views/ticket_zoom/meta.jst.eco:44
 #: app/frontend/apps/desktop/pages/ticket/components/TicketDetailView/TicketDetailTopBar/components/TicketInformationFull/TicketInformationBadgeList/ReferencingTicketsBadgePopover.vue:63
 #: app/frontend/apps/mobile/components/Organization/OrganizationItem.vue:51
 #: app/frontend/apps/mobile/components/User/UserItem.vue:31
@@ -620,7 +621,7 @@ msgstr ""
 msgid "A mentioned user has no agent access to this ticket"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_plugin/session_taken_over.coffee:26
+#: app/assets/javascripts/app/controllers/_plugin/session_taken_over.coffee:31
 msgid "A new session was created with your account. This session will be stopped to prevent a conflict."
 msgstr ""
 
@@ -649,7 +650,7 @@ msgstr ""
 msgid "A test ticket has been created, you can find it in your overview \"%s\" %l."
 msgstr ""
 
-#: app/models/ticket.rb:303
+#: app/models/ticket.rb:304
 msgid "A ticket cannot be merged into itself."
 msgstr ""
 
@@ -1622,7 +1623,7 @@ msgid "Agent idle timeout"
 msgstr ""
 
 #: app/models/role.rb:182
-#: app/models/user.rb:832
+#: app/models/user.rb:833
 msgid "Agent limit exceeded, please check your account settings."
 msgstr ""
 
@@ -2331,7 +2332,7 @@ msgstr ""
 msgid "Assignment timeout in minutes if assigned agent is not working on it. Ticket will be shown as unassigend."
 msgstr ""
 
-#: app/models/user.rb:734
+#: app/models/user.rb:735
 msgid "At least one identifier (firstname, lastname, phone, mobile or email) for user is required."
 msgstr ""
 
@@ -2348,7 +2349,7 @@ msgid "At least one object must be selected."
 msgstr ""
 
 #: app/models/role.rb:159
-#: app/models/user.rb:811
+#: app/models/user.rb:812
 msgid "At least one user needs to have admin permissions."
 msgstr ""
 
@@ -4325,7 +4326,7 @@ msgid "Continue anyway"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/_plugin/maintenance.coffee:40
-#: app/assets/javascripts/app/controllers/_plugin/session_taken_over.coffee:30
+#: app/assets/javascripts/app/controllers/_plugin/session_taken_over.coffee:35
 #: app/assets/javascripts/app/controllers/_plugin/session_timeout.coffee:103
 msgid "Continue session"
 msgstr ""
@@ -5000,6 +5001,10 @@ msgstr ""
 
 #: app/assets/javascripts/app/views/data_privacy/preview.jst.eco:7
 msgid "Customer tickets of the user will get deleted on execution of the task. No rollback possible."
+msgstr ""
+
+#: app/models/hr_portal/setup.rb:27
+msgid "Customers can create tickets here"
 msgstr ""
 
 #: app/assets/javascripts/app/models/organization.coffee:7
@@ -7098,7 +7103,7 @@ msgstr ""
 msgid "Email address"
 msgstr ""
 
-#: app/models/user.rb:744
+#: app/models/user.rb:745
 msgid "Email address '%{email}' is already used for another user."
 msgstr ""
 
@@ -7175,6 +7180,10 @@ msgstr ""
 
 #: app/services/service/ai/vectordb/embedding.rb:36
 msgid "Embedding provider returned no usable vector"
+msgstr ""
+
+#: app/models/hr_portal/setup.rb:28
+msgid "Employees can pick this group when they create a ticket (and later in the HR app), and every agent gets access to it. Switch off for teams tickets are only handed to (e.g. Dev, Network)."
 msgstr ""
 
 #: app/assets/javascripts/app/views/knowledge_base/public_menu_manager.jst.eco:21
@@ -7802,6 +7811,10 @@ msgstr ""
 msgid "Every time a customer creates a new ticket, they automatically receive a confirmation email to assure them that their issue has been submitted successfully. This behavior is built into Zammad, but it’s also highly customizable, and you can set up other automated actions just like it.\n\nMaybe you want to set a higher priority on any ticket with the word “urgent” in the title. Maybe you want to avoid sending auto-reply emails to customers from certain organizations. Maybe you want mark a ticket as “pending” whenever someone adds an internal note to a ticket.\n\nWhatever it is, you can do it with triggers: actions that watch tickets for certain changes, and then fire off whenever those changes occur."
 msgstr ""
 
+#: app/models/hr_portal/setup.rb:106
+msgid "Everyone working on the ticket. The first is its main owner (\"My Assigned Tickets\"); all of them are notified, and the others find it under \"My Subscribed Tickets\"."
+msgstr ""
+
 #: app/assets/javascripts/app/views/generic/object_import/index.jst.eco:28
 msgid "Example CSV file for download."
 msgstr ""
@@ -8114,6 +8127,10 @@ msgstr ""
 
 #: db/seeds/settings.rb:2163
 msgid "Field that uniquely identifies the user. If unset, \"sub\" is used."
+msgstr ""
+
+#: app/models/hr_portal/attachment_rules.rb:11
+msgid "File extensions employees may attach to tickets in the HR app, separated by commas (e.g. \"pdf, png, jpg\"). Leave empty to turn attachments off."
 msgstr ""
 
 #: lib/validations/ticket_article_validator/whatsapp_message.rb:25
@@ -8823,7 +8840,7 @@ msgstr ""
 msgid "Google reCAPTCHA Enterprise"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_plugin/navigation.coffee:212
+#: app/assets/javascripts/app/controllers/_plugin/navigation.coffee:213
 #: app/assets/javascripts/app/views/clues/clues_content.jst.eco:17
 #: app/frontend/apps/desktop/components/BetaUi/composables/useBetaUi.ts:83
 msgid "Got it"
@@ -8949,6 +8966,22 @@ msgstr ""
 
 #: app/assets/javascripts/app/models/webhook.coffee:15
 msgid "HMAC SHA1 Signature Token"
+msgstr ""
+
+#: app/models/hr_portal/attachment_rules.rb:9
+msgid "HR app: allowed attachment types"
+msgstr ""
+
+#: app/models/hr_portal/attachment_rules.rb:16
+msgid "HR app: maximum attachment size (MB)"
+msgstr ""
+
+#: app/models/hr_portal/attachment_rules.rb:23
+msgid "HR app: maximum attachments per message"
+msgstr ""
+
+#: app/models/hr_portal/setup.rb:199
+msgid "HR portal – open requests"
 msgstr ""
 
 #: db/seeds/settings.rb:5583
@@ -9092,7 +9125,7 @@ msgstr ""
 msgid "Hello, the customer service window for this conversation is about to expire, please reply to keep it open."
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_plugin/navigation.coffee:208
+#: app/assets/javascripts/app/controllers/_plugin/navigation.coffee:209
 #: app/assets/javascripts/app/controllers/clues/first_steps_clues.coffee:40
 #: app/frontend/apps/desktop/components/BetaUi/composables/useBetaUi.ts:82
 #: app/frontend/apps/desktop/components/CommonPageHelp/CommonPageHelp.vue:22
@@ -9310,6 +9343,10 @@ msgstr ""
 
 #: app/assets/javascripts/app/controllers/_dashboard/stats/ticket_escalation.coffee:19
 msgid "How many escalated tickets do you have open? (Mr. Bubbles gets grumpy if you have too many…)"
+msgstr ""
+
+#: app/models/hr_portal/attachment_rules.rb:25
+msgid "How many files an employee may attach to one message in the HR app."
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/_dashboard/stats/ticket_channel_distribution.coffee:37
@@ -10026,7 +10063,7 @@ msgstr ""
 msgid "Invalid client_id received!"
 msgstr ""
 
-#: app/models/user.rb:683
+#: app/models/user.rb:684
 msgid "Invalid email '%{email}'"
 msgstr ""
 
@@ -10206,7 +10243,7 @@ msgstr ""
 msgid "It is not possible to delete your current account."
 msgstr ""
 
-#: app/models/ticket.rb:301
+#: app/models/ticket.rb:302
 msgid "It is not possible to merge into an already merged ticket."
 msgstr ""
 
@@ -11403,6 +11440,10 @@ msgstr ""
 msgid "Manage your notification settings"
 msgstr ""
 
+#: app/models/hr_portal/setup.rb:161
+msgid "Managed in the HR app (Departments); the list here follows it."
+msgstr ""
+
 #: app/assets/javascripts/app/views/api.jst.eco:2
 #: app/assets/javascripts/app/views/calendar/index.jst.eco:3
 #: app/assets/javascripts/app/views/data_privacy/index.jst.eco:3
@@ -11884,7 +11925,7 @@ msgstr ""
 msgid "More information can be found here."
 msgstr ""
 
-#: app/models/user.rb:763
+#: app/models/user.rb:764
 msgid "More than 250 secondary organizations are not allowed."
 msgstr ""
 
@@ -12831,7 +12872,7 @@ msgstr ""
 msgid "No translation service is configured."
 msgstr ""
 
-#: app/models/ticket.rb:434
+#: app/models/ticket.rb:435
 msgid "No triggers active"
 msgstr ""
 
@@ -14938,7 +14979,7 @@ msgstr ""
 msgid "Recently closed items were cleared successfully."
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_plugin/navigation.coffee:550
+#: app/assets/javascripts/app/controllers/_plugin/navigation.coffee:551
 msgid "Recently viewed"
 msgstr ""
 
@@ -15399,6 +15440,10 @@ msgstr ""
 #: app/frontend/apps/desktop/pages/authentication/views/Login.vue:303
 #: app/frontend/apps/mobile/pages/authentication/views/Login.vue:161
 msgid "Request the password login here."
+msgstr ""
+
+#: app/models/hr_portal/setup.rb:174
+msgid "Request turned down (WCL). Shown to the employee as \"Rejected\" in the HR app."
 msgstr ""
 
 #: app/assets/javascripts/app/views/api.jst.eco:67
@@ -16291,17 +16336,17 @@ msgstr ""
 msgid "Secondary organizations"
 msgstr ""
 
-#: app/models/user.rb:751
+#: app/models/user.rb:752
 msgid "Secondary organizations are only allowed when the primary organization is given."
 msgstr ""
 
 #: app/models/concerns/checks_secondary_organizations_on_commit.rb:21
-#: app/models/user.rb:757
+#: app/models/user.rb:758
 msgid "Secondary organizations cannot include the primary organization."
 msgstr ""
 
 #: app/models/organization.rb:116
-#: app/models/user.rb:991
+#: app/models/user.rb:992
 msgid "Secondary organizations cannot include the same organization twice."
 msgstr ""
 
@@ -16738,7 +16783,7 @@ msgstr ""
 msgid "Services"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_plugin/session_taken_over.coffee:25
+#: app/assets/javascripts/app/controllers/_plugin/session_taken_over.coffee:30
 #: app/assets/javascripts/app/controllers/_plugin/session_timeout.coffee:98
 #: app/assets/javascripts/app/controllers/_ui_element/core_workflow_condition.coffee:40
 msgid "Session"
@@ -18909,6 +18954,10 @@ msgstr ""
 msgid "The language could not be updated."
 msgstr ""
 
+#: app/models/hr_portal/attachment_rules.rb:18
+msgid "The largest file, in megabytes, an employee may attach in the HR app. Note: one message with all its files must stay under the web server's request limit (about 28 MB on IIS by default)."
+msgstr ""
+
 #: app/frontend/apps/desktop/pages/knowledge-base/components/KnowledgeBaseFeedFlyout/KnowledgeBaseFeedFlyout.vue:156
 msgid "The latest internal answers in the whole knowledge base."
 msgstr ""
@@ -19652,6 +19701,10 @@ msgstr ""
 
 #: app/models/authorization/provider.rb:60
 msgid "The user account does not exist. Please contact your administrator."
+msgstr ""
+
+#: app/models/user/hr_departments.rb:15
+msgid "The user attribute \"department\" is missing."
 msgstr ""
 
 #: app/services/service/auth/send_admin_token.rb:32
@@ -21343,7 +21396,7 @@ msgstr ""
 msgid "Try Another Method"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_plugin/navigation.coffee:218
+#: app/assets/javascripts/app/controllers/_plugin/navigation.coffee:219
 msgid "Try New BETA UI"
 msgstr ""
 
@@ -23132,7 +23185,7 @@ msgstr ""
 msgid "You can switch between the old and the New BETA UI at any moment in the Personal settings > New BETA UI section."
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_plugin/navigation.coffee:209
+#: app/assets/javascripts/app/controllers/_plugin/navigation.coffee:210
 msgid "You can switch between the old and the New BETA UI at any moment in the Profile settings > New BETA UI section."
 msgstr ""
 
@@ -24363,7 +24416,7 @@ msgstr ""
 msgid "is the wrong length (should be 1 character)"
 msgstr ""
 
-#: app/models/user.rb:950
+#: app/models/user.rb:951
 msgid "is too long"
 msgstr ""
 

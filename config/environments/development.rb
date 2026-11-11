@@ -69,6 +69,18 @@ Rails.application.configure do
   # Raises helpful error messages.
   config.assets.raise_runtime_errors = true
 
+  # WCL: serve the precompiled assets (`rails assets:precompile`) instead of building them on each
+  # request. With the repository on a Windows drive shared into the container, every page load
+  # otherwise re-checks thousands of asset files (~12 s). Switch on by creating
+  # tmp/precompiled-assets-dev.txt; after changing CoffeeScript, eco or SCSS, precompile again.
+  if Rails.root.join('tmp/precompiled-assets-dev.txt').exist?
+    config.assets.compile = false
+    config.assets.digest  = true
+    config.public_file_server.enabled = true
+    # Fingerprinted file names change with their content, so the browser may keep them for good.
+    config.public_file_server.headers = { 'Cache-Control' => "public, max-age=#{1.year.to_i}, immutable" }
+  end
+
   # TODO: New in Rails 6
   # See https://www.fngtps.com/2019/rails6-blocked-host/
   config.hosts.clear

@@ -5,3 +5,22 @@ config/database.yml
 node_modules
 log/*.log
 tmp/
+
+# WCL: local development leftovers (the image builds its own assets).
+.pnpm-store/
+.playwright-mcp/
+# Compiled assets from local development (the image compiles its own); the folders that belong
+# to the repository (icons, chat widget, fonts, …) stay.
+public/assets/*
+!public/assets/chat
+!public/assets/error
+!public/assets/fonts
+!public/assets/form
+!public/assets/frontend
+!public/assets/icon-fonts
+!public/assets/images
+!public/assets/sounds
+!public/assets/tests
+public/vite/
+deploy/linux/.env
+deploy/linux/backup/
