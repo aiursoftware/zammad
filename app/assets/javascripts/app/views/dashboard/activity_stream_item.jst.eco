@@ -10,6 +10,10 @@
         <% end %>
       </span>
       <%- @humanTime(@item.created_at, false, 'activity-time') %>
+      <% flag = App.Ticket.forActivity(@item)?.priorityFlag() %>
+      <% if flag: %>
+        <span class="activity-priority activity-priority--<%= flag.color %>"><%- flag.icon %><%= flag.name %></span>
+      <% end %>
     </span>
     <span class="activity-icon">
       <% if @item.cssIcon: %>

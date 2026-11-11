@@ -17,6 +17,7 @@ class Group < ApplicationModel
   include HasRecursiveCteQuery
 
   include Group::Assets
+  include Group::HrPortalDefaults
 
   self.audit_log_attributes_ignored = %i[name_last]
 

@@ -1,8 +1,10 @@
 @use 'sass:list';
 @use 'sass:string';
 
-$high-priority-color: hsl(360, 71%, 60%);
+// WCL: high is amber and urgent red, so the two read apart at a glance (stock high is red).
+$high-priority-color: hsl(36, 95%, 52%);
 $low-priority-color: hsl(200, 68%, 73%);
+$urgent-priority-color: hsl(350, 85%, 52%);
 $minWidth: 1024px;
 $sidebarWidth: 280px;
 $desktopSidebarWidth: 360px;
@@ -1791,6 +1793,13 @@ td .icon-cog {
   &--low-priority {
     a {
       color: $low-priority-color;
+    }
+  }
+
+  &--urgent-priority {
+    a {
+      color: $urgent-priority-color;
+      font-weight: 700;
     }
   }
 }
@@ -5121,6 +5130,37 @@ footer {
   visibility: visible;
 }
 
+// Priority of a ticket task: a coloured stripe and icon, so urgent work stands out in the list.
+.nav-tab-priority {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+
+  @include bidi-style(margin-left, 6px, margin-right, 0);
+
+  .icon {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+.nav-tab:hover .nav-tab-priority {
+  visibility: hidden; // the close button takes its place
+}
+
+.nav-tab.task--high-priority {
+  box-shadow: inset 3px 0 0 $high-priority-color;
+}
+
+.nav-tab.task--urgent-priority {
+  box-shadow: inset 4px 0 0 $urgent-priority-color;
+  background: rgba($urgent-priority-color, 0.16);
+
+  .nav-tab-name {
+    font-weight: 700;
+  }
+}
+
 .nav-tab-close-inner {
   width: 19px;
   height: 19px;
@@ -6729,6 +6769,10 @@ a.list-group-item.active > .badge,
   fill: $low-priority-color;
 }
 
+.u-urgent-priority-color {
+  fill: $urgent-priority-color;
+}
+
 .stat-widgets {
   margin: -7px -7px 20px;
 }
@@ -7039,6 +7083,33 @@ a.list-group-item.active > .badge,
       height: 100%;
       fill: var(--ai-assist-blue);
     }
+  }
+}
+
+.activity-priority {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  margin-top: 4px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  border: 1px solid currentColor;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  line-height: 16px;
+
+  .icon {
+    width: 10px;
+    height: 10px;
+  }
+
+  &--high-priority {
+    color: $high-priority-color;
+  }
+
+  &--urgent-priority {
+    color: $urgent-priority-color;
   }
 }
 

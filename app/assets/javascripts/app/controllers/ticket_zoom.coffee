@@ -254,6 +254,10 @@ class App.TicketZoom extends App.Controller
       meta.type      = 'task'
       meta.iconTitle = ticket.iconTitle()
       meta.iconClass = ticket.iconClass()
+      if flag = ticket.priorityFlag()
+        meta.class        += " task--#{flag.color}"
+        meta.priorityIcon  = flag.icon
+        meta.priorityTitle = flag.name
     meta
 
   url: =>

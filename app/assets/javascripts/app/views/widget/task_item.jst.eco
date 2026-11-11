@@ -12,6 +12,9 @@
     <% end %>
   </div>
   <div class="nav-tab-name u-textTruncate flex<% if @item.meta.active is false: %> is-inactive<% end %>"><%= @item.meta.head %></div>
+  <% if @item.meta.priorityIcon: %>
+    <div class="nav-tab-priority" title="<%= @item.meta.priorityTitle %>"><%- @item.meta.priorityIcon %></div>
+  <% end %>
   <div class="nav-tab-close js-close" title="<%- @Ti('close') %>">
     <div class="nav-tab-close-inner">
       <%- @Icon('diagonal-cross') %>

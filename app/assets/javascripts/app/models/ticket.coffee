@@ -49,6 +49,28 @@ class App.Ticket extends App.Model
   rowClass: ->
     @priorityClass()
 
+  # Flag for priorities that stand out (a coloured one other than low), e. g. high and urgent;
+  #   used where only the ticket state is shown otherwise, like the task bar and activity stream.
+  priorityFlag: ->
+    priority = App.TicketPriority.findNative(@priority_id)
+    return if !priority
+    return if !priority.ui_color || priority.ui_color is 'low-priority'
+    name = App.i18n.translateInline(priority.name).replace(/^\d+\s*/, '')
+    {
+      name:  name
+      color: priority.ui_color
+      icon:  App.Utils.icon(priority.ui_icon || 'important', "u-#{priority.ui_color}-color")
+    }
+
+  # The ticket an activity stream entry is about, for ticket and article entries.
+  @forActivity: (item) ->
+    return if !item?.objectNative
+    return item.objectNative if item.object is 'Ticket'
+    return if item.object isnt 'TicketArticle' && item.object isnt 'Ticket::Article'
+    ticketId = item.objectNative.ticket_id
+    return if !ticketId || !App.Ticket.exists(ticketId)
+    App.Ticket.findNative(ticketId)
+
   getState: ->
     type = App.TicketState.findNative(@state_id)
     stateType = App.TicketStateType.findNative(type.state_type_id)
