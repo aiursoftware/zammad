@@ -1203,6 +1203,7 @@ export enum EnumPermissionAccess {
 /** All available public links screens */
 export enum EnumPublicLinksScreen {
   Login = 'login',
+  Navigation = 'navigation',
   PasswordReset = 'password_reset',
   Signup = 'signup'
 }

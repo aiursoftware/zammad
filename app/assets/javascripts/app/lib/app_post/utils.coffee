@@ -1477,13 +1477,25 @@ class App.Utils
 
   # apply email token field with autocompletion
   @tokanice: (selector, type) ->
-    source = "#{App.Config.get('api_path')}/users/search"
+    url = "#{App.Config.get('api_path')}/users/search"
+
+    # WCL: people are listed as soon as the field gets focus, so they can be picked without
+    #   typing; the search backend reads "*" as "everyone".
+    source = (request, response) ->
+      $.ajax(
+        url:      url
+        data:     { term: request.term?.trim() || '*' }
+        dataType: 'json'
+        success:  response
+        error:    -> response([])
+      )
     a = ->
       $(selector).tokenfield(
         createTokensOnBlur: true
+        showAutocompleteOnFocus: true
         autocomplete: {
           source: source
-          minLength: 2
+          minLength: 0
           create: ->
             $(@).data('ui-autocomplete')._renderItem = (ul, item) ->
               option_html = App.Utils.htmlEscape(item.label)

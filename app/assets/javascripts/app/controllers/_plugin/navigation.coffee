@@ -42,6 +42,12 @@ class Navigation extends App.Controller
       @renderMenu()
     )
 
+    # links an admin put in the main navigation (WCL)
+    @publicLinksSubscribeId = App.PublicLink.subscribe(=>
+      @renderMenu()
+    )
+    App.PublicLink.fetch() if !App.PublicLink.all().length
+
     # rerender menu
     @controllerBind('personal:render', =>
       @renderPersonal()
@@ -62,6 +68,8 @@ class Navigation extends App.Controller
     )
 
   release: =>
+    if @publicLinksSubscribeId
+      App.PublicLink.unsubscribe(@publicLinksSubscribeId)
     if @notificationWidget
       @notificationWidget.remove()
       @notificationWidget = undefined
@@ -96,7 +104,7 @@ class Navigation extends App.Controller
               shown = false
       if shown
         itemsNew.push item
-    items = itemsNew
+    items = itemsNew.concat(@publicLinkItems())
 
     # get open tabs to reopen on rerender
     openTab = {}
@@ -111,6 +119,23 @@ class Navigation extends App.Controller
       openTab:   openTab
       activeTab: activeTab
     )
+
+  # Public links with the "Main Navigation" context, after the built-in entries (WCL).
+  publicLinkItems: ->
+    links = App.PublicLink.search(
+      filter:
+        screen: ['navigation']
+      sortBy: 'prio'
+    )
+    for link in links
+      {
+        name:        link.title
+        description: link.description
+        target:      link.link
+        class:       'external'
+        external:    true
+        newTab:      link.new_tab
+      }
 
   click: (e) ->
     @preventDefaultAndStopPropagation(e)

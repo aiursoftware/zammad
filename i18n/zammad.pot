@@ -207,7 +207,7 @@ msgstr ""
 msgid "%s created role |%s|"
 msgstr ""
 
-#: app/assets/javascripts/app/models/ticket.coffee:112
+#: app/assets/javascripts/app/models/ticket.coffee:134
 #: app/frontend/shared/composables/activity-message/activityMessageBuilder/builders/ticket.ts:21
 #: app/models/online_notification/push_payload.rb:17
 msgid "%s created ticket |%s|"
@@ -432,7 +432,7 @@ msgstr ""
 msgid "%s updated role |%s|"
 msgstr ""
 
-#: app/assets/javascripts/app/models/ticket.coffee:114
+#: app/assets/javascripts/app/models/ticket.coffee:136
 #: app/frontend/shared/composables/activity-message/activityMessageBuilder/builders/ticket.ts:23
 #: app/models/online_notification/push_payload.rb:18
 msgid "%s updated ticket |%s|"
@@ -1904,7 +1904,7 @@ msgstr ""
 msgid "Another ticket was merged into ticket (#{ticket.title})\n\n<div>Hi #{recipient.firstname},</div>\n<br>\n<div>\nAnother ticket was merged into ticket (#{ticket.title}) by \"<b>#{current_user.longname}</b>\".\n</div>\n<br>\n<div>\n  <a href=\"#{config.http_type}://#{config.fqdn}/#ticket/zoom/#{ticket.id}\" target=\"zammad_app\">View this in #{config.product_name}</a>\n</div>\n"
 msgstr ""
 
-#: app/assets/javascripts/app/models/ticket.coffee:124
+#: app/assets/javascripts/app/models/ticket.coffee:146
 #: app/frontend/shared/composables/activity-message/activityMessageBuilder/builders/ticket.ts:33
 #: app/models/online_notification/push_payload.rb:23
 msgid "Another ticket was merged into ticket |%s|"
@@ -8823,7 +8823,7 @@ msgstr ""
 msgid "Google reCAPTCHA Enterprise"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_plugin/navigation.coffee:188
+#: app/assets/javascripts/app/controllers/_plugin/navigation.coffee:212
 #: app/assets/javascripts/app/views/clues/clues_content.jst.eco:17
 #: app/frontend/apps/desktop/components/BetaUi/composables/useBetaUi.ts:83
 msgid "Got it"
@@ -9092,7 +9092,7 @@ msgstr ""
 msgid "Hello, the customer service window for this conversation is about to expire, please reply to keep it open."
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_plugin/navigation.coffee:184
+#: app/assets/javascripts/app/controllers/_plugin/navigation.coffee:208
 #: app/assets/javascripts/app/controllers/clues/first_steps_clues.coffee:40
 #: app/frontend/apps/desktop/components/BetaUi/composables/useBetaUi.ts:82
 #: app/frontend/apps/desktop/components/CommonPageHelp/CommonPageHelp.vue:22
@@ -11069,6 +11069,10 @@ msgstr ""
 
 #: app/assets/javascripts/app/controllers/_channel/microsoft_graph.coffee:177
 msgid "Mailbox type"
+msgstr ""
+
+#: app/assets/javascripts/app/models/public_link.coffee:9
+msgid "Main Navigation (left sidebar)"
 msgstr ""
 
 #: app/frontend/apps/desktop/components/layout/LayoutPage.vue:114
@@ -14062,7 +14066,7 @@ msgstr ""
 msgid "Pending Reached Tickets"
 msgstr ""
 
-#: app/assets/javascripts/app/models/ticket.coffee:116
+#: app/assets/javascripts/app/models/ticket.coffee:138
 #: app/frontend/shared/composables/activity-message/activityMessageBuilder/builders/ticket.ts:25
 #: app/models/online_notification/push_payload.rb:19
 msgid "Pending reminder reached for ticket |%s|"
@@ -14934,7 +14938,7 @@ msgstr ""
 msgid "Recently closed items were cleared successfully."
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_plugin/navigation.coffee:526
+#: app/assets/javascripts/app/controllers/_plugin/navigation.coffee:550
 msgid "Recently viewed"
 msgstr ""
 
@@ -15941,7 +15945,7 @@ msgstr ""
 #: app/assets/javascripts/app/controllers/_integration/github.coffee:63
 #: app/assets/javascripts/app/controllers/_integration/gitlab.coffee:80
 #: app/assets/javascripts/app/controllers/_integration/idoit.coffee:93
-#: app/assets/javascripts/app/controllers/ticket_zoom.coffee:1234
+#: app/assets/javascripts/app/controllers/ticket_zoom.coffee:1238
 msgid "Saving failed."
 msgstr ""
 
@@ -18699,7 +18703,7 @@ msgid "The divider between TicketHook and ticket number. E. g. ': '."
 msgstr ""
 
 #: app/assets/javascripts/app/lib/app_post/ai_analytics_download.coffee:26
-#: app/assets/javascripts/app/lib/app_post/utils.coffee:1734
+#: app/assets/javascripts/app/lib/app_post/utils.coffee:1746
 msgid "The download could not be started. Please try again later."
 msgstr ""
 
@@ -20795,19 +20799,19 @@ msgstr ""
 msgid "Ticket with specified ID was not found. Try checking the URL for errors."
 msgstr ""
 
-#: app/assets/javascripts/app/models/ticket.coffee:118
+#: app/assets/javascripts/app/models/ticket.coffee:140
 #: app/frontend/shared/composables/activity-message/activityMessageBuilder/builders/ticket.ts:27
 #: app/models/online_notification/push_payload.rb:20
 msgid "Ticket |%s| has escalated!"
 msgstr ""
 
-#: app/assets/javascripts/app/models/ticket.coffee:122
+#: app/assets/javascripts/app/models/ticket.coffee:144
 #: app/frontend/shared/composables/activity-message/activityMessageBuilder/builders/ticket.ts:31
 #: app/models/online_notification/push_payload.rb:22
 msgid "Ticket |%s| was merged into another ticket"
 msgstr ""
 
-#: app/assets/javascripts/app/models/ticket.coffee:120
+#: app/assets/javascripts/app/models/ticket.coffee:142
 #: app/frontend/shared/composables/activity-message/activityMessageBuilder/builders/ticket.ts:29
 #: app/models/online_notification/push_payload.rb:21
 msgid "Ticket |%s| will escalate soon!"
@@ -21339,7 +21343,7 @@ msgstr ""
 msgid "Try Another Method"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_plugin/navigation.coffee:194
+#: app/assets/javascripts/app/controllers/_plugin/navigation.coffee:218
 msgid "Try New BETA UI"
 msgstr ""
 
@@ -23128,7 +23132,7 @@ msgstr ""
 msgid "You can switch between the old and the New BETA UI at any moment in the Personal settings > New BETA UI section."
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_plugin/navigation.coffee:185
+#: app/assets/javascripts/app/controllers/_plugin/navigation.coffee:209
 msgid "You can switch between the old and the New BETA UI at any moment in the Profile settings > New BETA UI section."
 msgstr ""
 
@@ -23681,7 +23685,7 @@ msgid "clear all"
 msgstr ""
 
 #: app/assets/javascripts/app/views/customer_chat/chat_window.jst.eco:16
-#: app/assets/javascripts/app/views/widget/task_item.jst.eco:15
+#: app/assets/javascripts/app/views/widget/task_item.jst.eco:18
 msgid "close"
 msgstr ""
 
@@ -23959,7 +23963,7 @@ msgstr ""
 msgid "ends with one of"
 msgstr ""
 
-#: app/assets/javascripts/app/models/ticket.coffee:85
+#: app/assets/javascripts/app/models/ticket.coffee:107
 msgid "escalated"
 msgstr ""
 
@@ -24201,7 +24205,7 @@ msgid "in range"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/_ui_element/active.coffee:5
-#: app/assets/javascripts/app/lib/app_post/utils.coffee:1492
+#: app/assets/javascripts/app/lib/app_post/utils.coffee:1504
 #: app/assets/javascripts/app/models/checklist_template.coffee:27
 #: app/assets/javascripts/app/models/webhook.coffee:44
 #: app/assets/javascripts/app/views/generic/object_search/item_object.jst.eco:16
@@ -24744,7 +24748,7 @@ msgstr ""
 msgid "quarter-hour(s)"
 msgstr ""
 
-#: app/assets/javascripts/app/models/ticket.coffee:87
+#: app/assets/javascripts/app/models/ticket.coffee:109
 msgid "reached"
 msgstr ""
 

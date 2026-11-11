@@ -23,16 +23,31 @@ class App.SearchableAjaxSelect extends App.SearchableSelect
     # e.g. Ticket to ticket or AnotherObject to another_object
     return underscored(@options.attribute.relation)
 
+  # WCL: organizations and users are listed as soon as the field opens, so they can be picked
+  #   without typing; the search backend reads "*" as "everything".
+  browsable: =>
+    @options.attribute.relation in ['Organization', 'User']
+
+  searchQuery: =>
+    query = @input.val()
+    return query if !@browsable()
+    return '*' if !query?.trim() || (!@options.attribute.multiple && query is @options.attribute.valueName)
+    query
+
+  onDropdownShown: =>
+    super
+    @search() if @browsable()
+
   cacheKey: =>
     objectString = @objectString()
-    query        = @input.val()
+    query        = @searchQuery()
 
     # create cache key
     return "#{objectString}+#{query}"
 
   ajaxAttributes: =>
     objectString = @objectString()
-    query        = @input.val()
+    query        = @searchQuery()
     cacheKey     = @cacheKey()
 
     {
@@ -57,8 +72,10 @@ class App.SearchableAjaxSelect extends App.SearchableSelect
 
   onInput: (event) =>
     super
+    @search()
 
-    query    = @input.val()
+  search: =>
+    query    = @searchQuery()
     cacheKey = @cacheKey()
 
     # use cache for search result

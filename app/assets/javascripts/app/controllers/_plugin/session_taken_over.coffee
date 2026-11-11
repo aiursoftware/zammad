@@ -1,6 +1,11 @@
+# WCL: logging in from another browser no longer stops this one, so the same person can work in
+#   several browsers at once. Set to true to bring Zammad's behaviour back.
+STOP_OTHER_SESSIONS = false
+
 class SessionTakeOver extends App.Controller
   constructor: ->
     super
+    return if !STOP_OTHER_SESSIONS
 
     @controllerBind(
       'ws:login'

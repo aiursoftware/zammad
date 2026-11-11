@@ -75,6 +75,10 @@ class App.ObjectOrganizationAutocompletion extends App.Controller
     @formControl.addClass 'focus'
     @open()
 
+    # WCL: list people and organizations as soon as the field opens, so one can be picked without
+    #   typing; the search backend reads "*" as "everything".
+    @lazySearch('*') if @searchTerm is ''
+
   focusInput: =>
     @objectSelect.trigger('focus') if not @formControl.hasClass('focus')
 
@@ -367,15 +371,11 @@ class App.ObjectOrganizationAutocompletion extends App.Controller
 
     @hideOrganizationMembers()
 
-    # hide dropdown
+    # back to the full list (WCL)
     if _.isEmpty(query)
-      @emptyResultList()
-
-      if !@attribute.disableCreateObject
-        @recipientList.append(@buildObjectNew())
-
       # reset object selection
       @resetObjectSelection() if !@attribute.multiple
+      @lazySearch('*')
       return
 
     # show dropdown

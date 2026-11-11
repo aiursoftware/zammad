@@ -5154,7 +5154,10 @@ footer {
 
 .nav-tab.task--urgent-priority {
   box-shadow: inset 4px 0 0 $urgent-priority-color;
-  background: rgba($urgent-priority-color, 0.16);
+
+  &:not(.is-active) {
+    background: rgba($urgent-priority-color, 0.16);
+  }
 
   .nav-tab-name {
     font-weight: 700;

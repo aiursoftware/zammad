@@ -13,7 +13,8 @@ class PublicLink < ApplicationModel
 
   self.audit_log_name_attribute = :title
 
-  AVAILABLE_SCREENS = %w[login signup password_reset].freeze
+  # navigation (WCL): shown to signed-in users in the left sidebar, under Overviews.
+  AVAILABLE_SCREENS = %w[login signup password_reset navigation].freeze
 
   validates :link,   presence: true, length: { maximum: 500 }
   validates :title,  presence: true, length: { maximum: 200 }
