@@ -72,6 +72,10 @@ begin
     missing << 'department dropdown' if ObjectManager::Attribute.get(object: 'User', name: 'department')&.data_type != 'tree_select'
     missing << 'attachment settings' if Setting.get('hr_portal_attachment_extensions').nil?
     missing << 'open-requests overview' if !Overview.exists?(link: 'hr_portal_open')
+    missing << 'Maintenance type field' if !ObjectManager::Attribute.get(object: 'Ticket', name: 'maintenance_type')
+    missing << 'hidden state on new tickets' if !CoreWorkflow.exists?(name: 'WCL: Customers do not pick the state of a new ticket')
+    missing << 'Location field' if !ObjectManager::Attribute.get(object: 'Ticket', name: 'location')
+    missing << 'Maintenance type workflow' if !CoreWorkflow.exists?(name: 'WCL: Maintenance type for Maintenance tickets')
     [missing.empty?, missing.empty? ? nil : "missing: #{missing.join(', ')} (run: rails zammad:wcl:setup)"]
   end
 
@@ -157,9 +161,15 @@ begin
     [ok, "reply HTTP #{code}, owner=#{json['owner_id']}, subscribed=#{subscribed} (agents #{agents.map(&:id)})"]
   end
 
-  check('HR app: Rejected state') do
-    code, json = http.call(:put, "tickets/#{ticket_id}", body: { state: 'rejected' })
-    [code == 200 && Ticket.find(ticket_id).state.name == 'rejected', "HTTP #{code} #{json.is_a?(Hash) ? json['state_id'] : json}"]
+  check('closing needs a note: refused without one') do
+    code, = http.call(:put, "tickets/#{ticket_id}", body: { state: 'rejected' })
+    [code == 422 && Ticket.uncached { Ticket.find(ticket_id).state.name } != 'rejected', "HTTP #{code}"]
+  end
+
+  check('HR app: Rejected state (with a note)') do
+    note = { body: 'verify: rejected with a reason', type: 'note', internal: true }
+    code, json = http.call(:put, "tickets/#{ticket_id}", body: { state: 'rejected', article: note })
+    [code == 200 && Ticket.uncached { Ticket.find(ticket_id).state.name } == 'rejected', "HTTP #{code} #{json.is_a?(Hash) ? json['state_id'] : json}"]
   end
 
   check('search: finds the ticket by text inside its attachment') do

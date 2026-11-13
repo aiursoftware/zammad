@@ -97,6 +97,7 @@ class User < ApplicationModel
   include HasTransactionDispatcher
   include ChecksSecondaryOrganizationsOnCommit
   include User::AssigneeOptions
+  include User::RemembersDepartment
 
   core_workflow_screens 'create', 'edit', 'invite_agent'
   core_workflow_admin_screens 'create', 'edit'

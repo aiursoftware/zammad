@@ -1062,6 +1062,17 @@ class App.TicketZoom extends App.Controller
 
       ticket.article = article
 
+    # WCL customization: closing (or rejecting) a ticket needs a note saying why.
+    if !macro.perform && !ticket.article && @changed('ticket', 'state_id') && App.TicketState.find(ticket.state_id)?.state_type?.name is 'closed'
+      App.Event.trigger('notify', {
+        type: 'error'
+        msg:  __('Please write a note before closing the ticket: what was done, or why it is closed.')
+      })
+      @$('.article-add .js-textarea').trigger('focus')
+      @submitEnable(e)
+      @autosaveStart()
+      return
+
     # add sidebar params
     if @sidebarWidget && @sidebarWidget.postParams
       @sidebarWidget.postParams(ticket: ticket)

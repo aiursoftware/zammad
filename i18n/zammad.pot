@@ -1463,6 +1463,10 @@ msgstr ""
 msgid "Add visibility schedule"
 msgstr ""
 
+#: app/models/hr_portal/setup.rb:381
+msgid "Add your locations in Admin > Objects > Ticket > Location."
+msgstr ""
+
 #: app/assets/javascripts/app/views/knowledge_base_video_servers/index.jst.eco:4
 msgid "Add your video server address here so it can be included in the Content Security Policy exceptions. Currently supported solutions are MediaCMS and PeerTube."
 msgstr ""
@@ -1623,7 +1627,7 @@ msgid "Agent idle timeout"
 msgstr ""
 
 #: app/models/role.rb:182
-#: app/models/user.rb:833
+#: app/models/user.rb:834
 msgid "Agent limit exceeded, please check your account settings."
 msgstr ""
 
@@ -2332,7 +2336,7 @@ msgstr ""
 msgid "Assignment timeout in minutes if assigned agent is not working on it. Ticket will be shown as unassigend."
 msgstr ""
 
-#: app/models/user.rb:735
+#: app/models/user.rb:736
 msgid "At least one identifier (firstname, lastname, phone, mobile or email) for user is required."
 msgstr ""
 
@@ -2349,7 +2353,7 @@ msgid "At least one object must be selected."
 msgstr ""
 
 #: app/models/role.rb:159
-#: app/models/user.rb:812
+#: app/models/user.rb:813
 msgid "At least one user needs to have admin permissions."
 msgstr ""
 
@@ -5003,7 +5007,7 @@ msgstr ""
 msgid "Customer tickets of the user will get deleted on execution of the task. No rollback possible."
 msgstr ""
 
-#: app/models/hr_portal/setup.rb:27
+#: app/models/hr_portal/setup.rb:33
 msgid "Customers can create tickets here"
 msgstr ""
 
@@ -7103,7 +7107,7 @@ msgstr ""
 msgid "Email address"
 msgstr ""
 
-#: app/models/user.rb:745
+#: app/models/user.rb:746
 msgid "Email address '%{email}' is already used for another user."
 msgstr ""
 
@@ -7182,7 +7186,7 @@ msgstr ""
 msgid "Embedding provider returned no usable vector"
 msgstr ""
 
-#: app/models/hr_portal/setup.rb:28
+#: app/models/hr_portal/setup.rb:34
 msgid "Employees can pick this group when they create a ticket (and later in the HR app), and every agent gets access to it. Switch off for teams tickets are only handed to (e.g. Dev, Network)."
 msgstr ""
 
@@ -7811,7 +7815,7 @@ msgstr ""
 msgid "Every time a customer creates a new ticket, they automatically receive a confirmation email to assure them that their issue has been submitted successfully. This behavior is built into Zammad, but it’s also highly customizable, and you can set up other automated actions just like it.\n\nMaybe you want to set a higher priority on any ticket with the word “urgent” in the title. Maybe you want to avoid sending auto-reply emails to customers from certain organizations. Maybe you want mark a ticket as “pending” whenever someone adds an internal note to a ticket.\n\nWhatever it is, you can do it with triggers: actions that watch tickets for certain changes, and then fire off whenever those changes occur."
 msgstr ""
 
-#: app/models/hr_portal/setup.rb:106
+#: app/models/hr_portal/setup.rb:112
 msgid "Everyone working on the ticket. The first is its main owner (\"My Assigned Tickets\"); all of them are notified, and the others find it under \"My Subscribed Tickets\"."
 msgstr ""
 
@@ -8581,6 +8585,10 @@ msgstr ""
 msgid "General communication error, maybe internet is not available!"
 msgstr ""
 
+#: app/models/hr_portal/setup.rb:277
+msgid "General facility repairs"
+msgstr ""
+
 #: app/models/ai/agent/type/ticket_tagger.rb:131
 msgid "General tagging principles"
 msgstr ""
@@ -8980,7 +8988,7 @@ msgstr ""
 msgid "HR app: maximum attachments per message"
 msgstr ""
 
-#: app/models/hr_portal/setup.rb:199
+#: app/models/hr_portal/setup.rb:253
 msgid "HR portal – open requests"
 msgstr ""
 
@@ -10063,7 +10071,7 @@ msgstr ""
 msgid "Invalid client_id received!"
 msgstr ""
 
-#: app/models/user.rb:684
+#: app/models/user.rb:685
 msgid "Invalid email '%{email}'"
 msgstr ""
 
@@ -11005,6 +11013,7 @@ msgstr ""
 #: app/assets/javascripts/app/views/profile/devices.jst.eco:13
 #: app/assets/javascripts/app/views/session.jst.eco:10
 #: app/frontend/apps/desktop/pages/personal-setting/views/PersonalSettingDevices.vue:100
+#: app/models/hr_portal/setup.rb:372
 msgid "Location"
 msgstr ""
 
@@ -11132,6 +11141,10 @@ msgstr ""
 
 #: app/controllers/application_controller/authenticates.rb:120
 msgid "Maintenance mode enabled!"
+msgstr ""
+
+#: app/models/hr_portal/setup.rb:298
+msgid "Maintenance type"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/manage.coffee:20
@@ -11438,10 +11451,6 @@ msgstr ""
 
 #: app/views/mailer/application.html.erb:47
 msgid "Manage your notification settings"
-msgstr ""
-
-#: app/models/hr_portal/setup.rb:161
-msgid "Managed in the HR app (Departments); the list here follows it."
 msgstr ""
 
 #: app/assets/javascripts/app/views/api.jst.eco:2
@@ -11925,7 +11934,7 @@ msgstr ""
 msgid "More information can be found here."
 msgstr ""
 
-#: app/models/user.rb:764
+#: app/models/user.rb:765
 msgid "More than 250 secondary organizations are not allowed."
 msgstr ""
 
@@ -12163,7 +12172,7 @@ msgstr ""
 msgid "Need session_id."
 msgstr ""
 
-#: app/controllers/tickets_controller.rb:418
+#: app/controllers/tickets_controller.rb:422
 msgid "Need user_id or organization_id as param"
 msgstr ""
 
@@ -12822,7 +12831,7 @@ msgstr ""
 #: app/controllers/organizations_controller.rb:107
 #: app/controllers/text_modules_controller.rb:79
 #: app/controllers/ticket_articles_controller.rb:240
-#: app/controllers/tickets_controller.rb:461
+#: app/controllers/tickets_controller.rb:465
 #: app/controllers/users_controller.rb:559
 msgid "No source data submitted!"
 msgstr ""
@@ -13275,6 +13284,10 @@ msgstr ""
 
 #: app/assets/javascripts/app/controllers/_ui_element/basedate.coffee:163
 msgid "October"
+msgstr ""
+
+#: app/models/hr_portal/setup.rb:276
+msgid "Office maintenance"
 msgstr ""
 
 #: public/assets/chat/chat.coffee:206
@@ -13730,6 +13743,10 @@ msgstr ""
 #: app/frontend/apps/mobile/pages/ticket/components/TicketDetailView/ArticleMetadataDialog.vue:61
 #: app/frontend/apps/mobile/pages/ticket/components/TicketDetailView/ArticleRemoteContentBadge.vue:21
 msgid "Original formatting"
+msgstr ""
+
+#: app/models/hr_portal/setup.rb:278
+msgid "Other"
 msgstr ""
 
 #: app/assets/javascripts/app/views/integration/cti.jst.eco:86
@@ -14220,6 +14237,10 @@ msgstr ""
 msgid "Phone number is already in use by another WhatsApp account."
 msgstr ""
 
+#: app/models/hr_portal/setup.rb:149
+msgid "Pick a department, or type a new one: it is added to the list for the next user. Admins can tidy the list in Admin > Objects > User > Department."
+msgstr ""
+
 #: app/assets/javascripts/app/views/profile/token_access.jst.eco:7
 #: app/frontend/apps/desktop/pages/personal-setting/views/PersonalSettingTokenAccess.vue:172
 msgid "Pick a name for the application, and we'll give you a unique token."
@@ -14434,6 +14455,11 @@ msgstr ""
 
 #: app/assets/javascripts/app/lib/base/jquery.textmodule.js:631
 msgid "Please wait…"
+msgstr ""
+
+#: app/assets/javascripts/app/controllers/ticket_zoom.coffee:1069
+#: app/models/hr_portal/close_note.rb:6
+msgid "Please write a note before closing the ticket: what was done, or why it is closed."
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/_channel/email.coffee:421
@@ -15442,7 +15468,7 @@ msgstr ""
 msgid "Request the password login here."
 msgstr ""
 
-#: app/models/hr_portal/setup.rb:174
+#: app/models/hr_portal/setup.rb:183
 msgid "Request turned down (WCL). Shown to the employee as \"Rejected\" in the HR app."
 msgstr ""
 
@@ -15990,7 +16016,7 @@ msgstr ""
 #: app/assets/javascripts/app/controllers/_integration/github.coffee:63
 #: app/assets/javascripts/app/controllers/_integration/gitlab.coffee:80
 #: app/assets/javascripts/app/controllers/_integration/idoit.coffee:93
-#: app/assets/javascripts/app/controllers/ticket_zoom.coffee:1238
+#: app/assets/javascripts/app/controllers/ticket_zoom.coffee:1249
 msgid "Saving failed."
 msgstr ""
 
@@ -16336,17 +16362,17 @@ msgstr ""
 msgid "Secondary organizations"
 msgstr ""
 
-#: app/models/user.rb:752
+#: app/models/user.rb:753
 msgid "Secondary organizations are only allowed when the primary organization is given."
 msgstr ""
 
 #: app/models/concerns/checks_secondary_organizations_on_commit.rb:21
-#: app/models/user.rb:758
+#: app/models/user.rb:759
 msgid "Secondary organizations cannot include the primary organization."
 msgstr ""
 
 #: app/models/organization.rb:116
-#: app/models/user.rb:992
+#: app/models/user.rb:993
 msgid "Secondary organizations cannot include the same organization twice."
 msgstr ""
 
@@ -19520,7 +19546,7 @@ msgstr ""
 msgid "The sorting mode you save here will apply to categories added later."
 msgstr ""
 
-#: app/controllers/tickets_controller.rb:372
+#: app/controllers/tickets_controller.rb:376
 msgid "The source ticket could not be found."
 msgstr ""
 
@@ -19584,7 +19610,7 @@ msgstr ""
 msgid "The tag could not be removed."
 msgstr ""
 
-#: app/controllers/tickets_controller.rb:363
+#: app/controllers/tickets_controller.rb:367
 msgid "The target ticket number could not be found."
 msgstr ""
 
@@ -20917,7 +20943,7 @@ msgid "Tickets bulk edit"
 msgstr ""
 
 #: app/controllers/ticket_articles_controller.rb:233
-#: app/controllers/tickets_controller.rb:454
+#: app/controllers/tickets_controller.rb:458
 msgid "Tickets can only be imported if system is in import mode."
 msgstr ""
 
@@ -21386,6 +21412,10 @@ msgstr ""
 
 #: app/assets/javascripts/app/models/trigger.coffee:7
 msgid "Triggers activated by actions are executed whenever a ticket is created or updated, while triggers activated by time events are executed when certain times are reached (e.g. pending time, escalation)."
+msgstr ""
+
+#: app/models/hr_portal/setup.rb:275
+msgid "Trucking / vehicle maintenance"
 msgstr ""
 
 #: db/seeds/settings.rb:6082
@@ -22652,6 +22682,10 @@ msgstr ""
 
 #: app/frontend/apps/desktop/components/BetaUi/BetaUiFeedbackConsentDialog.vue:34
 msgid "Want to join the BETA UI feedback program?"
+msgstr ""
+
+#: app/models/hr_portal/setup.rb:274
+msgid "Warehouse maintenance"
 msgstr ""
 
 #: app/assets/javascripts/app/views/data_privacy/preview.jst.eco:16
@@ -24416,7 +24450,7 @@ msgstr ""
 msgid "is the wrong length (should be 1 character)"
 msgstr ""
 
-#: app/models/user.rb:951
+#: app/models/user.rb:952
 msgid "is too long"
 msgstr ""
 

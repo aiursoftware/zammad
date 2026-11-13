@@ -7,8 +7,8 @@
 # - on an existing install, from the HrPortalSetup migration,
 # - by hand: `rails r 'HrPortal::Setup.run'` (or `rake zammad:wcl:setup`).
 #
-# Left to the admin: the groups (tick "Customers can create tickets here"), agents, Microsoft
-# 365 login, and later the HR app's API token.
+# Left to the admin: the other groups (tick "Customers can create tickets here"), agents,
+# Microsoft 365 login, and later the HR app's API token.
 module HrPortal::Setup # rubocop:disable Metrics/ModuleLength
   def self.run
     group_hr_portal_attribute
@@ -20,9 +20,13 @@ module HrPortal::Setup # rubocop:disable Metrics/ModuleLength
     HrPortal::AttachmentRules.create_settings
     rejected_state
     customers_cannot_reject
+    customers_no_state_on_create
     urgent_priority
     settings
     open_requests_overview
+    maintenance_type
+    ticket_location
+    without_hr_app
     true
   end
 
@@ -150,7 +154,10 @@ module HrPortal::Setup # rubocop:disable Metrics/ModuleLength
     )
   end
 
-  # The user's Department: a dropdown the HR app fills (see User::HrDepartments).
+  DEPARTMENT_NOTE = __('Pick a department, or type a new one: it is added to the list for the next user. Admins can tidy the list in Admin > Objects > User > Department.')
+
+  # The user's Department: a dropdown. Admins keep the list for now; the HR app fills it once
+  # connected (see User::HrDepartments).
   def self.user_department_dropdown
     attribute = ObjectManager::Attribute.get(object: 'User', name: 'department')
     return if !attribute || attribute.data_type == 'tree_select'
@@ -171,7 +178,7 @@ module HrPortal::Setup # rubocop:disable Metrics/ModuleLength
         translate:  false,
         maxlength:  200,
         item_class: 'formGroup--halfSize',
-        note:       __('Managed in the HR app (Departments); the list here follows it.'),
+        note:       DEPARTMENT_NOTE,
       },
     )
   end
@@ -217,6 +224,28 @@ module HrPortal::Setup # rubocop:disable Metrics/ModuleLength
     )
   end
 
+  # A new ticket from an employee always starts as "new"; the State field on their create form
+  # only offered "new" or "closed", so it is hidden there. They still see the state on the ticket.
+  def self.customers_no_state_on_create
+    agent = Permission.find_by(name: 'ticket.agent')
+    return if !agent
+
+    CoreWorkflow.create_if_not_exists(
+      name:               'WCL: Customers do not pick the state of a new ticket',
+      object:             'Ticket',
+      preferences:        { 'screen' => ['create_middle'] },
+      condition_saved:    {},
+      condition_selected: { 'session.permission_ids' => { 'operator' => 'is not', 'value' => [agent.id.to_s] } },
+      perform:            { 'ticket.state_id' => { 'operator' => 'hide', 'hide' => 'true' } },
+      active:             true,
+      stop_after_match:   false,
+      changeable:         true,
+      priority:           511,
+      created_by_id:      1,
+      updated_by_id:      1,
+    )
+  end
+
   # "4 urgent", above high, with its own colour (see the urgent-priority styles).
   def self.urgent_priority
     priority = Ticket::Priority.find_by(name: '4 urgent') || Ticket::Priority.new(name: '4 urgent')
@@ -251,9 +280,167 @@ module HrPortal::Setup # rubocop:disable Metrics/ModuleLength
       view:            { d: columns, s: columns, m: columns, view_mode_default: 's' },
       group_by:        'group',
       group_direction: 'ASC',
-      active:          true,
+      # Only tickets filed through the HR app are tagged; switched on when the HR app is connected.
+      active:          false,
       created_by_id:   1,
       updated_by_id:   1,
     )
+  end
+
+  MAINTENANCE_GROUP = 'Maintenance'.freeze
+  MAINTENANCE_TYPES = {
+    'warehouse' => __('Warehouse maintenance'),
+    'vehicle'   => __('Trucking / vehicle maintenance'),
+    'office'    => __('Office maintenance'),
+    'facility'  => __('General facility repairs'),
+    'other'     => 'Other',
+  }.freeze
+
+  # A "Maintenance" group with a "Maintenance type" the requester must pick; the field only
+  # shows on tickets in that group. The admin can rename the group and edit the types
+  # (Admin > Objects > Ticket > Maintenance type) afterwards.
+  def self.maintenance_type
+    group = Group.find_by(name: MAINTENANCE_GROUP) || Group.create!(
+      name: MAINTENANCE_GROUP, active: true, follow_up_possible: 'yes', created_by_id: 1, updated_by_id: 1
+    )
+    maintenance_type_attribute
+    maintenance_type_workflows(group)
+  end
+
+  def self.maintenance_type_attribute
+    return if ObjectManager::Attribute.get(object: 'Ticket', name: 'maintenance_type')
+
+    ObjectManager::Attribute.add(
+      force:         true,
+      object:        'Ticket',
+      name:          'maintenance_type',
+      display:       __('Maintenance type'),
+      data_type:     'select',
+      data_option:   {
+        options:    MAINTENANCE_TYPES,
+        default:    '',
+        null:       true,
+        nulloption: true,
+        translate:  false,
+        maxlength:  255,
+      },
+      editable:      true,
+      active:        true,
+      screens:       {
+        create_middle: {
+          'ticket.customer' => { null: true, item_class: 'column' },
+          'ticket.agent'    => { null: true, item_class: 'column' },
+        },
+        edit:          {
+          'ticket.customer' => { null: true },
+          'ticket.agent'    => { null: true },
+        },
+      },
+      to_create:     true,
+      to_migrate:    false,
+      to_delete:     false,
+      position:      35,
+      created_by_id: 1,
+      updated_by_id: 1,
+    )
+    ObjectManager::Attribute.migration_execute
+    Ticket.reset_column_information
+  end
+
+  # Hidden everywhere, except on tickets in the Maintenance group, where it is required.
+  def self.maintenance_type_workflows(group)
+    CoreWorkflow.create_if_not_exists(
+      name:               'WCL: Maintenance type hidden',
+      object:             'Ticket',
+      condition_saved:    {},
+      condition_selected: {},
+      perform:            { 'ticket.maintenance_type' => { 'operator' => 'hide', 'hide' => 'true' } },
+      active:             true,
+      stop_after_match:   false,
+      changeable:         true,
+      priority:           520,
+      created_by_id:      1,
+      updated_by_id:      1,
+    )
+    CoreWorkflow.create_if_not_exists(
+      name:               'WCL: Maintenance type for Maintenance tickets',
+      object:             'Ticket',
+      condition_saved:    {},
+      condition_selected: { 'ticket.group_id' => { 'operator' => 'is', 'value' => [group.id.to_s] } },
+      perform:            {
+        'ticket.maintenance_type' => {
+          'operator' => %w[show set_mandatory], 'show' => 'true', 'set_mandatory' => 'true'
+        },
+      },
+      active:             true,
+      stop_after_match:   false,
+      changeable:         true,
+      priority:           521,
+      created_by_id:      1,
+      updated_by_id:      1,
+    )
+  end
+
+  # Where the request is about; required on every new ticket. Starts with "Other" only: the admin
+  # adds the real locations in Admin > Objects > Ticket > Location.
+  def self.ticket_location
+    return if ObjectManager::Attribute.get(object: 'Ticket', name: 'location')
+
+    ObjectManager::Attribute.add(
+      force:         true,
+      object:        'Ticket',
+      name:          'location',
+      display:       __('Location'),
+      data_type:     'select',
+      data_option:   {
+        options:    { 'other' => __('Other') },
+        default:    '',
+        null:       true,
+        nulloption: true,
+        translate:  false,
+        maxlength:  255,
+        note:       __('Add your locations in Admin > Objects > Ticket > Location.'),
+      },
+      editable:      true,
+      active:        true,
+      screens:       {
+        create_middle: {
+          'ticket.customer' => { null: false, item_class: 'column' },
+          'ticket.agent'    => { null: false, item_class: 'column' },
+        },
+        edit:          {
+          'ticket.customer' => { null: true },
+          'ticket.agent'    => { null: true },
+        },
+      },
+      to_create:     true,
+      to_migrate:    false,
+      to_delete:     false,
+      position:      34,
+      created_by_id: 1,
+      updated_by_id: 1,
+    )
+    ObjectManager::Attribute.migration_execute
+    Ticket.reset_column_information
+  end
+
+  # Employees use Zammad itself for now; the HR app is connected later. Until then the Department
+  # dropdown also takes a typed name (kept for reuse, see User::RemembersDepartment), and the HR
+  # app's overview (empty without it) stays off. Once HR app tickets exist, both are left alone.
+  def self.without_hr_app
+    item = Tag::Item.find_by(name: 'hr-portal')
+    return if item && Tag.exists?(tag_item_id: item.id)
+
+    department_free_entry
+
+    Overview.find_by(link: 'hr_portal_open')&.update!(active: false)
+  end
+
+  def self.department_free_entry
+    department = ObjectManager::Attribute.get(object: 'User', name: 'department')
+    return if !department
+
+    data_option = department.data_option.merge('note' => DEPARTMENT_NOTE, 'unknown' => true)
+    department.update!(data_option: data_option) if data_option != department.data_option
   end
 end

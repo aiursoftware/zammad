@@ -91,7 +91,8 @@ services:
       BACKUP_TIME: "03:00"
       HOLD_DAYS: "14"
     volumes:
-      - zammad-storage:/opt/zammad/storage:ro
+      # Writable: a restore (files in ./backup/restore) unpacks the storage backup here.
+      - zammad-storage:/opt/zammad/storage
       - ./backup:/var/tmp/zammad
 
   zammad-postgresql:
