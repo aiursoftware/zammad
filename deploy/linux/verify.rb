@@ -72,10 +72,10 @@ begin
     missing << 'department dropdown' if ObjectManager::Attribute.get(object: 'User', name: 'department')&.data_type != 'tree_select'
     missing << 'attachment settings' if Setting.get('hr_portal_attachment_extensions').nil?
     missing << 'open-requests overview' if !Overview.exists?(link: 'hr_portal_open')
-    missing << 'Maintenance type field' if !ObjectManager::Attribute.get(object: 'Ticket', name: 'maintenance_type')
+    missing << 'Category field' if !ObjectManager::Attribute.get(object: 'Ticket', name: 'category')
     missing << 'hidden state on new tickets' if !CoreWorkflow.exists?(name: 'WCL: Customers do not pick the state of a new ticket')
     missing << 'Location field' if !ObjectManager::Attribute.get(object: 'Ticket', name: 'location')
-    missing << 'Maintenance type workflow' if !CoreWorkflow.exists?(name: 'WCL: Maintenance type for Maintenance tickets')
+    missing << 'Category by group' if !CoreWorkflow.exists?(name: 'WCL: Category follows the group')
     [missing.empty?, missing.empty? ? nil : "missing: #{missing.join(', ')} (run: rails zammad:wcl:setup)"]
   end
 
@@ -121,13 +121,14 @@ begin
     urgent = Ticket::Priority.find_by(name: '4 urgent')
     code, json = http.call(:post, 'tickets?expand=true', from: customer_email, body: {
                              title: 'WCL verify ticket', group_id: group.id, priority_id: urgent&.id, tags: 'hr-portal',
+                             location: 'WCL verify location',
                              article: { subject: 'WCL verify', body: 'Please check the attached file.', type: 'web',
                                         internal: false, content_type: 'text/plain',
                                         attachments: [{ 'filename' => 'verify.txt', 'mime-type' => 'text/plain',
                                                         'data' => Base64.strict_encode64(attachment_text) }] },
                            })
     ticket_id = json['id'] if code == 201
-    [code == 201 && json['priority'] == '4 urgent', "HTTP #{code} group=#{group.name}"]
+    [code == 201 && json['priority'] == '4 urgent', "HTTP #{code} group=#{group.name} #{json['error'] if json.is_a?(Hash)}".strip]
   end
 
   check('HR app: employee reads the thread and downloads the file') do

@@ -119,7 +119,10 @@ When employees should also see and file tickets from the HR app:
    `"Zammad": { "BaseUrl": "https://support.worldcraftlogistics.net", "ApiToken": "<token>" }`
 3. IIS: the HR API's app pool **Start Mode = AlwaysRunning**, **Idle Time-out = 0**, site
    **Preload Enabled = True** (its department sync runs in the background).
-4. Zammad: Admin → Overviews → **HR portal – open requests** → set it active (it is off while
+4. HR app code: its new-ticket form must also send **Location** (required in Zammad), and the
+   **Category** for groups that have categories (Admin → Objects → Ticket → Category), or Zammad
+   refuses the ticket.
+5. Zammad: Admin → Overviews → **HR portal – open requests** → set it active (it is off while
    the HR app isn't connected, since only HR app tickets show in it).
 
 From then on the HR app keeps Zammad's departments and employees' locations up to date, and

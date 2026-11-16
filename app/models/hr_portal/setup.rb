@@ -24,8 +24,10 @@ module HrPortal::Setup # rubocop:disable Metrics/ModuleLength
     urgent_priority
     settings
     open_requests_overview
-    maintenance_type
+    ticket_category
+    retire_maintenance_type
     ticket_location
+    location_free_text
     without_hr_app
     true
   end
@@ -288,52 +290,76 @@ module HrPortal::Setup # rubocop:disable Metrics/ModuleLength
   end
 
   MAINTENANCE_GROUP = 'Maintenance'.freeze
-  MAINTENANCE_TYPES = {
-    'warehouse' => __('Warehouse maintenance'),
-    'vehicle'   => __('Trucking / vehicle maintenance'),
-    'office'    => __('Office maintenance'),
-    'facility'  => __('General facility repairs'),
-    'other'     => 'Other',
-  }.freeze
+  MAINTENANCE_CATEGORIES = [
+    __('Warehouse maintenance'),
+    __('Trucking / vehicle maintenance'),
+    __('Office maintenance'),
+    __('General facility repairs'),
+    'Other',
+  ].freeze
 
-  # A "Maintenance" group with a "Maintenance type" the requester must pick; the field only
-  # shows on tickets in that group. The admin can rename the group and edit the types
-  # (Admin > Objects > Ticket > Maintenance type) afterwards.
-  def self.maintenance_type
-    group = Group.find_by(name: MAINTENANCE_GROUP) || Group.create!(
+  # "Category" on tickets, listed by group: in Admin > Objects > Ticket > Category the first level
+  # is a group's name and the entries under it are that group's categories. The ticket form only
+  # offers the chosen group's categories (required when it has any, hidden when it has none), see
+  # CoreWorkflow::Custom::WclTicketCategory. Starts with a Maintenance group and its categories.
+  def self.ticket_category
+    Group.find_by(name: MAINTENANCE_GROUP) || Group.create!(
       name: MAINTENANCE_GROUP, active: true, follow_up_possible: 'yes', created_by_id: 1, updated_by_id: 1
     )
-    maintenance_type_attribute
-    maintenance_type_workflows(group)
+    ticket_category_attribute
+    category_flat_list
+    Group::RenamesTicketCategories.add_category_entries(Group.where(active: true))
+    CoreWorkflow.create_if_not_exists(
+      name:               'WCL: Category follows the group',
+      object:             'Ticket',
+      condition_saved:    {},
+      condition_selected: {},
+      perform:            { 'custom.module' => { 'execute' => ['CoreWorkflow::Custom::WclTicketCategory'] } },
+      active:             true,
+      stop_after_match:   false,
+      changeable:         false,
+      priority:           520,
+      created_by_id:      1,
+      updated_by_id:      1,
+    )
   end
 
-  def self.maintenance_type_attribute
-    return if ObjectManager::Attribute.get(object: 'Ticket', name: 'maintenance_type')
+  def self.ticket_category_attribute
+    return if ObjectManager::Attribute.get(object: 'Ticket', name: 'category')
 
+    maintenance = {
+      'name'     => MAINTENANCE_GROUP,
+      'value'    => MAINTENANCE_GROUP,
+      'children' => MAINTENANCE_CATEGORIES.map { |name| { 'name' => name, 'value' => "#{MAINTENANCE_GROUP}::#{name}" } },
+    }
     ObjectManager::Attribute.add(
       force:         true,
       object:        'Ticket',
-      name:          'maintenance_type',
-      display:       __('Maintenance type'),
-      data_type:     'select',
+      name:          'category',
+      display:       __('Category'),
+      data_type:     'tree_select',
       data_option:   {
-        options:    MAINTENANCE_TYPES,
-        default:    '',
-        null:       true,
-        nulloption: true,
-        translate:  false,
-        maxlength:  255,
+        options:               [maintenance],
+        # the form lists only the chosen group's categories, so show them without the group level
+        flatten_single_branch: true,
+        default:               '',
+        null:                  true,
+        nulloption:            true,
+        multiple:              false,
+        translate:             false,
+        maxlength:             255,
+        note:                  __('First level: the name of a group. Under it: the categories offered for that group.'),
       },
       editable:      true,
       active:        true,
       screens:       {
         create_middle: {
-          'ticket.customer' => { null: true, item_class: 'column' },
-          'ticket.agent'    => { null: true, item_class: 'column' },
+          'ticket.customer' => { shown: true, required: false, item_class: 'column' },
+          'ticket.agent'    => { shown: true, required: false, item_class: 'column' },
         },
         edit:          {
-          'ticket.customer' => { null: true },
-          'ticket.agent'    => { null: true },
+          'ticket.customer' => { shown: true, required: false },
+          'ticket.agent'    => { shown: true, required: false },
         },
       },
       to_create:     true,
@@ -347,42 +373,27 @@ module HrPortal::Setup # rubocop:disable Metrics/ModuleLength
     Ticket.reset_column_information
   end
 
-  # Hidden everywhere, except on tickets in the Maintenance group, where it is required.
-  def self.maintenance_type_workflows(group)
-    CoreWorkflow.create_if_not_exists(
-      name:               'WCL: Maintenance type hidden',
-      object:             'Ticket',
-      condition_saved:    {},
-      condition_selected: {},
-      perform:            { 'ticket.maintenance_type' => { 'operator' => 'hide', 'hide' => 'true' } },
-      active:             true,
-      stop_after_match:   false,
-      changeable:         true,
-      priority:           520,
-      created_by_id:      1,
-      updated_by_id:      1,
-    )
-    CoreWorkflow.create_if_not_exists(
-      name:               'WCL: Maintenance type for Maintenance tickets',
-      object:             'Ticket',
-      condition_saved:    {},
-      condition_selected: { 'ticket.group_id' => { 'operator' => 'is', 'value' => [group.id.to_s] } },
-      perform:            {
-        'ticket.maintenance_type' => {
-          'operator' => %w[show set_mandatory], 'show' => 'true', 'set_mandatory' => 'true'
-        },
-      },
-      active:             true,
-      stop_after_match:   false,
-      changeable:         true,
-      priority:           521,
-      created_by_id:      1,
-      updated_by_id:      1,
-    )
-  end
+  LOCATION_DATA_OPTION = {
+    'type'      => 'text',
+    'maxlength' => 255,
+    'null'      => true,
+    'default'   => '',
+    'note'      => __('Where is it? e.g. Warehouse A, Office 2nd floor, Truck 51C-12345'),
+  }.freeze
 
-  # Where the request is about; required on every new ticket. Starts with "Other" only: the admin
-  # adds the real locations in Admin > Objects > Ticket > Location.
+  # shown/required: the format Admin > Objects saves, so editing the field there keeps it required.
+  LOCATION_SCREENS = {
+    'create_middle' => {
+      'ticket.customer' => { 'shown' => true, 'required' => true, 'item_class' => 'column' },
+      'ticket.agent'    => { 'shown' => true, 'required' => true, 'item_class' => 'column' },
+    },
+    'edit'          => {
+      'ticket.customer' => { 'shown' => true, 'required' => false },
+      'ticket.agent'    => { 'shown' => true, 'required' => false },
+    },
+  }.freeze
+
+  # Where the request is about, typed freely; required on every new ticket.
   def self.ticket_location
     return if ObjectManager::Attribute.get(object: 'Ticket', name: 'location')
 
@@ -391,28 +402,11 @@ module HrPortal::Setup # rubocop:disable Metrics/ModuleLength
       object:        'Ticket',
       name:          'location',
       display:       __('Location'),
-      data_type:     'select',
-      data_option:   {
-        options:    { 'other' => __('Other') },
-        default:    '',
-        null:       true,
-        nulloption: true,
-        translate:  false,
-        maxlength:  255,
-        note:       __('Add your locations in Admin > Objects > Ticket > Location.'),
-      },
+      data_type:     'input',
+      data_option:   LOCATION_DATA_OPTION.dup,
       editable:      true,
       active:        true,
-      screens:       {
-        create_middle: {
-          'ticket.customer' => { null: false, item_class: 'column' },
-          'ticket.agent'    => { null: false, item_class: 'column' },
-        },
-        edit:          {
-          'ticket.customer' => { null: true },
-          'ticket.agent'    => { null: true },
-        },
-      },
+      screens:       LOCATION_SCREENS.deep_dup,
       to_create:     true,
       to_migrate:    false,
       to_delete:     false,
@@ -420,6 +414,50 @@ module HrPortal::Setup # rubocop:disable Metrics/ModuleLength
       created_by_id: 1,
       updated_by_id: 1,
     )
+    ObjectManager::Attribute.migration_execute
+    Ticket.reset_column_information
+  end
+
+  # An install that got Location as a dropdown: it becomes free text (same column), and tickets
+  # keep the location's name instead of the option's key.
+  def self.location_free_text
+    attribute = ObjectManager::Attribute.get(object: 'Ticket', name: 'location')
+    return if !attribute || attribute.data_type == 'input'
+
+    names = option_names(attribute)
+    names.each do |key, name|
+      next if name.blank? || name.to_s == key
+
+      Ticket.where(location: key).update_all(location: name.to_s) # rubocop:disable Rails/SkipsModelValidations
+    end
+
+    attribute.update_columns( # rubocop:disable Rails/SkipsModelValidations
+      data_type:   'input',
+      data_option: LOCATION_DATA_OPTION.dup,
+      screens:     LOCATION_SCREENS.deep_dup,
+      updated_at:  Time.zone.now,
+    )
+  end
+
+  # An install that got the earlier "Maintenance type" field: its values move into Category
+  # ("Maintenance::<type>") and the field and its rules are removed.
+  def self.retire_maintenance_type
+    attribute = ObjectManager::Attribute.get(object: 'Ticket', name: 'maintenance_type')
+    return if !attribute
+
+    # the keys the field was created with, in case its options were edited since
+    names = { 'warehouse' => __('Warehouse maintenance'), 'vehicle' => __('Trucking / vehicle maintenance'),
+              'office' => __('Office maintenance'), 'facility' => __('General facility repairs'), 'other' => 'Other' }
+      .merge(option_names(attribute).compact_blank)
+    Ticket.where.not(maintenance_type: [nil, '']).find_each do |ticket|
+      next if ticket.category.present?
+
+      name = names[ticket.maintenance_type.to_s].presence || ticket.maintenance_type
+      ticket.update_columns(category: "#{MAINTENANCE_GROUP}::#{name}") # rubocop:disable Rails/SkipsModelValidations
+    end
+
+    CoreWorkflow.where(name: ['WCL: Maintenance type hidden', 'WCL: Maintenance type for Maintenance tickets']).destroy_all
+    ObjectManager::Attribute.remove(object: 'Ticket', name: 'maintenance_type')
     ObjectManager::Attribute.migration_execute
     Ticket.reset_column_information
   end
@@ -442,5 +480,22 @@ module HrPortal::Setup # rubocop:disable Metrics/ModuleLength
 
     data_option = department.data_option.merge('note' => DEPARTMENT_NOTE, 'unknown' => true)
     department.update!(data_option: data_option) if data_option != department.data_option
+  end
+
+  # { key => name } of a select's options, stored as a hash or (after editing in Admin > Objects)
+  # as a list of { value:, name: }.
+  def self.option_names(attribute)
+    options = attribute.data_option['options']
+    return options.to_h { |key, name| [key.to_s, name.to_s] } if options.is_a?(Hash)
+
+    Array(options).to_h { |option| [option['value'].to_s, option['name'].to_s] }
+  end
+
+  # Installs whose Category was created before the form showed the group's categories directly.
+  def self.category_flat_list
+    attribute = ObjectManager::Attribute.get(object: 'Ticket', name: 'category')
+    return if !attribute || attribute.data_option['flatten_single_branch']
+
+    attribute.update!(data_option: attribute.data_option.merge('flatten_single_branch' => true))
   end
 end

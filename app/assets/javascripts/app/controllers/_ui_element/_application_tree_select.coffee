@@ -77,6 +77,13 @@ class App.UiElement.ApplicationTreeSelect extends App.UiElement.ApplicationUiEle
   @filterOptionArray: (attribute) ->
     attribute.options = @filterTreeOptions(attribute, 0, attribute.options)
 
+    # WCL customization: a field whose filter leaves one branch (e.g. the ticket Category, which
+    # lists only the chosen group's categories) shows that branch's entries directly.
+    return if !attribute.flatten_single_branch
+    branches = _.filter(attribute.options, (option) -> option.value)
+    return if branches.length isnt 1 || !branches[0].inactive || _.isEmpty(branches[0].children)
+    attribute.options = _.reject(attribute.options, (option) -> option is branches[0]).concat(branches[0].children)
+
   @buildOptionList: (list, attribute) ->
     return super if !@isTreeRelation(attribute)
 

@@ -6,6 +6,7 @@ class ObjectManager::Attribute < ApplicationModel
   include ChecksClientNotification
   include HasAuditLogs
   include CanSeed
+  include ObjectManager::Attribute::KeepsWclOptions
 
   self.audit_log_attributes_ignored = %i[to_create to_migrate to_delete to_config data_option_new position]
 

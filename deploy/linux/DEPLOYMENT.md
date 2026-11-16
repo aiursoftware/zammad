@@ -165,7 +165,26 @@ new group.
 ### Departments
 
 Go to **Admin → Objects → User → Department**. Add your department names; employees pick their
-department from this list.
+department from this list. A name typed on a user that isn't in the list yet is added to it.
+
+### Categories (per group)
+
+Go to **Admin → Objects → Ticket → Category**. It is a tree:
+
+- **first level** = a group's name, exactly as in Admin → Groups (e.g. `Maintenance`, `IT`);
+- **under it** = that group's categories (e.g. `Warehouse maintenance`, `Office maintenance`).
+
+On a new ticket, picking a group shows only its categories, and one must be chosen. Groups without
+an entry here have no Category field. Save, then click **Update database**.
+
+Each active group has its entry here automatically: a new group gets an empty one, and renaming a
+group renames its entry (and the Category of its existing tickets). An entry deleted by hand comes
+back empty on save. To stop a group offering categories, delete the categories under it; the entry
+itself goes away only when the group is deactivated or deleted.
+
+### Location
+
+Every new ticket needs a **Location**. It is typed freely (e.g. "Warehouse A", "Truck 51C-12345").
 
 ### Microsoft 365 sign-in
 

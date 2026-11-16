@@ -479,11 +479,11 @@ msgstr ""
 msgid "%{model} can have full or granular access to group"
 msgstr ""
 
-#: app/models/object_manager/attribute.rb:631
+#: app/models/object_manager/attribute.rb:632
 msgid "%{name} already exists"
 msgstr ""
 
-#: app/models/object_manager/attribute.rb:615
+#: app/models/object_manager/attribute.rb:616
 msgid "%{name} is a reserved word"
 msgstr ""
 
@@ -1461,10 +1461,6 @@ msgstr ""
 
 #: app/frontend/apps/desktop/pages/knowledge-base/components/KnowledgeBaseAnswer/KnowledgeBaseAnswerSidebar/KnowledgeBaseAnswerVisibilityScheduleFlyout.vue:112
 msgid "Add visibility schedule"
-msgstr ""
-
-#: app/models/hr_portal/setup.rb:381
-msgid "Add your locations in Admin > Objects > Ticket > Location."
 msgstr ""
 
 #: app/assets/javascripts/app/views/knowledge_base_video_servers/index.jst.eco:4
@@ -3299,6 +3295,7 @@ msgstr ""
 #: app/assets/javascripts/app/views/ticket_zoom/knowledge_base_ai_draft_modal.jst.eco:78
 #: app/frontend/apps/desktop/components/KnowledgeBase/KnowledgeBaseAnswer/KnowledgeBaseAnswerAttributes.vue:85
 #: app/frontend/apps/desktop/entities/knowledge-base/composables/useAnswerFormSchema.ts:170
+#: app/models/hr_portal/setup.rb:319
 msgid "Category"
 msgstr ""
 
@@ -5007,7 +5004,7 @@ msgstr ""
 msgid "Customer tickets of the user will get deleted on execution of the task. No rollback possible."
 msgstr ""
 
-#: app/models/hr_portal/setup.rb:33
+#: app/models/hr_portal/setup.rb:35
 msgid "Customers can create tickets here"
 msgstr ""
 
@@ -7186,7 +7183,7 @@ msgstr ""
 msgid "Embedding provider returned no usable vector"
 msgstr ""
 
-#: app/models/hr_portal/setup.rb:34
+#: app/models/hr_portal/setup.rb:36
 msgid "Employees can pick this group when they create a ticket (and later in the HR app), and every agent gets access to it. Switch off for teams tickets are only handed to (e.g. Dev, Network)."
 msgstr ""
 
@@ -7815,7 +7812,7 @@ msgstr ""
 msgid "Every time a customer creates a new ticket, they automatically receive a confirmation email to assure them that their issue has been submitted successfully. This behavior is built into Zammad, but it’s also highly customizable, and you can set up other automated actions just like it.\n\nMaybe you want to set a higher priority on any ticket with the word “urgent” in the title. Maybe you want to avoid sending auto-reply emails to customers from certain organizations. Maybe you want mark a ticket as “pending” whenever someone adds an internal note to a ticket.\n\nWhatever it is, you can do it with triggers: actions that watch tickets for certain changes, and then fire off whenever those changes occur."
 msgstr ""
 
-#: app/models/hr_portal/setup.rb:112
+#: app/models/hr_portal/setup.rb:114
 msgid "Everyone working on the ticket. The first is its main owner (\"My Assigned Tickets\"); all of them are notified, and the others find it under \"My Subscribed Tickets\"."
 msgstr ""
 
@@ -8252,6 +8249,10 @@ msgstr ""
 msgid "First article (oldest)"
 msgstr ""
 
+#: app/models/hr_portal/setup.rb:331
+msgid "First level: the name of a group. Under it: the categories offered for that group."
+msgstr ""
+
 #: app/assets/javascripts/app/models/user.coffee:18
 #: app/frontend/apps/desktop/composables/authentication/useSignupForm.ts:14
 #: db/seeds/object_manager_attributes.rb:817
@@ -8585,7 +8586,7 @@ msgstr ""
 msgid "General communication error, maybe internet is not available!"
 msgstr ""
 
-#: app/models/hr_portal/setup.rb:277
+#: app/models/hr_portal/setup.rb:279
 msgid "General facility repairs"
 msgstr ""
 
@@ -8988,7 +8989,7 @@ msgstr ""
 msgid "HR app: maximum attachments per message"
 msgstr ""
 
-#: app/models/hr_portal/setup.rb:253
+#: app/models/hr_portal/setup.rb:255
 msgid "HR portal – open requests"
 msgstr ""
 
@@ -9985,7 +9986,7 @@ msgstr ""
 msgid "Internal Knowledge Base feed:"
 msgstr ""
 
-#: app/models/object_manager/attribute.rb:714
+#: app/models/object_manager/attribute.rb:715
 msgid "Internal attributes cannot be deleted"
 msgstr ""
 
@@ -11013,7 +11014,7 @@ msgstr ""
 #: app/assets/javascripts/app/views/profile/devices.jst.eco:13
 #: app/assets/javascripts/app/views/session.jst.eco:10
 #: app/frontend/apps/desktop/pages/personal-setting/views/PersonalSettingDevices.vue:100
-#: app/models/hr_portal/setup.rb:372
+#: app/models/hr_portal/setup.rb:382
 msgid "Location"
 msgstr ""
 
@@ -11141,10 +11142,6 @@ msgstr ""
 
 #: app/controllers/application_controller/authenticates.rb:120
 msgid "Maintenance mode enabled!"
-msgstr ""
-
-#: app/models/hr_portal/setup.rb:298
-msgid "Maintenance type"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/manage.coffee:20
@@ -13286,7 +13283,7 @@ msgstr ""
 msgid "October"
 msgstr ""
 
-#: app/models/hr_portal/setup.rb:276
+#: app/models/hr_portal/setup.rb:278
 msgid "Office maintenance"
 msgstr ""
 
@@ -13743,10 +13740,6 @@ msgstr ""
 #: app/frontend/apps/mobile/pages/ticket/components/TicketDetailView/ArticleMetadataDialog.vue:61
 #: app/frontend/apps/mobile/pages/ticket/components/TicketDetailView/ArticleRemoteContentBadge.vue:21
 msgid "Original formatting"
-msgstr ""
-
-#: app/models/hr_portal/setup.rb:278
-msgid "Other"
 msgstr ""
 
 #: app/assets/javascripts/app/views/integration/cti.jst.eco:86
@@ -14237,7 +14230,7 @@ msgstr ""
 msgid "Phone number is already in use by another WhatsApp account."
 msgstr ""
 
-#: app/models/hr_portal/setup.rb:149
+#: app/models/hr_portal/setup.rb:151
 msgid "Pick a department, or type a new one: it is added to the list for the next user. Admins can tidy the list in Admin > Objects > User > Department."
 msgstr ""
 
@@ -15468,7 +15461,7 @@ msgstr ""
 msgid "Request the password login here."
 msgstr ""
 
-#: app/models/hr_portal/setup.rb:183
+#: app/models/hr_portal/setup.rb:185
 msgid "Request turned down (WCL). Shown to the employee as \"Rejected\" in the HR app."
 msgstr ""
 
@@ -21414,7 +21407,7 @@ msgstr ""
 msgid "Triggers activated by actions are executed whenever a ticket is created or updated, while triggers activated by time events are executed when certain times are reached (e.g. pending time, escalation)."
 msgstr ""
 
-#: app/models/hr_portal/setup.rb:275
+#: app/models/hr_portal/setup.rb:277
 msgid "Trucking / vehicle maintenance"
 msgstr ""
 
@@ -22684,7 +22677,7 @@ msgstr ""
 msgid "Want to join the BETA UI feedback program?"
 msgstr ""
 
-#: app/models/hr_portal/setup.rb:274
+#: app/models/hr_portal/setup.rb:276
 msgid "Warehouse maintenance"
 msgstr ""
 
@@ -22875,6 +22868,10 @@ msgstr ""
 
 #: app/assets/javascripts/app/controllers/_ui_element/_application_selector.coffee:693
 msgid "Where"
+msgstr ""
+
+#: app/models/hr_portal/setup.rb:361
+msgid "Where is it? e.g. Warehouse A, Office 2nd floor, Truck 51C-12345"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/_channel/chat.coffee:49
@@ -23684,7 +23681,7 @@ msgstr ""
 msgid "at"
 msgstr ""
 
-#: app/models/object_manager/attribute.rb:611
+#: app/models/object_manager/attribute.rb:612
 msgid "at least one letter is required"
 msgstr ""
 
@@ -23693,7 +23690,7 @@ msgstr ""
 msgid "attachment,attached,enclosed,enclosure"
 msgstr ""
 
-#: app/models/object_manager/attribute.rb:644
+#: app/models/object_manager/attribute.rb:645
 msgid "attribute is not editable"
 msgstr ""
 
@@ -23727,7 +23724,7 @@ msgstr ""
 msgid "camera,image,photo,picture"
 msgstr ""
 
-#: app/models/object_manager/attribute.rb:703
+#: app/models/object_manager/attribute.rb:704
 msgid "can't be altered after creation (you can delete the attribute and create another with the desired value)"
 msgstr ""
 
@@ -23737,11 +23734,11 @@ msgstr ""
 msgid "can't be empty"
 msgstr ""
 
-#: app/models/object_manager/attribute.rb:710
+#: app/models/object_manager/attribute.rb:711
 msgid "can't be modified"
 msgstr ""
 
-#: app/models/object_manager/attribute.rb:602
+#: app/models/object_manager/attribute.rb:603
 msgid "can't be used because *_id and *_ids are not allowed"
 msgstr ""
 
@@ -24760,7 +24757,7 @@ msgstr ""
 msgid "now"
 msgstr ""
 
-#: app/models/object_manager/attribute.rb:608
+#: app/models/object_manager/attribute.rb:609
 msgid "only lowercase letters, numbers, and '_' are allowed"
 msgstr ""
 
@@ -25021,7 +25018,7 @@ msgstr ""
 msgid "sms"
 msgstr ""
 
-#: app/models/object_manager/attribute.rb:605
+#: app/models/object_manager/attribute.rb:606
 msgid "spaces are not allowed"
 msgstr ""
 
