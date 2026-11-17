@@ -261,10 +261,9 @@ class TicketsController < ApplicationController
       end
     end
 
-    # WCL customization: closing a ticket needs a note (see HrPortal::CloseNote).
-    if params['macro.id'].blank? && HrPortal::CloseNote.missing?(ticket, clean_params[:state_id], params[:article])
-      raise Exceptions::UnprocessableContent, HrPortal::CloseNote::MESSAGE
-    end
+    # WCL customization: closing a ticket needs a note, rejecting a public one (see HrPortal::CloseNote).
+    close_note_problem = params['macro.id'].blank? && HrPortal::CloseNote.problem(ticket, clean_params[:state_id], params[:article])
+    raise Exceptions::UnprocessableContent, close_note_problem if close_note_problem
 
     Transaction.execute do
       ticket.with_lock do

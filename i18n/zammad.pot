@@ -3295,7 +3295,7 @@ msgstr ""
 #: app/assets/javascripts/app/views/ticket_zoom/knowledge_base_ai_draft_modal.jst.eco:78
 #: app/frontend/apps/desktop/components/KnowledgeBase/KnowledgeBaseAnswer/KnowledgeBaseAnswerAttributes.vue:85
 #: app/frontend/apps/desktop/entities/knowledge-base/composables/useAnswerFormSchema.ts:170
-#: app/models/hr_portal/setup.rb:319
+#: app/models/hr_portal/setup.rb:320
 msgid "Category"
 msgstr ""
 
@@ -8249,7 +8249,7 @@ msgstr ""
 msgid "First article (oldest)"
 msgstr ""
 
-#: app/models/hr_portal/setup.rb:331
+#: app/models/hr_portal/setup.rb:332
 msgid "First level: the name of a group. Under it: the categories offered for that group."
 msgstr ""
 
@@ -11014,7 +11014,7 @@ msgstr ""
 #: app/assets/javascripts/app/views/profile/devices.jst.eco:13
 #: app/assets/javascripts/app/views/session.jst.eco:10
 #: app/frontend/apps/desktop/pages/personal-setting/views/PersonalSettingDevices.vue:100
-#: app/models/hr_portal/setup.rb:382
+#: app/models/hr_portal/setup.rb:383
 msgid "Location"
 msgstr ""
 
@@ -12169,7 +12169,7 @@ msgstr ""
 msgid "Need session_id."
 msgstr ""
 
-#: app/controllers/tickets_controller.rb:422
+#: app/controllers/tickets_controller.rb:421
 msgid "Need user_id or organization_id as param"
 msgstr ""
 
@@ -12652,7 +12652,7 @@ msgstr ""
 msgid "No customer assigned yet."
 msgstr ""
 
-#: app/models/group.rb:42
+#: app/models/group.rb:43
 msgid "No double colons (::) allowed, reserved delimiter"
 msgstr ""
 
@@ -12828,7 +12828,7 @@ msgstr ""
 #: app/controllers/organizations_controller.rb:107
 #: app/controllers/text_modules_controller.rb:79
 #: app/controllers/ticket_articles_controller.rb:240
-#: app/controllers/tickets_controller.rb:465
+#: app/controllers/tickets_controller.rb:464
 #: app/controllers/users_controller.rb:559
 msgid "No source data submitted!"
 msgstr ""
@@ -14450,8 +14450,8 @@ msgstr ""
 msgid "Please wait…"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/ticket_zoom.coffee:1069
-#: app/models/hr_portal/close_note.rb:6
+#: app/assets/javascripts/app/controllers/ticket_zoom.coffee:1073
+#: app/models/hr_portal/close_note.rb:7
 msgid "Please write a note before closing the ticket: what was done, or why it is closed."
 msgstr ""
 
@@ -15088,6 +15088,11 @@ msgstr ""
 #: app/assets/javascripts/app/views/signup/verify.jst.eco:4
 #: app/frontend/apps/desktop/pages/authentication/views/Signup.vue:48
 msgid "Registration successful!"
+msgstr ""
+
+#: app/assets/javascripts/app/controllers/ticket_zoom.coffee:1071
+#: app/models/hr_portal/close_note.rb:8
+msgid "Rejecting needs a public note that the requester can see: explain why it is rejected (switch the note from internal to public)."
 msgstr ""
 
 #: lib/excel_sheet/ai/analytics/errors.rb:30
@@ -16009,7 +16014,7 @@ msgstr ""
 #: app/assets/javascripts/app/controllers/_integration/github.coffee:63
 #: app/assets/javascripts/app/controllers/_integration/gitlab.coffee:80
 #: app/assets/javascripts/app/controllers/_integration/idoit.coffee:93
-#: app/assets/javascripts/app/controllers/ticket_zoom.coffee:1249
+#: app/assets/javascripts/app/controllers/ticket_zoom.coffee:1257
 msgid "Saving failed."
 msgstr ""
 
@@ -18653,7 +18658,7 @@ msgstr ""
 msgid "The checklist feature is not active"
 msgstr ""
 
-#: app/models/group.rb:112
+#: app/models/group.rb:113
 msgid "The chosen parent group is part of a circular reference."
 msgstr ""
 
@@ -19539,7 +19544,7 @@ msgstr ""
 msgid "The sorting mode you save here will apply to categories added later."
 msgstr ""
 
-#: app/controllers/tickets_controller.rb:376
+#: app/controllers/tickets_controller.rb:375
 msgid "The source ticket could not be found."
 msgstr ""
 
@@ -19603,7 +19608,7 @@ msgstr ""
 msgid "The tag could not be removed."
 msgstr ""
 
-#: app/controllers/tickets_controller.rb:367
+#: app/controllers/tickets_controller.rb:366
 msgid "The target ticket number could not be found."
 msgstr ""
 
@@ -20186,15 +20191,15 @@ msgstr ""
 msgid "This field was configured incorrectly and can't be submitted."
 msgstr ""
 
-#: app/models/group.rb:85
+#: app/models/group.rb:86
 msgid "This group cannot be moved into itself."
 msgstr ""
 
-#: app/models/group.rb:86
+#: app/models/group.rb:87
 msgid "This group cannot be moved into one of its children."
 msgstr ""
 
-#: app/models/group.rb:92
+#: app/models/group.rb:93
 msgid "This group exceeds the allowed nesting depth."
 msgstr ""
 
@@ -20204,7 +20209,7 @@ msgstr ""
 msgid "This group has no email address configured for outgoing communication."
 msgstr ""
 
-#: app/models/group.rb:98
+#: app/models/group.rb:99
 msgid "This group's children would exceed the allowed nesting depth."
 msgstr ""
 
@@ -20936,7 +20941,7 @@ msgid "Tickets bulk edit"
 msgstr ""
 
 #: app/controllers/ticket_articles_controller.rb:233
-#: app/controllers/tickets_controller.rb:458
+#: app/controllers/tickets_controller.rb:457
 msgid "Tickets can only be imported if system is in import mode."
 msgstr ""
 
@@ -22870,7 +22875,7 @@ msgstr ""
 msgid "Where"
 msgstr ""
 
-#: app/models/hr_portal/setup.rb:361
+#: app/models/hr_portal/setup.rb:362
 msgid "Where is it? e.g. Warehouse A, Office 2nd floor, Truck 51C-12345"
 msgstr ""
 

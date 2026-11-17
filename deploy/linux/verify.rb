@@ -167,8 +167,12 @@ begin
     [code == 422 && Ticket.uncached { Ticket.find(ticket_id).state.name } != 'rejected', "HTTP #{code}"]
   end
 
-  check('HR app: Rejected state (with a note)') do
-    note = { body: 'verify: rejected with a reason', type: 'note', internal: true }
+  check('HR app: Rejected state (needs a public note)') do
+    internal = { body: 'verify: internal reason', type: 'note', internal: true }
+    code_internal, = http.call(:put, "tickets/#{ticket_id}", body: { state: 'rejected', article: internal })
+    next [false, "an internal note was accepted for Rejected (HTTP #{code_internal})"] if code_internal != 422
+
+    note = { body: 'verify: rejected with a reason', type: 'note', internal: false }
     code, json = http.call(:put, "tickets/#{ticket_id}", body: { state: 'rejected', article: note })
     [code == 200 && Ticket.uncached { Ticket.find(ticket_id).state.name } == 'rejected', "HTTP #{code} #{json.is_a?(Hash) ? json['state_id'] : json}"]
   end

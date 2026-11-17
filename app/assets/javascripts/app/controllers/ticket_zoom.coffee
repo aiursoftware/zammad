@@ -1062,16 +1062,24 @@ class App.TicketZoom extends App.Controller
 
       ticket.article = article
 
-    # WCL customization: closing (or rejecting) a ticket needs a note saying why.
-    if !macro.perform && !ticket.article && @changed('ticket', 'state_id') && App.TicketState.find(ticket.state_id)?.state_type?.name is 'closed'
-      App.Event.trigger('notify', {
-        type: 'error'
-        msg:  __('Please write a note before closing the ticket: what was done, or why it is closed.')
-      })
-      @$('.article-add .js-textarea').trigger('focus')
-      @submitEnable(e)
-      @autosaveStart()
-      return
+    # WCL customization: closing a ticket needs a note saying why; rejecting needs a public one,
+    #   so the requester learns why (see HrPortal::CloseNote).
+    closingState = App.TicketState.find(ticket.state_id)
+    if !macro.perform && @changed('ticket', 'state_id') && closingState?.state_type?.name is 'closed'
+      closeNoteError = undefined
+      if closingState.name is 'rejected' && (!ticket.article || ticket.article.internal is true || ticket.article.internal is 'true')
+        closeNoteError = __('Rejecting needs a public note that the requester can see: explain why it is rejected (switch the note from internal to public).')
+      else if !ticket.article
+        closeNoteError = __('Please write a note before closing the ticket: what was done, or why it is closed.')
+      if closeNoteError
+        App.Event.trigger('notify', {
+          type: 'error'
+          msg:  closeNoteError
+        })
+        @$('.article-add .js-textarea').trigger('focus')
+        @submitEnable(e)
+        @autosaveStart()
+        return
 
     # add sidebar params
     if @sidebarWidget && @sidebarWidget.postParams
