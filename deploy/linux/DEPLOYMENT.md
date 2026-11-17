@@ -167,14 +167,24 @@ new group.
 
 ### Managers
 
-A manager follows the agents' work in the groups they oversee:
+A manager follows the agents' work in the groups they oversee. There is one **Manager** role;
+what each manager sees comes from the groups set on that person:
 
-1. **Admin → Users → the manager → Roles**: tick **Manager** (also tick **Agent** if they should be
-   able to own tickets themselves).
+1. **Admin → Users → the manager → Roles**: tick **Manager** only. Don't also tick **Agent**: the
+   Agent role has access to every group, so they would see every team's tickets.
 2. Same screen, **Group permissions**: add each group they oversee with **Read**, **Overview** and
    **Change** (not Full, so they aren't offered as an owner). Leave out the groups they shouldn't see.
 
-They then see only those groups' tickets, everywhere (overviews, search, Reporting), with:
+```text
+Maintenance manager  → Role: Manager   Group permissions: Maintenance
+IT manager           → Role: Manager   Group permissions: IT, Network, Dev
+```
+
+Don't add groups to the **Manager** role itself (Admin → Roles): every manager would then see them.
+Keep the role name **Manager** (the app looks for it by name); put job titles on the user instead.
+
+They then see only those groups' tickets, everywhere (overviews, search, Reporting, the Maintenance
+Report and the weekly email), with:
 
 - the **Team** overviews: _open tickets by agent_, _unassigned tickets_, _no update for 3 days_ and
   _closed in the last 7 days_ (grouped by agent);

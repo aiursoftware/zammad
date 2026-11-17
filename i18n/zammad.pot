@@ -224,6 +224,10 @@ msgstr ""
 msgid "%s credentials"
 msgstr ""
 
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:68
+msgid "%s days"
+msgstr ""
+
 #: app/frontend/shared/i18n/dates.ts:103
 msgid "%s days ago"
 msgstr ""
@@ -261,6 +265,10 @@ msgstr ""
 
 #: app/frontend/apps/desktop/pages/knowledge-base/components/KnowledgeBaseAnswerEdit/concurrentChange.ts:37
 msgid "%s has updated this answer. Submitting will replace their changes."
+msgstr ""
+
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:67
+msgid "%s hours"
 msgstr ""
 
 #: app/frontend/shared/i18n/dates.ts:110
@@ -351,6 +359,10 @@ msgstr ""
 
 #: app/assets/javascripts/app/views/channel/email_account_overview.jst.eco:49
 msgid "%s recommends using OAuth. %s announced it's going to drop Basic Authentication support in the future."
+msgstr ""
+
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:111
+msgid "%s requests submitted between %s and %s in %s."
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/agent_ticket_merge.coffee:65
@@ -451,6 +463,10 @@ msgstr ""
 msgid "%s user to %s user"
 msgstr ""
 
+#: app/assets/javascripts/app/lib/app_post/wcl_domain_assignment.coffee:30
+msgid "%s users assigned (%s)."
+msgstr ""
+
 #: lib/whatsapp/webhook/message.rb:53
 msgid "%s via WhatsApp"
 msgstr ""
@@ -515,6 +531,7 @@ msgstr ""
 msgid "+ %s more"
 msgstr ""
 
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:68
 #: db/seeds/settings.rb:1173
 msgid "1 day"
 msgstr ""
@@ -523,6 +540,7 @@ msgstr ""
 msgid "1 day ago"
 msgstr ""
 
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:67
 #: app/frontend/apps/desktop/components/BetaUi/FeedbackDialog/FeedbackDialog.vue:32
 #: db/seeds/settings.rb:1173
 msgid "1 hour"
@@ -2284,6 +2302,10 @@ msgstr ""
 msgid "Article(s) to analyze"
 msgstr ""
 
+#: app/assets/javascripts/app/lib/app_post/wcl_domain_assignment.coffee:10
+msgid "Assign"
+msgstr ""
+
 #: db/seeds/object_manager_attributes.rb:2239
 msgid "Assign Follow-Ups"
 msgstr ""
@@ -2308,6 +2330,12 @@ msgstr ""
 
 #: db/seeds/object_manager_attributes.rb:1837
 msgid "Assign users based on user domain."
+msgstr ""
+
+#: app/assets/javascripts/app/controllers/organization.coffee:36
+#: app/assets/javascripts/app/controllers/organization_profile/action_row.coffee:37
+#: app/assets/javascripts/app/lib/app_post/wcl_domain_assignment.coffee:10
+msgid "Assign users by domain"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/_dashboard/stats/ticket_load_measure.coffee:21
@@ -2712,11 +2740,11 @@ msgstr ""
 msgid "Avatar with initials %s"
 msgstr ""
 
-#: app/models/wcl/maintenance_report.rb:274
+#: app/models/wcl/maintenance_report.rb:283
 msgid "Average completion (days)"
 msgstr ""
 
-#: app/models/wcl/maintenance_report.rb:262
+#: app/models/wcl/maintenance_report.rb:271
 msgid "Average completion time (days)"
 msgstr ""
 
@@ -2733,9 +2761,16 @@ msgstr ""
 msgid "Average: %s%"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:57
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:119
+msgid "Avg. completion"
+msgstr ""
+
 #: app/models/wcl/manager_summary.rb:67
 msgid "Avg. completion (days)"
+msgstr ""
+
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:74
+msgid "Avg. days"
 msgstr ""
 
 #: app/assets/javascripts/app/lib/app_post/ai_provider/azure_ai.coffee:3
@@ -3008,8 +3043,8 @@ msgstr ""
 msgid "But it's only available in these languages:"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:68
-#: app/models/wcl/maintenance_report.rb:245
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:84
+#: app/models/wcl/maintenance_report.rb:254
 msgid "By category"
 msgstr ""
 
@@ -3017,13 +3052,13 @@ msgstr ""
 msgid "By default, the follow-up check is done via the subject of an email. This setting lets you add more fields for which the follow-up check will be executed."
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:66
-#: app/models/wcl/maintenance_report.rb:243
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:82
+#: app/models/wcl/maintenance_report.rb:252
 msgid "By department"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:67
-#: app/models/wcl/maintenance_report.rb:244
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:83
+#: app/models/wcl/maintenance_report.rb:253
 msgid "By location"
 msgstr ""
 
@@ -3035,18 +3070,18 @@ msgstr ""
 msgid "By mapping your agents' sipgate users to their Zammad user accounts, Zammad can support your agents by opening either a new ticket dialogue or the user profile upon picking up a new call."
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:65
-#: app/models/wcl/maintenance_report.rb:241
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:92
+#: app/models/wcl/maintenance_report.rb:250
 msgid "By month"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:69
-#: app/models/wcl/maintenance_report.rb:246
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:85
+#: app/models/wcl/maintenance_report.rb:255
 msgid "By person"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:64
-#: app/models/wcl/maintenance_report.rb:240
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:91
+#: app/models/wcl/maintenance_report.rb:249
 msgid "By week"
 msgstr ""
 
@@ -3342,7 +3377,7 @@ msgstr ""
 msgid "Categories"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:70
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:84
 #: app/assets/javascripts/app/models/knowledge_base_answer.coffee:51
 #: app/assets/javascripts/app/views/popover/kb_generic.jst.eco:36
 #: app/assets/javascripts/app/views/ticket_zoom/knowledge_base_ai_draft_modal.jst.eco:78
@@ -4079,7 +4114,7 @@ msgstr ""
 msgid "Complete translations"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:59
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:76
 msgid "Completed"
 msgstr ""
 
@@ -4087,7 +4122,7 @@ msgstr ""
 msgid "Completed Tasks"
 msgstr ""
 
-#: app/models/wcl/maintenance_report.rb:259
+#: app/models/wcl/maintenance_report.rb:268
 msgid "Completed in period"
 msgstr ""
 
@@ -5216,7 +5251,7 @@ msgstr ""
 msgid "Days"
 msgstr ""
 
-#: app/models/wcl/maintenance_report.rb:300
+#: app/models/wcl/maintenance_report.rb:309
 msgid "Days to complete"
 msgstr ""
 
@@ -6344,6 +6379,7 @@ msgid "Delivery failed: \"%s\""
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/department.coffee:3
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:82
 #: app/models/wcl/setup.rb:156
 #: db/seeds/object_manager_attributes.rb:1234
 msgid "Department"
@@ -6763,7 +6799,7 @@ msgstr ""
 msgid "Download Error Logs"
 msgstr ""
 
-#: app/assets/javascripts/app/views/maintenance_report/index.jst.eco:29
+#: app/assets/javascripts/app/views/maintenance_report/index.jst.eco:28
 msgid "Download Excel"
 msgstr ""
 
@@ -6911,7 +6947,7 @@ msgstr ""
 
 #: app/assets/javascripts/app/controllers/_ai/provider_connections.coffee:648
 #: app/assets/javascripts/app/controllers/_channel/whatsapp.coffee:60
-#: app/assets/javascripts/app/controllers/organization_profile/action_row.coffee:36
+#: app/assets/javascripts/app/controllers/organization_profile/action_row.coffee:44
 #: app/assets/javascripts/app/controllers/tag.coffee:118
 #: app/assets/javascripts/app/controllers/translation.coffee:92
 #: app/assets/javascripts/app/controllers/user_profile/action_row.coffee:78
@@ -8623,7 +8659,7 @@ msgstr ""
 #: app/assets/javascripts/app/controllers/_ui_element/postmaster_match.coffee:10
 #: app/assets/javascripts/app/models/ticket_article.coffee:7
 #: app/assets/javascripts/app/views/cti/caller_log.jst.eco:13
-#: app/assets/javascripts/app/views/maintenance_report/index.jst.eco:9
+#: app/assets/javascripts/app/views/maintenance_report/index.jst.eco:10
 #: app/assets/javascripts/app/views/ticket_zoom/article_view.jst.eco:16
 #: app/frontend/apps/desktop/pages/cti/components/CallerLogTable.vue:57
 #: app/frontend/apps/desktop/pages/ticket/components/TicketDetailView/ArticleMeta/useArticleMeta.ts:89
@@ -8958,7 +8994,7 @@ msgstr ""
 #: app/assets/javascripts/app/views/generic/user_permission_group.jst.eco:3
 #: app/assets/javascripts/app/views/integration/pgp_group.jst.eco:4
 #: app/assets/javascripts/app/views/integration/smime_group.jst.eco:4
-#: app/assets/javascripts/app/views/maintenance_report/index.jst.eco:17
+#: app/assets/javascripts/app/views/maintenance_report/index.jst.eco:18
 #: app/assets/javascripts/app/views/popover/ticket.jst.eco:38
 #: app/assets/javascripts/app/views/profile/notification.jst.eco:29
 #: app/assets/javascripts/app/views/telegram/index.jst.eco:31
@@ -11096,7 +11132,7 @@ msgstr ""
 msgid "Localization of execution changes"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:70
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:83
 #: app/assets/javascripts/app/views/generic/calender_preview.jst.eco:6
 #: app/assets/javascripts/app/views/profile/devices.jst.eco:13
 #: app/assets/javascripts/app/views/session.jst.eco:10
@@ -11228,7 +11264,7 @@ msgid "Maintenance Mode"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/maintenance_report.coffee:11
-#: app/assets/javascripts/app/views/maintenance_report/index.jst.eco:3
+#: app/assets/javascripts/app/views/maintenance_report/index.jst.eco:4
 msgid "Maintenance Report"
 msgstr ""
 
@@ -11236,7 +11272,7 @@ msgstr ""
 msgid "Maintenance mode enabled!"
 msgstr ""
 
-#: app/models/wcl/maintenance_report.rb:254
+#: app/models/wcl/maintenance_report.rb:263
 msgid "Maintenance report"
 msgstr ""
 
@@ -12010,7 +12046,7 @@ msgstr ""
 msgid "Monitoring Token"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:65
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:92
 #: app/assets/javascripts/app/views/report/time_range_picker.jst.eco:3
 msgid "Month"
 msgstr ""
@@ -12142,7 +12178,6 @@ msgstr ""
 #: app/assets/javascripts/app/controllers/_ui_element/object_attribute_options_context.coffee:21
 #: app/assets/javascripts/app/controllers/chat.coffee:568
 #: app/assets/javascripts/app/controllers/knowledge_base/video_servers_manager.coffee:79
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:59
 #: app/assets/javascripts/app/controllers/widget/two_factor_configuration/modal/security_keys.coffee:58
 #: app/assets/javascripts/app/models/_application_model.coffee:160
 #: app/assets/javascripts/app/models/ai_agent.coffee:6
@@ -12370,7 +12405,7 @@ msgstr ""
 msgid "New Macro"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/organization.coffee:36
+#: app/assets/javascripts/app/controllers/organization.coffee:37
 msgid "New Organization"
 msgstr ""
 
@@ -12878,6 +12913,14 @@ msgstr ""
 msgid "No related knowledge base answer links."
 msgstr ""
 
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:89
+msgid "No repeat issues in this period."
+msgstr ""
+
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:109
+msgid "No requests were submitted between %s and %s in %s."
+msgstr ""
+
 #: app/frontend/apps/desktop/components/Search/QuickSearch/QuickSearchResultList/QuickSearchResultList.vue:171
 msgid "No results for this query."
 msgstr ""
@@ -12997,6 +13040,10 @@ msgstr ""
 msgid "No user creation on logon"
 msgstr ""
 
+#: app/assets/javascripts/app/lib/app_post/wcl_domain_assignment.coffee:27
+msgid "No users to assign: everyone with a matching email already has an organization."
+msgstr ""
+
 #: app/services/service/knowledge_base/create_answer_from_ai_result.rb:59
 msgid "No valid knowledge base category provided."
 msgstr ""
@@ -13114,6 +13161,10 @@ msgstr ""
 msgid "Not reached"
 msgstr ""
 
+#: app/assets/javascripts/app/views/maintenance_report/result.jst.eco:63
+msgid "Not set"
+msgstr ""
+
 #: app/frontend/apps/desktop/pages/ticket/components/TicketDetailView/ArticleBubble/ArticleBubbleBody.vue:348
 msgid "Not translated due to your preferences."
 msgstr ""
@@ -13169,12 +13220,16 @@ msgstr ""
 msgid "Notes are visible to agents only, never to customers."
 msgstr ""
 
-#: app/assets/javascripts/app/views/maintenance_report/result.jst.eco:13
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:60
 msgid "Nothing in this period."
 msgstr ""
 
 #: app/assets/javascripts/app/views/generic/column_select.jst.eco:20
 msgid "Nothing selected"
+msgstr ""
+
+#: app/assets/javascripts/app/views/maintenance_report/result.jst.eco:84
+msgid "Nothing to break down for this period. Try a wider date range or another group."
 msgstr ""
 
 #: app/assets/javascripts/app/views/import/otrs.jst.eco:94
@@ -13403,11 +13458,11 @@ msgstr ""
 msgid "Ok"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:81
-msgid "Oldest open (days)"
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:120
+msgid "Oldest open"
 msgstr ""
 
-#: app/models/wcl/maintenance_report.rb:264
+#: app/models/wcl/maintenance_report.rb:273
 #: app/models/wcl/manager_summary.rb:68
 msgid "Oldest open ticket"
 msgstr ""
@@ -13601,8 +13656,8 @@ msgstr ""
 msgid "Open note box"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:69
-#: app/models/wcl/maintenance_report.rb:246
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:85
+#: app/models/wcl/maintenance_report.rb:255
 msgid "Open now"
 msgstr ""
 
@@ -13942,8 +13997,8 @@ msgstr ""
 msgid "Outdent text"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:77
-#: app/models/wcl/maintenance_report.rb:261
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:118
+#: app/models/wcl/maintenance_report.rb:270
 #: app/models/wcl/manager_summary.rb:66
 msgid "Outstanding now"
 msgstr ""
@@ -14304,7 +14359,7 @@ msgstr ""
 msgid "Persistent Node.js (V8)"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:69
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:85
 msgid "Person"
 msgstr ""
 
@@ -15010,6 +15065,14 @@ msgstr ""
 msgid "Put a message on the login page. To change it, click on the text area below and change it in-line."
 msgstr ""
 
+#: app/assets/javascripts/app/lib/app_post/wcl_domain_assignment.coffee:5
+msgid "Put every user with an email ending in @%s and no organization into %s?"
+msgstr ""
+
+#: app/assets/javascripts/app/lib/app_post/wcl_domain_assignment.coffee:7
+msgid "Put every user without an organization into the organization matching their email domain? Only organizations with \"Domain based assignment\" switched on are used."
+msgstr ""
+
 #: db/seeds/settings.rb:3870
 msgid "Puts Zammad into import mode. This disables some triggers and denies access to all users without the permission \"admin.maintenance\"."
 msgstr ""
@@ -15226,11 +15289,11 @@ msgstr ""
 msgid "Registration successful!"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:76
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:101
 msgid "Rejected"
 msgstr ""
 
-#: app/models/wcl/maintenance_report.rb:260
+#: app/models/wcl/maintenance_report.rb:269
 msgid "Rejected in period"
 msgstr ""
 
@@ -15519,12 +15582,9 @@ msgstr ""
 msgid "Reorder"
 msgstr ""
 
-#: app/models/wcl/maintenance_report.rb:247
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:86
+#: app/models/wcl/maintenance_report.rb:256
 msgid "Repeat issues"
-msgstr ""
-
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:70
-msgid "Repeat issues (same category at the same location)"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/_ui_element/richtext_additions/popup_image.coffee:3
@@ -17216,7 +17276,7 @@ msgstr ""
 msgid "Shoot"
 msgstr ""
 
-#: app/assets/javascripts/app/views/maintenance_report/index.jst.eco:28
+#: app/assets/javascripts/app/views/maintenance_report/index.jst.eco:27
 #: app/assets/javascripts/app/views/profile/calendar_subscriptions.jst.eco:67
 msgid "Show"
 msgstr ""
@@ -17899,8 +17959,8 @@ msgstr ""
 msgid "Sticker file"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:60
-#: app/models/wcl/maintenance_report.rb:243
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:77
+#: app/models/wcl/maintenance_report.rb:252
 msgid "Still open"
 msgstr ""
 
@@ -18012,15 +18072,15 @@ msgstr ""
 msgid "Submit your changes"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:59
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:75
 msgid "Submitted"
 msgstr ""
 
-#: app/models/wcl/maintenance_report.rb:258
+#: app/models/wcl/maintenance_report.rb:267
 msgid "Submitted in period"
 msgstr ""
 
-#: app/models/wcl/maintenance_report.rb:263
+#: app/models/wcl/maintenance_report.rb:272
 msgid "Submitted in period and completed (%)"
 msgstr ""
 
@@ -19647,6 +19707,10 @@ msgstr ""
 msgid "The rules instruct the AI agent on when to generate new tags and when to prefer tags from existing tags list."
 msgstr ""
 
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:88
+msgid "The same category reported at the same location more than once."
+msgstr ""
+
 #: app/frontend/apps/desktop/pages/knowledge-base/components/KnowledgeBaseAnswer/KnowledgeBaseAnswerSidebar/KnowledgeBaseAnswerScheduledVisibility.vue:49
 msgid "The scheduled visibility change could not be removed."
 msgstr ""
@@ -19938,6 +20002,10 @@ msgstr ""
 #: app/controllers/sessions_controller.rb:273
 #: app/graphql/gql/mutations/two_factor_method_initiate_authentication.rb:36
 msgid "The username or password is incorrect."
+msgstr ""
+
+#: app/assets/javascripts/app/lib/app_post/wcl_domain_assignment.coffee:34
+msgid "The users could not be assigned."
 msgstr ""
 
 #: app/models/core_workflow/result.rb:40
@@ -20968,8 +21036,8 @@ msgstr ""
 msgid "Ticket number or title"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:70
-#: app/models/wcl/maintenance_report.rb:289
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:86
+#: app/models/wcl/maintenance_report.rb:298
 msgid "Ticket numbers"
 msgstr ""
 
@@ -21100,7 +21168,7 @@ msgid "TicketID"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/_plugin/keyboard_shortcuts.coffee:456
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:70
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:86
 #: app/assets/javascripts/app/controllers/widget/user.coffee:87
 #: app/assets/javascripts/app/views/import/freshdesk.jst.eco:94
 #: app/assets/javascripts/app/views/import/kayako.jst.eco:98
@@ -21289,7 +21357,7 @@ msgstr ""
 #: app/assets/javascripts/app/controllers/_ui_element/postmaster_match.coffee:14
 #: app/assets/javascripts/app/models/ticket_article.coffee:8
 #: app/assets/javascripts/app/views/cti/caller_log.jst.eco:18
-#: app/assets/javascripts/app/views/maintenance_report/index.jst.eco:13
+#: app/assets/javascripts/app/views/maintenance_report/index.jst.eco:14
 #: app/assets/javascripts/app/views/ticket_zoom/article_new.jst.eco:52
 #: app/assets/javascripts/app/views/ticket_zoom/article_view.jst.eco:28
 #: app/frontend/apps/desktop/pages/cti/components/CallerLogTable.vue:64
@@ -21856,6 +21924,10 @@ msgstr ""
 
 #: app/frontend/apps/desktop/components/Ticket/DragAndDropBulk/DragAndDropBulkBottomDrawer.vue:173
 msgid "Unassign owner & move to group"
+msgstr ""
+
+#: app/assets/javascripts/app/views/maintenance_report/result.jst.eco:63
+msgid "Unassigned"
 msgstr ""
 
 #: app/controllers/first_steps_controller.rb:206
@@ -22985,7 +23057,7 @@ msgstr ""
 msgid "Wednesday"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:64
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:91
 #: app/assets/javascripts/app/views/report/time_range_picker.jst.eco:4
 msgid "Week"
 msgstr ""
@@ -23995,6 +24067,10 @@ msgstr ""
 msgid "closed"
 msgstr ""
 
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:116
+msgid "closed in this period"
+msgstr ""
+
 #: app/frontend/apps/desktop/pages/ticket/components/TicketSidebar/TicketSidebarCustomer/TicketSidebarCustomerContent.vue:108
 msgid "closed tickets"
 msgstr ""
@@ -24987,6 +25063,10 @@ msgstr ""
 msgid "open tickets"
 msgstr ""
 
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:118
+msgid "open today, any date"
+msgstr ""
+
 #: app/assets/javascripts/app/controllers/_channel/google.coffee:61
 msgid "optional"
 msgstr ""
@@ -25488,6 +25568,10 @@ msgstr ""
 #: db/seeds/object_manager_attributes.rb:1533
 #: db/seeds/settings.rb:655
 msgid "yes"
+msgstr ""
+
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:105
+msgid "your groups"
 msgstr ""
 
 #: app/assets/javascripts/app/views/settings/ticket_number.jst.eco:6

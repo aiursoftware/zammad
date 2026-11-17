@@ -30,6 +30,14 @@ class App.OrganizationProfileActionRow extends App.ControllerObserverActionRow
       }
     ]
 
+    # WCL customization: see App.WclDomainAssignment.
+    if organization.domain && organization.domain_assignment && App.User.current()?.permission('admin.organization')
+      actions.push {
+        name:     'wcl-domain-assignment'
+        title:    __('Assign users by domain')
+        callback: (organization) => App.WclDomainAssignment.run(@el.closest('.content'), organization)
+      }
+
     if organization.isAccessibleBy(App.User.current(), 'change')
       actions.unshift {
         name:     'edit'

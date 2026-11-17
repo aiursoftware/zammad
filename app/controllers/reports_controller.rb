@@ -143,6 +143,9 @@ class ReportsController < ApplicationController
       raise Exceptions::UnprocessableContent, __('The reporting profile could not be found.')
     end
 
+    # WCL customization: non-admins (e.g. managers) only count tickets of groups they may read.
+    profile.condition = Wcl::ReportGroupScope.restrict(profile.condition, current_user) if !current_user.permissions?('admin')
+
     local_config = Report.config
     if !local_config || !local_config[:metric] || !local_config[:metric][params[:metric].to_sym]
       raise Exceptions::UnprocessableContent, "Could not find metric #{params[:metric]}"

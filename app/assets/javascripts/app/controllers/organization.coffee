@@ -33,9 +33,16 @@ class Organization extends App.ControllerSubContent
         navupdate: '#organizations'
         buttons: [
           { name: __('Import'), 'data-type': 'import', class: 'btn' }
+          { name: __('Assign users by domain'), 'data-type': 'wcl-domain-assignment', class: 'btn' }
           { name: __('New Organization'), 'data-type': 'new', class: 'btn--success' }
         ]
       container: @el.closest('.content')
+    )
+
+    # WCL customization: see App.WclDomainAssignment.
+    @el.on('click', '[data-type=wcl-domain-assignment]', (e) =>
+      e.preventDefault()
+      App.WclDomainAssignment.run(@el.closest('.content'))
     )
 
   show: (params) =>
