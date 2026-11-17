@@ -2712,11 +2712,11 @@ msgstr ""
 msgid "Avatar with initials %s"
 msgstr ""
 
-#: app/models/wcl/maintenance_report.rb:261
+#: app/models/wcl/maintenance_report.rb:274
 msgid "Average completion (days)"
 msgstr ""
 
-#: app/models/wcl/maintenance_report.rb:249
+#: app/models/wcl/maintenance_report.rb:262
 msgid "Average completion time (days)"
 msgstr ""
 
@@ -3009,7 +3009,7 @@ msgid "But it's only available in these languages:"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/maintenance_report.coffee:68
-#: app/models/wcl/maintenance_report.rb:232
+#: app/models/wcl/maintenance_report.rb:245
 msgid "By category"
 msgstr ""
 
@@ -3018,12 +3018,12 @@ msgid "By default, the follow-up check is done via the subject of an email. This
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/maintenance_report.coffee:66
-#: app/models/wcl/maintenance_report.rb:230
+#: app/models/wcl/maintenance_report.rb:243
 msgid "By department"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/maintenance_report.coffee:67
-#: app/models/wcl/maintenance_report.rb:231
+#: app/models/wcl/maintenance_report.rb:244
 msgid "By location"
 msgstr ""
 
@@ -3036,17 +3036,17 @@ msgid "By mapping your agents' sipgate users to their Zammad user accounts, Zamm
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/maintenance_report.coffee:65
-#: app/models/wcl/maintenance_report.rb:228
+#: app/models/wcl/maintenance_report.rb:241
 msgid "By month"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/maintenance_report.coffee:69
-#: app/models/wcl/maintenance_report.rb:233
+#: app/models/wcl/maintenance_report.rb:246
 msgid "By person"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/maintenance_report.coffee:64
-#: app/models/wcl/maintenance_report.rb:227
+#: app/models/wcl/maintenance_report.rb:240
 msgid "By week"
 msgstr ""
 
@@ -4087,7 +4087,7 @@ msgstr ""
 msgid "Completed Tasks"
 msgstr ""
 
-#: app/models/wcl/maintenance_report.rb:246
+#: app/models/wcl/maintenance_report.rb:259
 msgid "Completed in period"
 msgstr ""
 
@@ -5216,7 +5216,7 @@ msgstr ""
 msgid "Days"
 msgstr ""
 
-#: app/models/wcl/maintenance_report.rb:294
+#: app/models/wcl/maintenance_report.rb:300
 msgid "Days to complete"
 msgstr ""
 
@@ -7264,7 +7264,7 @@ msgid "Embedding provider returned no usable vector"
 msgstr ""
 
 #: app/models/wcl/setup.rb:40
-msgid "Employees can pick this group when they create a ticket (and later in the HR app), and every agent gets access to it. Switch off for teams tickets are only handed to (e.g. Dev, Network)."
+msgid "Employees can pick this group when they create a ticket (and later in the HR app). Switch off for teams tickets are only handed to (e.g. Dev, Network)."
 msgstr ""
 
 #: app/assets/javascripts/app/views/knowledge_base/public_menu_manager.jst.eco:21
@@ -11236,7 +11236,7 @@ msgstr ""
 msgid "Maintenance mode enabled!"
 msgstr ""
 
-#: app/models/wcl/maintenance_report.rb:241
+#: app/models/wcl/maintenance_report.rb:254
 msgid "Maintenance report"
 msgstr ""
 
@@ -13407,7 +13407,7 @@ msgstr ""
 msgid "Oldest open (days)"
 msgstr ""
 
-#: app/models/wcl/maintenance_report.rb:251
+#: app/models/wcl/maintenance_report.rb:264
 #: app/models/wcl/manager_summary.rb:68
 msgid "Oldest open ticket"
 msgstr ""
@@ -13602,7 +13602,7 @@ msgid "Open note box"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/maintenance_report.coffee:69
-#: app/models/wcl/maintenance_report.rb:233
+#: app/models/wcl/maintenance_report.rb:246
 msgid "Open now"
 msgstr ""
 
@@ -13943,7 +13943,7 @@ msgid "Outdent text"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/maintenance_report.coffee:77
-#: app/models/wcl/maintenance_report.rb:248
+#: app/models/wcl/maintenance_report.rb:261
 #: app/models/wcl/manager_summary.rb:66
 msgid "Outstanding now"
 msgstr ""
@@ -14587,7 +14587,7 @@ msgid "Please wait…"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/ticket_zoom.coffee:1073
-#: app/models/wcl/close_note.rb:7
+#: app/models/wcl/close_note.rb:5
 msgid "Please write a note before closing the ticket: what was done, or why it is closed."
 msgstr ""
 
@@ -15230,12 +15230,12 @@ msgstr ""
 msgid "Rejected"
 msgstr ""
 
-#: app/models/wcl/maintenance_report.rb:247
+#: app/models/wcl/maintenance_report.rb:260
 msgid "Rejected in period"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/ticket_zoom.coffee:1071
-#: app/models/wcl/close_note.rb:8
+#: app/models/wcl/close_note.rb:6
 msgid "Rejecting needs a public note that the requester can see: explain why it is rejected (switch the note from internal to public)."
 msgstr ""
 
@@ -15519,7 +15519,7 @@ msgstr ""
 msgid "Reorder"
 msgstr ""
 
-#: app/models/wcl/maintenance_report.rb:234
+#: app/models/wcl/maintenance_report.rb:247
 msgid "Repeat issues"
 msgstr ""
 
@@ -17900,7 +17900,7 @@ msgid "Sticker file"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/maintenance_report.coffee:60
-#: app/models/wcl/maintenance_report.rb:230
+#: app/models/wcl/maintenance_report.rb:243
 msgid "Still open"
 msgstr ""
 
@@ -18016,11 +18016,11 @@ msgstr ""
 msgid "Submitted"
 msgstr ""
 
-#: app/models/wcl/maintenance_report.rb:245
+#: app/models/wcl/maintenance_report.rb:258
 msgid "Submitted in period"
 msgstr ""
 
-#: app/models/wcl/maintenance_report.rb:250
+#: app/models/wcl/maintenance_report.rb:263
 msgid "Submitted in period and completed (%)"
 msgstr ""
 
@@ -20969,7 +20969,7 @@ msgid "Ticket number or title"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/maintenance_report.coffee:70
-#: app/models/wcl/maintenance_report.rb:283
+#: app/models/wcl/maintenance_report.rb:289
 msgid "Ticket numbers"
 msgstr ""
 
