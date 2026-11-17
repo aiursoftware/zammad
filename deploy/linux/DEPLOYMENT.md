@@ -178,7 +178,14 @@ They then see only those groups' tickets, everywhere (overviews, search, Reporti
 
 - the **Team** overviews: _open tickets by agent_, _unassigned tickets_, _no update for 3 days_ and
   _closed in the last 7 days_ (grouped by agent);
-- **Reporting**: charts and Excel exports of tickets by agent, group, state and time.
+- **Reporting**: charts and Excel exports of tickets by agent, group, state and time;
+- **Maintenance Report** (left menu): submitted, completed, rejected, outstanding, average
+  completion time, by week/month/department/location/category/person, repeat issues (same
+  category at the same location), and an Excel download;
+- a **weekly summary email** every Monday at 07:00 (server time zone) with last week's numbers
+  and the Excel attached. It goes out through the notification email channel (Admin → Channels →
+  Email → Notification), so that must work. Switch it off in **Admin → Settings → Ticket → Base →
+  Weekly summary email to managers**.
 
 A new group isn't added to managers automatically: add it to the managers who should see it.
 

@@ -3,7 +3,8 @@
 # WCL customization: the Maintenance report (Reporting > Maintenance Report, and its Excel
 # download). For a period and a set of groups it counts tickets submitted, completed, rejected and
 # still open, the average completion time (created -> closed), and breaks that down by week,
-# month, department, location, category and person (the ticket's main owner).
+# month, department, location, category and person (the ticket's main owner). It also lists repeat
+# issues (the same category at the same location more than once) and the oldest open ticket.
 #
 # Only tickets the user may read are counted (TicketPolicy::ReadScope).
 class Wcl::MaintenanceReport
@@ -32,6 +33,8 @@ class Wcl::MaintenanceReport
       by_location:   breakdown { |ticket| ticket.location.to_s.strip.presence },
       by_category:   breakdown { |ticket| category_name(ticket) },
       by_person:     by_person,
+      repeats:       repeats,
+      oldest_open:   oldest_open,
     }
   end
 
@@ -176,6 +179,39 @@ class Wcl::MaintenanceReport
     end
   end
 
+  # The same category reported at the same location (ignoring case and spaces) more than once in
+  # the period: a sign of a recurring problem.
+  def repeats # rubocop:disable Metrics/AbcSize
+    submitted
+      .select { |ticket| location_name(ticket) }
+      .group_by { |ticket| [location_name(ticket).downcase.squish, category_name(ticket).to_s.downcase] }
+      .values
+      .select { |tickets| tickets.size > 1 }
+      .sort_by { |tickets| [-tickets.size, location_name(tickets.first).downcase] }
+      .map do |tickets|
+        {
+          location:   location_name(tickets.first),
+          category:   category_name(tickets.first) || '(none)',
+          count:      tickets.size,
+          still_open: tickets.count { |ticket| open_state_ids.include?(ticket.state_id) },
+          tickets:    tickets.sort_by(&:created_at).map { |ticket| "##{ticket.number}" }.join(', '),
+        }
+      end
+  end
+
+  def oldest_open
+    ticket = outstanding.min_by(&:created_at)
+    return if !ticket
+
+    { number: ticket.number, title: ticket.title, days_open: ((Time.current - ticket.created_at) / 1.day).floor, owner: owner_name(ticket) }
+  end
+
+  def location_name(ticket)
+    return if !ticket.has_attribute?(:location)
+
+    ticket.location.to_s.squish.presence
+  end
+
   def owner_name(ticket)
     ticket.owner_id.to_i <= 1 ? '(unassigned)' : ticket.owner&.fullname.to_s
   end
@@ -206,6 +242,7 @@ class Wcl::MaintenanceReport
     write_table(workbook.add_worksheet(__('By location')), formats, ['Location', 'Submitted', 'Completed', __('Still open')], data[:by_location], breakdown_columns)
     write_table(workbook.add_worksheet(__('By category')), formats, ['Category', 'Submitted', 'Completed', __('Still open')], data[:by_category], breakdown_columns)
     write_table(workbook.add_worksheet(__('By person')), formats, ['Person', 'Completed', __('Open now')], data[:by_person], %i[name completed open_now average_days])
+    write_repeats(workbook.add_worksheet(__('Repeat issues')), formats)
     write_tickets(workbook.add_worksheet('Tickets'), formats)
   end
 
@@ -222,6 +259,7 @@ class Wcl::MaintenanceReport
       [__('Outstanding now'), data[:summary][:outstanding_now]],
       [__('Average completion time (days)'), data[:summary][:average_days]],
       [__('Submitted in period and completed (%)'), data[:summary][:completion_rate_pct]],
+      [__('Oldest open ticket'), oldest_open_text],
       ['Generated', "#{local(Time.current)} (#{timezone})"],
     ]
     rows.each_with_index do |(label, value), index|
@@ -242,6 +280,24 @@ class Wcl::MaintenanceReport
           key == :average_days ? sheet.write_number(index + 1, column, value, formats[:number]) : write_cell(sheet, index + 1, column, value)
         end
       end
+    end
+  end
+
+  def oldest_open_text
+    oldest = data[:oldest_open]
+    return '' if !oldest
+
+    "##{oldest[:number]} #{oldest[:title]} (#{oldest[:days_open]} days, #{oldest[:owner]})"
+  end
+
+  def write_repeats(sheet, formats)
+    headers = ['Location', 'Category', 'Tickets', __('Still open'), __('Ticket numbers')]
+    sheet.set_column(0, 1, 28)
+    sheet.set_column(4, 4, 50)
+    headers.each_with_index { |header, column| sheet.write(0, column, header, formats[:header]) }
+    keys = %i[location category count still_open tickets]
+    data[:repeats].each_with_index do |row, index|
+      keys.each_with_index { |key, column| write_cell(sheet, index + 1, column, row[key]) }
     end
   end
 

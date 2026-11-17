@@ -3,6 +3,7 @@
     <div style="border: 1px solid hsla(0,0%,50%,.3); border-radius: 6px; padding: 10px 16px; min-width: 140px;">
       <div class="text-muted" style="font-size: 12px;"><%= card.label %></div>
       <div style="font-size: 24px; font-weight: 600;"><%= card.value %></div>
+      <% if card.hint: %><div class="text-muted u-textTruncate" style="font-size: 12px; max-width: 220px;" title="<%= card.hint %>"><%= card.hint %></div><% end %>
     </div>
   <% end %>
 </div>

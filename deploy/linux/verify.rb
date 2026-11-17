@@ -63,7 +63,7 @@ begin
     [response.code == '200', "HTTP #{response.code}"]
   end
 
-  check('setup: HR app integration (states, priorities, fields, settings)') do
+  check('setup: WCL data (states, priorities, fields, settings)') do
     missing = []
     missing << 'rejected state' if !Ticket::State.exists?(name: 'rejected')
     missing << 'urgent priority' if Ticket::Priority.find_by(name: '4 urgent')&.ui_color != 'urgent-priority'
@@ -80,6 +80,7 @@ begin
     missing << 'hidden state on new tickets' if !CoreWorkflow.exists?(name: 'WCL: Customers do not pick the state of a new ticket')
     missing << 'Location field' if !ObjectManager::Attribute.get(object: 'Ticket', name: 'location')
     missing << 'Category by group' if !CoreWorkflow.exists?(name: 'WCL: Category follows the group')
+    missing << 'weekly manager summary' if Setting.get('wcl_manager_summary').nil? || !Scheduler.exists?(method: 'Wcl::ManagerSummary.deliver_all')
     [missing.empty?, missing.empty? ? nil : "missing: #{missing.join(', ')} (run: rails zammad:wcl:setup)"]
   end
 
@@ -201,6 +202,7 @@ begin
 ensure
   Ticket.find_by(id: ticket_id)&.destroy if ticket_id
   User.find_by(email: customer_email)&.destroy
+  User.where('email LIKE ?', 'wcl-verify-other-%@example.invalid').find_each(&:destroy)
   Department.find_by(name: 'WCL Verify Dept')&.destroy if defined?(Department) && Department.table_exists?
   Organization.find_by(name: 'ZZ: WCL Verify')&.destroy
   attribute = ObjectManager::Attribute.get(object: 'User', name: 'department')

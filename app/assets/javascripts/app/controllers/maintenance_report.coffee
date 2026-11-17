@@ -67,6 +67,7 @@ class MaintenanceReport extends App.ControllerAppContent
       { title: App.i18n.translateInline('By location'), rows: data.by_location, columns: breakdown }
       { title: App.i18n.translateInline('By category'), rows: data.by_category, columns: breakdown }
       { title: App.i18n.translateInline('By person'), rows: data.by_person, columns: [@column('name', __('Person')), @column('completed', __('Completed')), @column('open_now', __('Open now')), average] }
+      { title: App.i18n.translateInline('Repeat issues (same category at the same location)'), rows: data.repeats, columns: [@column('location', __('Location')), @column('category', __('Category')), @column('count', __('Tickets')), @column('still_open', __('Still open')), @column('tickets', __('Ticket numbers'))] }
     ]
     summary = data.summary
     cards = [
@@ -76,6 +77,8 @@ class MaintenanceReport extends App.ControllerAppContent
       { label: App.i18n.translateInline('Outstanding now'), value: summary.outstanding_now }
       { label: App.i18n.translateInline('Avg. completion (days)'), value: if summary.average_days? then summary.average_days else '–' }
     ]
+    if data.oldest_open
+      cards.push { label: App.i18n.translateInline('Oldest open (days)'), value: data.oldest_open.days_open, hint: "##{data.oldest_open.number} #{data.oldest_open.title}" }
     @$('.js-result').html App.view('maintenance_report/result')(cards: cards, tables: tables)
 
   download: (e) =>
@@ -83,4 +86,4 @@ class MaintenanceReport extends App.ControllerAppContent
     window.location.href = "#{@apiPath}/wcl/reports/maintenance?#{@query()}&sheet=true"
 
 App.Config.set('maintenance_report', MaintenanceReport, 'Routes')
-App.Config.set('MaintenanceReport', { prio: 8100, parent: '', name: __('Maintenance Report'), translate: true, target: '#maintenance_report', icon: 'report', permission: ['report'] }, 'NavBarRight')
+App.Config.set('MaintenanceReport', { prio: 8100, parent: '', name: __('Maintenance Report'), translate: true, target: '#maintenance_report', icon: 'tools', permission: ['report'] }, 'NavBarRight')

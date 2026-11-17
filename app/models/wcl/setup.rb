@@ -32,6 +32,7 @@ module Wcl::Setup # rubocop:disable Metrics/ModuleLength
     manager_role
     work_states
     ticket_department
+    manager_summary
     true
   end
 
@@ -713,5 +714,31 @@ module Wcl::Setup # rubocop:disable Metrics/ModuleLength
       Department.create!(name: name, active: true, created_by_id: 1, updated_by_id: 1)
     end
     Department.refresh_dropdowns
+  end
+
+  # The weekly summary email to managers (Wcl::ManagerSummary): a switch in Admin > Settings >
+  # Ticket > Base, and a scheduler job that sends it on Monday at 07:00 (system time zone).
+  def self.manager_summary
+    Setting.create_if_not_exists(
+      title:       __('Weekly summary email to managers'),
+      name:        Wcl::ManagerSummary::SETTING,
+      area:        'Ticket::Base',
+      description: __("Every Monday at 07:00, send each user with the Manager role a summary of last week's tickets for their groups, with the Excel report attached."),
+      options:     { form: [{ display: '', null: true, name: Wcl::ManagerSummary::SETTING, tag: 'boolean', options: { true => 'yes', false => 'no' } }] },
+      preferences: { prio: 2000, permission: ['admin.ticket'] },
+      state:       true,
+      frontend:    false,
+    )
+
+    scheduler = Scheduler.find_or_initialize_by(method: 'Wcl::ManagerSummary.deliver_all')
+    scheduler.update!(
+      name:          'WCL: weekly summary to managers',
+      period:        1.hour,
+      prio:          3,
+      active:        true,
+      timeplan:      { 'days' => { 'Mon' => true }, 'hours' => { '7' => true }, 'minutes' => { '0' => true } },
+      updated_by_id: 1,
+      created_by_id: scheduler.created_by_id || 1,
+    )
   end
 end
