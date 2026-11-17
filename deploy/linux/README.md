@@ -45,7 +45,7 @@ organization name, **email channel** — needed for notifications and admin pass
   to (Dev, Network). Every agent gets access to a new group automatically.
 - **Agents** (Admin → Users → New, role _Agent_).
 - **Departments** (Admin → Objects → User → Department): add your department names; employees'
-  department is picked from this list. (Once the HR app is connected, it keeps this list for you.)
+  department is picked from this list (Admin → Manage → Departments).
 
 ## 3. Microsoft 365 sign-in for employees
 
@@ -125,5 +125,4 @@ When employees should also see and file tickets from the HR app:
 5. Zammad: Admin → Overviews → **HR portal – open requests** → set it active (it is off while
    the HR app isn't connected, since only HR app tickets show in it).
 
-From then on the HR app keeps Zammad's departments and employees' locations up to date, and
-tickets filed in either place show in both.
+From then on, tickets filed in either place show in both.

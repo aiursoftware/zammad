@@ -91,8 +91,8 @@ begin
     [response.code == '200', "#{url} HTTP #{response.code}"]
   end
 
-  check('HR app: attachment rules endpoint') do
-    code, json = http.call(:get, 'hr_portal/attachment_rules')
+  check('API: attachment rules endpoint') do
+    code, json = http.call(:get, 'wcl/attachment_rules')
     [code == 200 && json['extensions'].is_a?(Array) && json['max_bytes'].to_i.positive?, "HTTP #{code} #{json}"]
   end
 
@@ -102,7 +102,7 @@ begin
     [options.include?('WCL Verify Dept'), "options: #{options.first(5)}..."]
   end
 
-  check('HR app: customer created with a location organization') do
+  check('API: customer created with a location organization') do
     code, = http.call(:post, 'users', body: { firstname: 'WCL', lastname: 'Verify', email: customer_email,
                                                    organization: 'ZZ: WCL Verify', roles: ['Customer'] })
     if [422, 404].include?(code)
@@ -119,7 +119,7 @@ begin
 
   attachment_text = "wclverify#{SecureRandom.hex(3)} payslip discrepancy"
 
-  check('HR app: employee files a ticket with an attachment (urgent, tagged)') do
+  check('API: employee files a ticket with an attachment (urgent, tagged)') do
     urgent = Ticket::Priority.find_by(name: '4 urgent')
     code, json = http.call(:post, 'tickets?expand=true', from: customer_email, body: {
                              title: 'WCL verify ticket', group_id: group.id, priority_id: urgent&.id, tags: 'hr-portal',
@@ -133,7 +133,7 @@ begin
     [code == 201 && json['priority'] == '4 urgent', "HTTP #{code} group=#{group.name} #{json['error'] if json.is_a?(Hash)}".strip]
   end
 
-  check('HR app: employee reads the thread and downloads the file') do
+  check('API: employee reads the thread and downloads the file') do
     code, articles = http.call(:get, "ticket_articles/by_ticket/#{ticket_id}?expand=true", from: customer_email)
     article = articles.first
     file = article['attachments'].first
@@ -141,7 +141,7 @@ begin
     [code == 200 && dcode == 200 && response.body == attachment_text, "HTTP #{code}/#{dcode}"]
   end
 
-  check('HR app: another employee is refused the ticket') do
+  check('API: another employee is refused the ticket') do
     other = "wcl-verify-other-#{SecureRandom.hex(3)}@example.invalid"
     User.create!(firstname: 'Other', lastname: 'Verify', email: other, roles: Role.where(name: 'Customer'))
     code, = http.call(:get, "tickets/#{ticket_id}", from: other)
@@ -149,7 +149,7 @@ begin
     [[403, 404].include?(code), "HTTP #{code}"]
   end
 
-  check('HR app: reply, owners and subscribers') do
+  check('API: reply, owners and subscribers') do
     code, = http.call(:post, 'ticket_articles', from: customer_email,
                                                 body: { ticket_id: ticket_id, body: 'More details', type: 'web', internal: false, content_type: 'text/plain' })
     # Agents who may already work in the group; nothing about them is changed.
@@ -169,7 +169,7 @@ begin
     [code == 422 && Ticket.uncached { Ticket.find(ticket_id).state.name } != 'rejected', "HTTP #{code}"]
   end
 
-  check('HR app: Rejected state (needs a public note)') do
+  check('API: Rejected state (needs a public note)') do
     internal = { body: 'verify: internal reason', type: 'note', internal: true }
     code_internal, = http.call(:put, "tickets/#{ticket_id}", body: { state: 'rejected', article: internal })
     next [false, "an internal note was accepted for Rejected (HTTP #{code_internal})"] if code_internal != 422

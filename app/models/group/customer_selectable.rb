@@ -1,7 +1,7 @@
 # Copyright (C) 2012-2026 Zammad Foundation, https://zammad-foundation.org/
 
 # WCL customization: the "Show in HR app" switch on a group (attribute `hr_portal`, added by
-# the GroupHrPortalFlag migration) is the one place to decide whether employees can file into it.
+# the GroupCustomerSelectableFlag migration) is the one place to decide whether employees can file into it.
 #
 # - The switch drives Zammad's "Customer selectable groups" setting, which the HR app reads
 #   its categories from. Change it on the group, not in the setting.
@@ -9,7 +9,7 @@
 #   and answers its tickets without further setup.
 #
 # Imports and the initial seed are left alone.
-module Group::HrPortalDefaults
+module Group::CustomerSelectable
   extend ActiveSupport::Concern
 
   # Zammad reads an empty "Customer selectable groups" setting as "every group". When no group
@@ -17,22 +17,22 @@ module Group::HrPortalDefaults
   NO_GROUP = '0'.freeze
 
   included do
-    after_create  :hr_portal_give_agents_access
-    after_save    :hr_portal_sync_customer_groups
-    after_destroy :hr_portal_sync_customer_groups
+    after_create  :give_agents_access
+    after_save    :sync_customer_selectable_groups
+    after_destroy :sync_customer_selectable_groups
   end
 
   private
 
-  def hr_portal_enabled?
+  def customer_selectable_enabled?
     return false if !has_attribute?(:hr_portal)
     return false if Setting.get('import_mode')
 
     Setting.get('system_init_done').present?
   end
 
-  def hr_portal_sync_customer_groups
-    return if !hr_portal_enabled?
+  def sync_customer_selectable_groups
+    return if !customer_selectable_enabled?
     # A new group keeping the column default ("yes") counts as no change, so creation always syncs.
     return if !destroyed? && !previously_new_record? && !saved_change_to_hr_portal?
 
@@ -40,14 +40,14 @@ module Group::HrPortalDefaults
     Setting.set('customer_ticket_create_group_ids', ids.presence || [NO_GROUP])
   end
 
-  def hr_portal_give_agents_access
-    return if !hr_portal_enabled?
+  def give_agents_access
+    return if !customer_selectable_enabled?
     return if !hr_portal
 
     # Every role that answers tickets, whatever it is called ("Agent" by default).
     Role.with_permissions('ticket.agent').each do |role|
-      # managers get their groups one by one, on the user (see HrPortal::Setup.manager_role)
-      next if role.name == HrPortal::Setup::MANAGER_ROLE
+      # managers get their groups one by one, on the user (see Wcl::Setup.manager_role)
+      next if role.name == Wcl::Setup::MANAGER_ROLE
       next if RoleGroup.exists?(role_id: role.id, group_id: id, access: 'full')
 
       RoleGroup.create!(role_id: role.id, group_id: id, access: 'full')

@@ -2,7 +2,7 @@
 
 # WCL customization: the files employees may attach to their tickets in the HR app. Admins set
 # them in Admin → Ticket → Settings → Base; the HR app reads them and checks every upload.
-module HrPortal::AttachmentRules
+module Wcl::AttachmentRules
   DEFAULT_EXTENSIONS = 'pdf, png, jpg, jpeg, gif, webp, heic, bmp, doc, docx, xls, xlsx, ppt, pptx, odt, ods, txt, csv, rtf, zip'.freeze
 
   SETTINGS = [

@@ -5,7 +5,7 @@
 #
 # - unknown: a dropdown that also takes a typed name (no longer used for Department);
 # - flatten_single_branch: the ticket Category lists the group's categories directly;
-# - hr_departments: the HR app's department ids (User::HrDepartments);
+# - hr_departments: department ids from the former HR app sync (no longer used);
 # - suggestions: values offered while typing in a text field.
 #
 # The ticket Category also keeps an entry for every active group (Group::RenamesTicketCategories):

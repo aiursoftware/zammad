@@ -2,7 +2,7 @@
 
 # WCL customization: the ticket's Category offers only the categories of the chosen group.
 #
-# The Category field (a tree, see HrPortal::Setup.ticket_category) has a group's name on its first
+# The Category field (a tree, see Wcl::Setup.ticket_category) has a group's name on its first
 # level and that group's categories below it. For the selected group the field lists those
 # categories and must be filled in; a group without categories hides it.
 class CoreWorkflow::Custom::WclTicketCategory < CoreWorkflow::Custom::Backend

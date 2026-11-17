@@ -19,10 +19,10 @@ class CreateDepartments < ActiveRecord::Migration[7.2]
       Department.reset_column_information
     end
 
-    # return if it's a new setup (the seeds run HrPortal::Setup)
+    # return if it's a new setup (the seeds run Wcl::Setup)
     return if !Setting.exists?(name: 'system_init_done')
 
-    HrPortal::Setup.departments
+    Wcl::Setup.departments
   end
 
   def down

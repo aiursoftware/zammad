@@ -4,20 +4,20 @@
 # Safe to run again; each step only adds what is missing. It runs
 #
 # - on a fresh install, from the seeds (db/seeds/wcl.rb),
-# - on an existing install, from the HrPortalSetup migration,
-# - by hand: `rails r 'HrPortal::Setup.run'` (or `rake zammad:wcl:setup`).
+# - on an existing install, from the WclSetup migration,
+# - by hand: `rails r 'Wcl::Setup.run'` (or `rake zammad:wcl:setup`).
 #
 # Left to the admin: the other groups (tick "Customers can create tickets here"), agents,
 # Microsoft 365 login, and later the HR app's API token.
-module HrPortal::Setup # rubocop:disable Metrics/ModuleLength
+module Wcl::Setup # rubocop:disable Metrics/ModuleLength
   def self.run
-    group_hr_portal_attribute
-    group_hr_portal_label
+    group_customer_selectable_attribute
+    group_customer_selectable_label
     customer_priority
     ticket_assignees_attribute
     owners_core_workflow
     department_dropdown
-    HrPortal::AttachmentRules.create_settings
+    Wcl::AttachmentRules.create_settings
     rejected_state
     customers_cannot_reject
     customers_no_state_on_create
@@ -40,8 +40,8 @@ module HrPortal::Setup # rubocop:disable Metrics/ModuleLength
   GROUP_FLAG_DISPLAY = __('Customers can create tickets here')
   GROUP_FLAG_NOTE    = __('Employees can pick this group when they create a ticket (and later in the HR app), and every agent gets access to it. Switch off for teams tickets are only handed to (e.g. Dev, Network).')
 
-  # The customer-selectable switch on groups (attribute hr_portal, see Group::HrPortalDefaults).
-  def self.group_hr_portal_attribute
+  # The customer-selectable switch on groups (attribute hr_portal, see Group::CustomerSelectable).
+  def self.group_customer_selectable_attribute
     return if ObjectManager::Attribute.exists?(object_lookup_id: ObjectLookup.by_name('Group'), name: 'hr_portal')
 
     ObjectManager::Attribute.add(
@@ -84,7 +84,7 @@ module HrPortal::Setup # rubocop:disable Metrics/ModuleLength
   end
 
   # An install made while the switch was called "Show in HR app" gets the new wording.
-  def self.group_hr_portal_label
+  def self.group_customer_selectable_label
     attribute = ObjectManager::Attribute.get(object: 'Group', name: 'hr_portal')
     return if !attribute || attribute.display == GROUP_FLAG_DISPLAY
 

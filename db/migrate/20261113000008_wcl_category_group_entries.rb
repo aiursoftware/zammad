@@ -2,9 +2,9 @@
 
 # WCL customization: every active group gets its (empty) entry in the ticket Category, see
 # Group::RenamesTicketCategories.
-class HrPortalCategoryGroupEntries < ActiveRecord::Migration[7.2]
+class WclCategoryGroupEntries < ActiveRecord::Migration[7.2]
   def up
-    # return if it's a new setup (the seeds run HrPortal::Setup)
+    # return if it's a new setup (the seeds run Wcl::Setup)
     return if !Setting.exists?(name: 'system_init_done')
 
     Group::RenamesTicketCategories.add_category_entries(Group.where(active: true))

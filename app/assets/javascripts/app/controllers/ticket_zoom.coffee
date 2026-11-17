@@ -1063,7 +1063,7 @@ class App.TicketZoom extends App.Controller
       ticket.article = article
 
     # WCL customization: closing a ticket needs a note saying why; rejecting needs a public one,
-    #   so the requester learns why (see HrPortal::CloseNote).
+    #   so the requester learns why (see Wcl::CloseNote).
     closingState = App.TicketState.find(ticket.state_id)
     if !macro.perform && @changed('ticket', 'state_id') && closingState?.state_type?.name is 'closed'
       closeNoteError = undefined

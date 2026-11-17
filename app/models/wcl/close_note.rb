@@ -4,7 +4,7 @@
 # same update. Rejecting needs a note the customer can see (not internal), so they learn why.
 # Checked on ticket updates through the web app and the REST API; system changes (triggers,
 # scheduler, macros) are left alone.
-module HrPortal::CloseNote
+module Wcl::CloseNote
   MESSAGE        = __('Please write a note before closing the ticket: what was done, or why it is closed.')
   MESSAGE_REJECT = __('Rejecting needs a public note that the requester can see: explain why it is rejected (switch the note from internal to public).')
 

@@ -1,7 +1,7 @@
 # Copyright (C) 2012-2026 Zammad Foundation, https://zammad-foundation.org/
 
 # WCL customization: the ticket's Department is the requester's department at the time of the
-# ticket (attribute `department`, see HrPortal::Setup.ticket_department), so reports by department
+# ticket (attribute `department`, see Wcl::Setup.ticket_department), so reports by department
 # stay right after someone changes department. Set when the ticket is created and when its
 # customer changes; agents can correct it on the ticket.
 module Ticket::StampsDepartment

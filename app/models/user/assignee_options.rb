@@ -10,7 +10,7 @@ module User::AssigneeOptions
   end
 
   # Every active agent, by name, in the tree select's shape: [{ "value" => "12", "name" => "Lan Nguyen" }].
-  # Users whose only agent role is Manager (HrPortal::Setup.manager_role) follow tickets but don't own them.
+  # Users whose only agent role is Manager (Wcl::Setup.manager_role) follow tickets but don't own them.
   def self.options
     agent_roles = Role.with_permissions('ticket.agent').pluck(:id)
     manager     = Role.find_by(name: 'Manager')&.id

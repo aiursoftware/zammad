@@ -1,0 +1,23 @@
+<div class="horizontal" style="gap: 12px; flex-wrap: wrap; margin-bottom: 24px;">
+  <% for card in @cards: %>
+    <div style="border: 1px solid hsla(0,0%,50%,.3); border-radius: 6px; padding: 10px 16px; min-width: 140px;">
+      <div class="text-muted" style="font-size: 12px;"><%= card.label %></div>
+      <div style="font-size: 24px; font-weight: 600;"><%= card.value %></div>
+    </div>
+  <% end %>
+</div>
+<% for table in @tables: %>
+  <h2><%= table.title %></h2>
+  <% if table.rows.length is 0: %>
+    <p class="text-muted"><%- @T('Nothing in this period.') %></p>
+  <% else: %>
+    <table class="table table-hover" style="margin-bottom: 24px;">
+      <thead><tr><% for column in table.columns: %><th><%= column.label %></th><% end %></tr></thead>
+      <tbody>
+        <% for row in table.rows: %>
+          <tr><% for column in table.columns: %><td><%= if row[column.key]? then row[column.key] else '–' %></td><% end %></tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+<% end %>
