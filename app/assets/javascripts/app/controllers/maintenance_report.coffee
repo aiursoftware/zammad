@@ -50,36 +50,83 @@ class MaintenanceReport extends App.ControllerAppContent
       success: (data) => @renderResult(data)
     )
 
-  column: (key, label) ->
-    { key: key, label: App.i18n.translateInline(label) }
+  column: (key, label, options = {}) ->
+    _.extend({ key: key, label: App.i18n.translateInline(label) }, options)
+
+  table: (title, rows, columns, options = {}) ->
+    max = {}
+    for column in columns when column.bar
+      max[column.key] = _.max(_.map(rows, (row) -> row[column.key] or 0)) or 0
+    _.extend({ title: App.i18n.translateInline(title), rows: rows or [], columns: columns, max: max, empty: App.i18n.translateInline('Nothing in this period.') }, options)
+
+  # Under a day reads better in hours ("5 hours" rather than "0.2 days").
+  formatDuration: (days) ->
+    return '–' if !days?
+    if days < 1
+      hours = Math.max(1, Math.round(days * 24))
+      return if hours is 1 then App.i18n.translatePlain('1 hour') else App.i18n.translatePlain('%s hours', hours)
+    if days is 1 then App.i18n.translatePlain('1 day') else App.i18n.translatePlain('%s days', days)
+
+  formatDate: (iso) ->
+    App.i18n.translateDate(iso)
 
   renderResult: (data) ->
-    average = @column('average_days', __('Avg. completion (days)'))
-    breakdown = [
-      @column('name', __('Name')), @column('submitted', __('Submitted')), @column('completed', __('Completed')),
-      @column('still_open', __('Still open')), average
-    ]
-    period = (label) => [@column('period', label), @column('submitted', __('Submitted')), @column('completed', __('Completed')), average]
+    average   = @column('average_days', __('Avg. days'), numeric: true)
+    submitted = @column('submitted', __('Submitted'), numeric: true, bar: true)
+    completed = @column('completed', __('Completed'), numeric: true)
+    stillOpen = @column('still_open', __('Still open'), numeric: true)
+    breakdown = (label) => [@column('name', label), submitted, completed, stillOpen, average]
+    period    = (label) => [@column('period', label), submitted, completed, average]
+
     tables = [
-      { title: App.i18n.translateInline('By week'), rows: data.by_week, columns: period(__('Week')) }
-      { title: App.i18n.translateInline('By month'), rows: data.by_month, columns: period(__('Month')) }
-      { title: App.i18n.translateInline('By department'), rows: data.by_department, columns: breakdown }
-      { title: App.i18n.translateInline('By location'), rows: data.by_location, columns: breakdown }
-      { title: App.i18n.translateInline('By category'), rows: data.by_category, columns: breakdown }
-      { title: App.i18n.translateInline('By person'), rows: data.by_person, columns: [@column('name', __('Person')), @column('completed', __('Completed')), @column('open_now', __('Open now')), average] }
-      { title: App.i18n.translateInline('Repeat issues (same category at the same location)'), rows: data.repeats, columns: [@column('location', __('Location')), @column('category', __('Category')), @column('count', __('Tickets')), @column('still_open', __('Still open')), @column('tickets', __('Ticket numbers'))] }
+      @table(__('By department'), data.by_department, breakdown(__('Department')))
+      @table(__('By location'), data.by_location, breakdown(__('Location')))
+      @table(__('By category'), data.by_category, breakdown(__('Category')))
+      @table(__('By person'), data.by_person, [@column('name', __('Person')), @column('completed', __('Completed'), numeric: true, bar: true), @column('open_now', __('Open now'), numeric: true), average])
+      @table(__('Repeat issues'), data.repeats, [@column('location', __('Location')), @column('category', __('Category')), @column('count', __('Tickets'), numeric: true, bar: true), @column('still_open', __('Still open'), numeric: true), @column('tickets', __('Ticket numbers'))],
+        className: "wcl-panel--wide #{if data.repeats?.length then 'wcl-panel--alert' else ''}"
+        hint:      App.i18n.translateInline('The same category reported at the same location more than once.')
+        empty:     App.i18n.translateInline('No repeat issues in this period.')
+      )
+      @table(__('By week'), data.by_week, period(__('Week')))
+      @table(__('By month'), data.by_month, period(__('Month')))
     ]
-    summary = data.summary
-    cards = [
-      { label: App.i18n.translateInline('Submitted'), value: summary.submitted }
-      { label: App.i18n.translateInline('Completed'), value: summary.completed }
+
+    summary  = data.summary
+    outcome  = summary.outcome or { completed: 0, rejected: 0, open: 0 }
+    total    = summary.submitted or 0
+    percent  = (value) -> if total then Math.round(value * 100 / total) else 0
+    flow = [
+      { key: 'completed', label: App.i18n.translateInline('Completed'), value: outcome.completed, percent: percent(outcome.completed) }
+      { key: 'rejected', label: App.i18n.translateInline('Rejected'), value: outcome.rejected, percent: percent(outcome.rejected) }
+      { key: 'open', label: App.i18n.translateInline('Still open'), value: outcome.open, percent: percent(outcome.open) }
+    ]
+
+    groups = if data.groups?.length then data.groups.join(', ') else App.i18n.translateInline('your groups')
+    from   = @formatDate(data.period.from)
+    to     = @formatDate(data.period.to)
+    text   = if total is 0
+      App.i18n.translatePlain('No requests were submitted between %s and %s in %s.', from, to, groups)
+    else
+      App.i18n.translatePlain('%s requests submitted between %s and %s in %s.', total, from, to, groups)
+
+    oldest = data.oldest_open
+    kpis = [
+      { label: App.i18n.translateInline('Submitted'), value: total }
+      { label: App.i18n.translateInline('Completed'), value: summary.completed, note: App.i18n.translateInline('closed in this period') }
       { label: App.i18n.translateInline('Rejected'), value: summary.rejected }
-      { label: App.i18n.translateInline('Outstanding now'), value: summary.outstanding_now }
-      { label: App.i18n.translateInline('Avg. completion (days)'), value: if summary.average_days? then summary.average_days else '–' }
+      { label: App.i18n.translateInline('Outstanding now'), value: summary.outstanding_now, note: App.i18n.translateInline('open today, any date') }
+      { label: App.i18n.translateInline('Avg. completion'), value: @formatDuration(summary.average_days) }
+      { label: App.i18n.translateInline('Oldest open'), value: (if oldest then @formatDuration(Math.max(oldest.days_open, 1)) else '–'), note: (if oldest then "##{oldest.number} #{oldest.title}"), link: (if oldest then "#ticket/zoom/#{oldest.id}") }
     ]
-    if data.oldest_open
-      cards.push { label: App.i18n.translateInline('Oldest open (days)'), value: data.oldest_open.days_open, hint: "##{data.oldest_open.number} #{data.oldest_open.title}" }
-    @$('.js-result').html App.view('maintenance_report/result')(cards: cards, tables: tables)
+
+    @$('.js-result').html App.view('maintenance_report/result')(
+      lead:      { text: text, submitted: total }
+      flow:      flow
+      flowLabel: _.map(flow, (part) -> "#{part.label} #{part.value}").join(', ')
+      kpis:      kpis
+      tables:    tables
+    )
 
   download: (e) =>
     e.preventDefault()

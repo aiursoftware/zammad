@@ -1,0 +1,342 @@
+/* WCL customization: Maintenance Report page. Uses Zammad's theme variables only, so light and dark both work. */
+
+.wcl-report {
+  --wcl-completed: var(--supergood-color);
+  --wcl-rejected: var(--danger-color);
+  --wcl-open: var(--ok-color);
+  --wcl-gap: 20px;
+
+  display: flex;
+  flex-direction: column;
+  padding: 20px 28px 40px;
+  color: var(--text-normal);
+  font-variant-numeric: tabular-nums;
+}
+
+.wcl-report .page-header {
+  margin-bottom: 12px;
+}
+
+.wcl-muted {
+  color: var(--text-muted);
+}
+
+/* Filters */
+
+.wcl-report-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 16px;
+  padding-bottom: var(--wcl-gap);
+  margin-bottom: var(--wcl-gap);
+  border-bottom: 1px solid var(--border);
+}
+
+.wcl-report-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  font-weight: normal;
+  min-width: 150px;
+}
+
+.wcl-report-field,
+.wcl-report-field > span {
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.wcl-report-field > span {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.wcl-report-field--wide {
+  min-width: 220px;
+}
+
+.wcl-report-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.wcl-report-actions .btn {
+  margin: 0;
+}
+
+/* Overview: sentence, outcome bar, key numbers */
+
+.wcl-report-overview {
+  margin-bottom: 28px;
+}
+
+.wcl-report-lead {
+  margin: 0 0 14px;
+  font-size: 20px;
+  line-height: 1.35;
+  color: var(--header-primary);
+  max-width: 70ch;
+}
+
+.wcl-flow {
+  display: flex;
+  height: 14px;
+  border-radius: 7px;
+  overflow: hidden;
+  background: var(--background-modifier-accent);
+  gap: 2px;
+}
+
+.wcl-flow-part {
+  flex-basis: 0;
+  min-width: 6px;
+}
+
+.wcl-flow-part--completed,
+.wcl-flow-legend-item--completed .wcl-flow-swatch {
+  background: var(--wcl-completed);
+}
+
+.wcl-flow-part--rejected,
+.wcl-flow-legend-item--rejected .wcl-flow-swatch {
+  background: var(--wcl-rejected);
+}
+
+.wcl-flow-part--open,
+.wcl-flow-legend-item--open .wcl-flow-swatch {
+  background: var(--wcl-open);
+}
+
+.wcl-flow-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+}
+
+.wcl-flow-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.wcl-flow-swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+}
+
+.wcl-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  margin: 22px 0 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.wcl-kpi {
+  padding: 14px 18px 14px 0;
+  min-width: 0;
+}
+
+.wcl-kpi + .wcl-kpi {
+  padding-left: 18px;
+  border-left: 1px solid var(--border);
+}
+
+.wcl-kpi dt {
+  font-size: 13px;
+  font-weight: normal;
+  color: var(--text-muted);
+}
+
+.wcl-kpi dd {
+  margin: 4px 0 0;
+}
+
+.wcl-kpi-value {
+  display: block;
+  font-size: 26px;
+  line-height: 1.15;
+  font-weight: 600;
+  color: var(--header-primary);
+}
+
+.wcl-kpi-note {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+a.wcl-kpi-note {
+  color: var(--text-link);
+}
+
+/* Breakdown panels */
+
+.wcl-report-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr));
+  gap: var(--wcl-gap);
+  align-items: start;
+}
+
+.wcl-panel {
+  min-width: 0;
+  padding: 16px 18px 10px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--background-secondary);
+}
+
+.wcl-panel--wide {
+  grid-column: 1 / -1;
+}
+
+.wcl-panel--alert {
+  border-left: 3px solid var(--wcl-open);
+}
+
+.wcl-panel-head {
+  margin-bottom: 8px;
+}
+
+.wcl-panel-head h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--header-primary);
+}
+
+.wcl-panel-head p {
+  margin: 2px 0 0;
+  font-size: 13px;
+}
+
+.wcl-empty {
+  margin: 6px 0 10px;
+  color: var(--text-muted);
+}
+
+.wcl-report-nothing {
+  padding: 28px 0;
+  color: var(--text-muted);
+  text-align: center;
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+}
+
+.wcl-table-wrap {
+  overflow-x: auto;
+}
+
+.wcl-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.wcl-table thead th {
+  padding: 6px 10px 6px 0;
+  font-size: 12px;
+  font-weight: normal;
+  text-transform: none;
+  letter-spacing: 0;
+  text-align: left;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.wcl-table tbody th,
+.wcl-table td {
+  padding: 7px 10px 7px 0;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.wcl-table tbody tr:last-child th,
+.wcl-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.wcl-table tbody th {
+  font-weight: normal;
+  color: var(--header-primary);
+  max-width: 260px;
+  overflow-wrap: break-word;
+}
+
+.wcl-table tbody th.is-unset {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.wcl-table .is-number {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.wcl-table td.is-bar {
+  position: relative;
+  min-width: 110px;
+}
+
+.wcl-bar {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  height: 6px;
+  max-width: calc(100% - 44px);
+  transform: translateY(-50%);
+  border-radius: 3px;
+  background: var(--highlight);
+  opacity: 0.55;
+}
+
+.wcl-bar-value {
+  position: relative;
+}
+
+@media (max-width: 767px) {
+  .wcl-report {
+    padding: 12px 16px 32px;
+  }
+
+  .wcl-kpi,
+  .wcl-kpi + .wcl-kpi {
+    padding: 12px 12px 12px 0;
+    border-left: none;
+  }
+
+  .wcl-report-lead {
+    font-size: 17px;
+  }
+
+  .wcl-panel {
+    padding: 14px 12px 8px;
+  }
+
+  .wcl-table {
+    min-width: 400px;
+    font-size: 13px;
+  }
+
+  .wcl-table td.is-bar {
+    min-width: 0;
+  }
+
+  .wcl-bar {
+    display: none;
+  }
+}

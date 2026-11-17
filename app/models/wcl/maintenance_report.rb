@@ -147,7 +147,17 @@ class Wcl::MaintenanceReport
       rejected:            rejected.size,
       outstanding_now:     outstanding.size,
       average_days:        average_days(completed),
+      outcome:             outcome,
       completion_rate_pct: submitted.empty? ? nil : ((submitted.count { |ticket| completed_ids.include?(ticket.id) } * 100.0) / submitted.size).round(1),
+    }
+  end
+
+  # Where the tickets submitted in the period are now.
+  def outcome
+    {
+      completed: submitted.count { |ticket| closed_state_ids.include?(ticket.state_id) && ticket.state_id != rejected_state_id },
+      rejected:  submitted.count { |ticket| ticket.state_id == rejected_state_id },
+      open:      submitted.count { |ticket| closed_state_ids.exclude?(ticket.state_id) },
     }
   end
 
@@ -218,7 +228,7 @@ class Wcl::MaintenanceReport
     ticket = outstanding.min_by(&:created_at)
     return if !ticket
 
-    { number: ticket.number, title: ticket.title, days_open: ((Time.current - ticket.created_at) / 1.day).floor, owner: owner_name(ticket) }
+    { id: ticket.id, number: ticket.number, title: ticket.title, days_open: ((Time.current - ticket.created_at) / 1.day).floor, owner: owner_name(ticket) }
   end
 
   def location_name(ticket)
