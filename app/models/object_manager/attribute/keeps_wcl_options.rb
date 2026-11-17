@@ -3,9 +3,10 @@
 # WCL customization: field settings that Admin > Objects has no input for, so saving a field there
 # would drop them. They are carried over from the field's previous settings:
 #
-# - unknown: the Department dropdown also takes a typed name (User::RemembersDepartment);
+# - unknown: a dropdown that also takes a typed name (no longer used for Department);
 # - flatten_single_branch: the ticket Category lists the group's categories directly;
-# - hr_departments: the HR app's department ids (User::HrDepartments).
+# - hr_departments: the HR app's department ids (User::HrDepartments);
+# - suggestions: values offered while typing in a text field.
 #
 # The ticket Category also keeps an entry for every active group (Group::RenamesTicketCategories):
 # an entry removed by hand comes back empty, so the group's link isn't lost to a retyped name.
@@ -13,7 +14,7 @@
 module ObjectManager::Attribute::KeepsWclOptions
   extend ActiveSupport::Concern
 
-  KEPT = %w[unknown flatten_single_branch hr_departments].freeze
+  KEPT = %w[unknown flatten_single_branch hr_departments suggestions].freeze
 
   included do
     before_save :keep_wcl_options, if: -> { persisted? && will_save_change_to_data_option? }

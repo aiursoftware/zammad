@@ -10,10 +10,14 @@ module User::AssigneeOptions
   end
 
   # Every active agent, by name, in the tree select's shape: [{ "value" => "12", "name" => "Lan Nguyen" }].
+  # Users whose only agent role is Manager (HrPortal::Setup.manager_role) follow tickets but don't own them.
   def self.options
+    agent_roles = Role.with_permissions('ticket.agent').pluck(:id)
+    manager     = Role.find_by(name: 'Manager')&.id
     User.with_permissions('ticket.agent')
       .where(active: true)
       .where.not(id: 1)
+      .reject { |user| manager && (user.role_ids & agent_roles) == [manager] }
       .sort_by { |user| user.fullname.downcase }
       .map { |user| { 'value' => user.id.to_s, 'name' => user.fullname } }
   end

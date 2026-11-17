@@ -46,6 +46,8 @@ module Group::HrPortalDefaults
 
     # Every role that answers tickets, whatever it is called ("Agent" by default).
     Role.with_permissions('ticket.agent').each do |role|
+      # managers get their groups one by one, on the user (see HrPortal::Setup.manager_role)
+      next if role.name == HrPortal::Setup::MANAGER_ROLE
       next if RoleGroup.exists?(role_id: role.id, group_id: id, access: 'full')
 
       RoleGroup.create!(role_id: role.id, group_id: id, access: 'full')

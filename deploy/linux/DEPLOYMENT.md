@@ -118,6 +118,9 @@ chmod +x build.sh
 ./build.sh                     # 15–25 minutes the first time
 ```
 
+`build.sh` also creates the `backup` folder and gives it to the Zammad user (uid 1000), so it may
+ask for your `sudo` password once.
+
 ### Step 7 — Start
 
 ```bash
@@ -162,10 +165,32 @@ Go to **Admin → Groups**:
 Go to **Admin → Users → New**, with the role **Agent**. Every agent automatically gets access to each
 new group.
 
+### Managers
+
+A manager follows the agents' work in the groups they oversee:
+
+1. **Admin → Users → the manager → Roles**: tick **Manager** (also tick **Agent** if they should be
+   able to own tickets themselves).
+2. Same screen, **Group permissions**: add each group they oversee with **Read**, **Overview** and
+   **Change** (not Full, so they aren't offered as an owner). Leave out the groups they shouldn't see.
+
+They then see only those groups' tickets, everywhere (overviews, search, Reporting), with:
+
+- the **Team** overviews: _open tickets by agent_, _unassigned tickets_, _no update for 3 days_ and
+  _closed in the last 7 days_ (grouped by agent);
+- **Reporting**: charts and Excel exports of tickets by agent, group, state and time.
+
+A new group isn't added to managers automatically: add it to the managers who should see it.
+
 ### Departments
 
-Go to **Admin → Objects → User → Department**. Add your department names; employees pick their
-department from this list. A name typed on a user that isn't in the list yet is added to it.
+**Admin → Manage → Departments** lists your departments (name, email, note, active).
+
+- On a user (and on a ticket), **Department** is a dropdown of the active departments here. Add new
+  departments here first.
+- **Rename** a department here and it's renamed on its users and tickets.
+- Set a department **inactive** to stop suggesting it (users keep it).
+- Nothing is synced with the HR app.
 
 ### Categories (per group)
 
@@ -388,6 +413,7 @@ Run all of these from `~/zammad/deploy/linux`.
 | `sudo: a password is required` | You pressed Enter without typing. Type your password; it stays invisible as you type. |
 | `is not in the sudoers file` | The account has no admin rights. Ask whoever set up the server to run `usermod -aG docker <user>` as root. |
 | Browser shows a certificate error / site not reachable | Check `docker compose logs caddy`. Usually DNS doesn't point at the server yet, or port 80/443 is closed. |
+| Backup fails: `Cannot open: Permission denied` | The `backup` folder belongs to root. Run `sudo chown -R 1000:1000 backup` (or `./build.sh`, which fixes it). |
 | `zammad-init` keeps restarting | Check `docker compose logs zammad-init`. Most often `POSTGRES_PASSWORD` was changed after the first start. Put the original value back. |
 | Elasticsearch exits right away | The `vm.max_map_count` step (section 2, step 2) is missing. Run it, then `docker compose up -d`. |
 | Search finds nothing | Rebuild the search index (see the table above). |

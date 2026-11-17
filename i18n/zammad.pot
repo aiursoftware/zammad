@@ -650,7 +650,7 @@ msgstr ""
 msgid "A test ticket has been created, you can find it in your overview \"%s\" %l."
 msgstr ""
 
-#: app/models/ticket.rb:304
+#: app/models/ticket.rb:305
 msgid "A ticket cannot be merged into itself."
 msgstr ""
 
@@ -1115,6 +1115,7 @@ msgstr ""
 #: app/assets/javascripts/app/models/chat.coffee:257
 #: app/assets/javascripts/app/models/checklist_template.coffee:9
 #: app/assets/javascripts/app/models/core_workflow.coffee:14
+#: app/assets/javascripts/app/models/department.coffee:10
 #: app/assets/javascripts/app/models/email_address.coffee:37
 #: app/assets/javascripts/app/models/group.coffee:16
 #: app/assets/javascripts/app/models/job.coffee:16
@@ -1623,7 +1624,7 @@ msgid "Agent idle timeout"
 msgstr ""
 
 #: app/models/role.rb:182
-#: app/models/user.rb:834
+#: app/models/user.rb:833
 msgid "Agent limit exceeded, please check your account settings."
 msgstr ""
 
@@ -2332,7 +2333,7 @@ msgstr ""
 msgid "Assignment timeout in minutes if assigned agent is not working on it. Ticket will be shown as unassigend."
 msgstr ""
 
-#: app/models/user.rb:736
+#: app/models/user.rb:735
 msgid "At least one identifier (firstname, lastname, phone, mobile or email) for user is required."
 msgstr ""
 
@@ -2349,7 +2350,7 @@ msgid "At least one object must be selected."
 msgstr ""
 
 #: app/models/role.rb:159
-#: app/models/user.rb:813
+#: app/models/user.rb:812
 msgid "At least one user needs to have admin permissions."
 msgstr ""
 
@@ -2849,6 +2850,10 @@ msgstr ""
 msgid "Begin forwarded message"
 msgstr ""
 
+#: app/models/hr_portal/setup.rb:543
+msgid "Being worked on (WCL)."
+msgstr ""
+
 #: app/frontend/apps/desktop/pages/guided-setup/views/GuidedSetupImport/GuidedSetupImportSelection.vue:49
 msgid "Beta"
 msgstr ""
@@ -3295,7 +3300,7 @@ msgstr ""
 #: app/assets/javascripts/app/views/ticket_zoom/knowledge_base_ai_draft_modal.jst.eco:78
 #: app/frontend/apps/desktop/components/KnowledgeBase/KnowledgeBaseAnswer/KnowledgeBaseAnswerAttributes.vue:85
 #: app/frontend/apps/desktop/entities/knowledge-base/composables/useAnswerFormSchema.ts:170
-#: app/models/hr_portal/setup.rb:320
+#: app/models/hr_portal/setup.rb:340
 msgid "Category"
 msgstr ""
 
@@ -5004,7 +5009,7 @@ msgstr ""
 msgid "Customer tickets of the user will get deleted on execution of the task. No rollback possible."
 msgstr ""
 
-#: app/models/hr_portal/setup.rb:35
+#: app/models/hr_portal/setup.rb:38
 msgid "Customers can create tickets here"
 msgstr ""
 
@@ -6278,8 +6283,18 @@ msgstr ""
 msgid "Delivery failed: \"%s\""
 msgstr ""
 
+#: app/assets/javascripts/app/controllers/department.coffee:3
+#: app/models/hr_portal/setup.rb:155
 #: db/seeds/object_manager_attributes.rb:1234
 msgid "Department"
+msgstr ""
+
+#: app/models/hr_portal/setup.rb:155
+msgid "Department of the requester when the ticket was created; filled in automatically."
+msgstr ""
+
+#: app/assets/javascripts/app/controllers/department.coffee:3
+msgid "Departments"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/_application_controller/_modal_generic_description.coffee:5
@@ -7020,6 +7035,7 @@ msgstr ""
 #: app/assets/javascripts/app/controllers/_ui_element/object_perform_action.coffee:59
 #: app/assets/javascripts/app/controllers/agent_ticket_create.coffee:66
 #: app/assets/javascripts/app/controllers/getting_started/channel.coffee:15
+#: app/assets/javascripts/app/models/department.coffee:8
 #: app/assets/javascripts/app/models/email_address.coffee:2
 #: app/assets/javascripts/app/models/group.coffee:12
 #: app/assets/javascripts/app/models/user.coffee:20
@@ -7104,7 +7120,7 @@ msgstr ""
 msgid "Email address"
 msgstr ""
 
-#: app/models/user.rb:746
+#: app/models/user.rb:745
 msgid "Email address '%{email}' is already used for another user."
 msgstr ""
 
@@ -7183,7 +7199,7 @@ msgstr ""
 msgid "Embedding provider returned no usable vector"
 msgstr ""
 
-#: app/models/hr_portal/setup.rb:36
+#: app/models/hr_portal/setup.rb:39
 msgid "Employees can pick this group when they create a ticket (and later in the HR app), and every agent gets access to it. Switch off for teams tickets are only handed to (e.g. Dev, Network)."
 msgstr ""
 
@@ -7812,7 +7828,7 @@ msgstr ""
 msgid "Every time a customer creates a new ticket, they automatically receive a confirmation email to assure them that their issue has been submitted successfully. This behavior is built into Zammad, but it’s also highly customizable, and you can set up other automated actions just like it.\n\nMaybe you want to set a higher priority on any ticket with the word “urgent” in the title. Maybe you want to avoid sending auto-reply emails to customers from certain organizations. Maybe you want mark a ticket as “pending” whenever someone adds an internal note to a ticket.\n\nWhatever it is, you can do it with triggers: actions that watch tickets for certain changes, and then fire off whenever those changes occur."
 msgstr ""
 
-#: app/models/hr_portal/setup.rb:114
+#: app/models/hr_portal/setup.rb:117
 msgid "Everyone working on the ticket. The first is its main owner (\"My Assigned Tickets\"); all of them are notified, and the others find it under \"My Subscribed Tickets\"."
 msgstr ""
 
@@ -8249,7 +8265,7 @@ msgstr ""
 msgid "First article (oldest)"
 msgstr ""
 
-#: app/models/hr_portal/setup.rb:332
+#: app/models/hr_portal/setup.rb:352
 msgid "First level: the name of a group. Under it: the categories offered for that group."
 msgstr ""
 
@@ -8586,7 +8602,7 @@ msgstr ""
 msgid "General communication error, maybe internet is not available!"
 msgstr ""
 
-#: app/models/hr_portal/setup.rb:279
+#: app/models/hr_portal/setup.rb:299
 msgid "General facility repairs"
 msgstr ""
 
@@ -8989,7 +9005,7 @@ msgstr ""
 msgid "HR app: maximum attachments per message"
 msgstr ""
 
-#: app/models/hr_portal/setup.rb:255
+#: app/models/hr_portal/setup.rb:275
 msgid "HR portal – open requests"
 msgstr ""
 
@@ -10072,7 +10088,7 @@ msgstr ""
 msgid "Invalid client_id received!"
 msgstr ""
 
-#: app/models/user.rb:685
+#: app/models/user.rb:684
 msgid "Invalid email '%{email}'"
 msgstr ""
 
@@ -10252,7 +10268,7 @@ msgstr ""
 msgid "It is not possible to delete your current account."
 msgstr ""
 
-#: app/models/ticket.rb:302
+#: app/models/ticket.rb:303
 msgid "It is not possible to merge into an already merged ticket."
 msgstr ""
 
@@ -11014,7 +11030,7 @@ msgstr ""
 #: app/assets/javascripts/app/views/profile/devices.jst.eco:13
 #: app/assets/javascripts/app/views/session.jst.eco:10
 #: app/frontend/apps/desktop/pages/personal-setting/views/PersonalSettingDevices.vue:100
-#: app/models/hr_portal/setup.rb:383
+#: app/models/hr_portal/setup.rb:403
 msgid "Location"
 msgstr ""
 
@@ -11931,7 +11947,7 @@ msgstr ""
 msgid "More information can be found here."
 msgstr ""
 
-#: app/models/user.rb:765
+#: app/models/user.rb:764
 msgid "More than 250 secondary organizations are not allowed."
 msgstr ""
 
@@ -12060,6 +12076,7 @@ msgstr ""
 #: app/assets/javascripts/app/models/checklist_template_item.coffee:5
 #: app/assets/javascripts/app/models/core_workflow.coffee:6
 #: app/assets/javascripts/app/models/core_workflow_custom_module.coffee:4
+#: app/assets/javascripts/app/models/department.coffee:7
 #: app/assets/javascripts/app/models/group.coffee:7
 #: app/assets/javascripts/app/models/job.coffee:6
 #: app/assets/javascripts/app/models/knowledge_base_answer_translation.coffee:6
@@ -12253,6 +12270,10 @@ msgstr ""
 
 #: app/assets/javascripts/app/views/data_privacy/index.jst.eco:8
 msgid "New Deletion Task"
+msgstr ""
+
+#: app/assets/javascripts/app/controllers/department.coffee:19
+msgid "New Department"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/group.coffee:33
@@ -12878,7 +12899,7 @@ msgstr ""
 msgid "No translation service is configured."
 msgstr ""
 
-#: app/models/ticket.rb:435
+#: app/models/ticket.rb:436
 msgid "No triggers active"
 msgstr ""
 
@@ -13020,6 +13041,7 @@ msgstr ""
 #: app/assets/javascripts/app/models/ai_agent.coffee:9
 #: app/assets/javascripts/app/models/ai_text_tool.coffee:29
 #: app/assets/javascripts/app/models/chat.coffee:252
+#: app/assets/javascripts/app/models/department.coffee:9
 #: app/assets/javascripts/app/models/email_address.coffee:35
 #: app/assets/javascripts/app/models/group.coffee:14
 #: app/assets/javascripts/app/models/job.coffee:15
@@ -13283,7 +13305,7 @@ msgstr ""
 msgid "October"
 msgstr ""
 
-#: app/models/hr_portal/setup.rb:278
+#: app/models/hr_portal/setup.rb:298
 msgid "Office maintenance"
 msgstr ""
 
@@ -14230,13 +14252,13 @@ msgstr ""
 msgid "Phone number is already in use by another WhatsApp account."
 msgstr ""
 
-#: app/models/hr_portal/setup.rb:151
-msgid "Pick a department, or type a new one: it is added to the list for the next user. Admins can tidy the list in Admin > Objects > User > Department."
-msgstr ""
-
 #: app/assets/javascripts/app/views/profile/token_access.jst.eco:7
 #: app/frontend/apps/desktop/pages/personal-setting/views/PersonalSettingTokenAccess.vue:172
 msgid "Pick a name for the application, and we'll give you a unique token."
+msgstr ""
+
+#: app/models/hr_portal/setup.rb:154
+msgid "Pick the department. The list is managed in Admin > Manage > Departments."
 msgstr ""
 
 #: app/frontend/apps/desktop/pages/ticket/components/TicketDetailView/ArticleReplyPanel.vue:143
@@ -15466,7 +15488,7 @@ msgstr ""
 msgid "Request the password login here."
 msgstr ""
 
-#: app/models/hr_portal/setup.rb:185
+#: app/models/hr_portal/setup.rb:205
 msgid "Request turned down (WCL). Shown to the employee as \"Rejected\" in the HR app."
 msgstr ""
 
@@ -16176,6 +16198,10 @@ msgstr ""
 msgid "Search for checklist templates"
 msgstr ""
 
+#: app/assets/javascripts/app/controllers/department.coffee:16
+msgid "Search for departments"
+msgstr ""
+
 #: app/assets/javascripts/app/controllers/group.coffee:23
 msgid "Search for groups"
 msgstr ""
@@ -16360,17 +16386,17 @@ msgstr ""
 msgid "Secondary organizations"
 msgstr ""
 
-#: app/models/user.rb:753
+#: app/models/user.rb:752
 msgid "Secondary organizations are only allowed when the primary organization is given."
 msgstr ""
 
 #: app/models/concerns/checks_secondary_organizations_on_commit.rb:21
-#: app/models/user.rb:759
+#: app/models/user.rb:758
 msgid "Secondary organizations cannot include the primary organization."
 msgstr ""
 
 #: app/models/organization.rb:116
-#: app/models/user.rb:993
+#: app/models/user.rb:992
 msgid "Secondary organizations cannot include the same organization twice."
 msgstr ""
 
@@ -18138,6 +18164,22 @@ msgstr ""
 msgid "Target ticket"
 msgstr ""
 
+#: app/models/hr_portal/setup.rb:525
+msgid "Team: closed in the last 7 days"
+msgstr ""
+
+#: app/models/hr_portal/setup.rb:521
+msgid "Team: no update for 3 days"
+msgstr ""
+
+#: app/models/hr_portal/setup.rb:514
+msgid "Team: open tickets by agent"
+msgstr ""
+
+#: app/models/hr_portal/setup.rb:517
+msgid "Team: unassigned tickets"
+msgstr ""
+
 #: app/assets/javascripts/app/controllers/_channel/telegram.coffee:13
 #: app/assets/javascripts/app/views/telegram/index.jst.eco:3
 #: app/frontend/apps/desktop/pages/ticket/components/TicketDetailView/article-type/plugins/telegramPersonalMessage.ts:7
@@ -18753,6 +18795,10 @@ msgstr ""
 
 #: app/models/ai/agent/type/custom_ai_agent.rb:81
 msgid "The definition is a JSON object that defines the action to be performed by the AI agent."
+msgstr ""
+
+#: app/assets/javascripts/app/models/department.coffee
+msgid "The departments of your company. The **Department** of a user (and of a ticket) is picked from the active departments here.\n\nRenaming a department renames it on its users and tickets. Set a department inactive to stop offering it; users keep it."
 msgstr ""
 
 #: app/models/ai/agent/type/custom_ai_agent.rb:29
@@ -21291,6 +21337,10 @@ msgstr ""
 msgid "Tracked as checklist item in"
 msgstr ""
 
+#: app/models/hr_portal/setup.rb:497
+msgid "Tracks the work of the agents in the groups set on each manager (Admin > Users > Group permissions: Read, Overview, Change): Reporting and the \"Team\" overviews. Not offered as an owner unless the user is also an Agent."
+msgstr ""
+
 #: app/assets/javascripts/app/views/customer_chat/chat_window.jst.eco:27
 msgid "Transfer conversation to another chat:"
 msgstr ""
@@ -21412,7 +21462,7 @@ msgstr ""
 msgid "Triggers activated by actions are executed whenever a ticket is created or updated, while triggers activated by time events are executed when certain times are reached (e.g. pending time, escalation)."
 msgstr ""
 
-#: app/models/hr_portal/setup.rb:277
+#: app/models/hr_portal/setup.rb:297
 msgid "Trucking / vehicle maintenance"
 msgstr ""
 
@@ -21929,6 +21979,7 @@ msgstr ""
 #: app/assets/javascripts/app/models/chat_sessions.coffee:11
 #: app/assets/javascripts/app/models/core_workflow.coffee:15
 #: app/assets/javascripts/app/models/data_privacy_task.coffee:10
+#: app/assets/javascripts/app/models/department.coffee:11
 #: app/assets/javascripts/app/models/email_address.coffee:36
 #: app/assets/javascripts/app/models/group.coffee:15
 #: app/assets/javascripts/app/models/job.coffee:24
@@ -22678,11 +22729,15 @@ msgstr ""
 msgid "Waiting in %s"
 msgstr ""
 
+#: app/models/hr_portal/setup.rb:544
+msgid "Waiting, e.g. for parts or a supplier; does not escalate (WCL)."
+msgstr ""
+
 #: app/frontend/apps/desktop/components/BetaUi/BetaUiFeedbackConsentDialog.vue:34
 msgid "Want to join the BETA UI feedback program?"
 msgstr ""
 
-#: app/models/hr_portal/setup.rb:276
+#: app/models/hr_portal/setup.rb:296
 msgid "Warehouse maintenance"
 msgstr ""
 
@@ -22875,7 +22930,7 @@ msgstr ""
 msgid "Where"
 msgstr ""
 
-#: app/models/hr_portal/setup.rb:362
+#: app/models/hr_portal/setup.rb:382
 msgid "Where is it? e.g. Warehouse A, Office 2nd floor, Truck 51C-12345"
 msgstr ""
 
@@ -24452,7 +24507,7 @@ msgstr ""
 msgid "is the wrong length (should be 1 character)"
 msgstr ""
 
-#: app/models/user.rb:952
+#: app/models/user.rb:951
 msgid "is too long"
 msgstr ""
 

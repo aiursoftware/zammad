@@ -16,7 +16,7 @@ module HrPortal::Setup # rubocop:disable Metrics/ModuleLength
     customer_priority
     ticket_assignees_attribute
     owners_core_workflow
-    user_department_dropdown
+    department_dropdown
     HrPortal::AttachmentRules.create_settings
     rejected_state
     customers_cannot_reject
@@ -29,6 +29,9 @@ module HrPortal::Setup # rubocop:disable Metrics/ModuleLength
     ticket_location
     location_free_text
     without_hr_app
+    manager_role
+    work_states
+    ticket_department
     true
   end
 
@@ -156,33 +159,50 @@ module HrPortal::Setup # rubocop:disable Metrics/ModuleLength
     )
   end
 
-  DEPARTMENT_NOTE = __('Pick a department, or type a new one: it is added to the list for the next user. Admins can tidy the list in Admin > Objects > User > Department.')
+  DEPARTMENT_NOTE        = __('Pick the department. The list is managed in Admin > Manage > Departments.')
+  TICKET_DEPARTMENT_NOTE = __('Department of the requester when the ticket was created; filled in automatically.')
 
-  # The user's Department: a dropdown. Admins keep the list for now; the HR app fills it once
-  # connected (see User::HrDepartments).
-  def self.user_department_dropdown
-    attribute = ObjectManager::Attribute.get(object: 'User', name: 'department')
+  # The user's Department (and the ticket's): a dropdown of the active departments of Admin >
+  # Manage > Departments; no new names are typed here, and nothing is synced with the HR app.
+  # Also turns the earlier text field / dropdown into this one; the values are kept.
+  def self.department_dropdown
+    Department::DROPDOWNS.each { |object, name| department_dropdown_field(object, name) }
+    Department.refresh_dropdowns
+  end
+
+  def self.department_dropdown_field(object, name)
+    attribute = ObjectManager::Attribute.get(object: object, name: name)
     return if !attribute || attribute.data_type == 'tree_select'
 
-    # Departments people already have stay pickable until the HR app sends its list.
-    names   = User.where.not(department: [nil, '']).distinct.pluck(:department).sort_by(&:downcase)
-    options = names.map { |name| { 'value' => name, 'name' => name } }
-
     # The column stays a string; only the way it is edited changes.
-    attribute.update!(
+    attribute.update_columns( # rubocop:disable Rails/SkipsModelValidations
       data_type:   'tree_select',
-      data_option: {
-        options:    options,
-        default:    '',
-        null:       true,
-        nulloption: true,
-        multiple:   false,
-        translate:  false,
-        maxlength:  200,
-        item_class: 'formGroup--halfSize',
-        note:       DEPARTMENT_NOTE,
-      },
+      data_option: department_data_option(object == 'User' ? DEPARTMENT_NOTE : TICKET_DEPARTMENT_NOTE, half: object == 'User'),
+      updated_at:  Time.zone.now,
     )
+  end
+
+  def self.department_data_option(note, half: false)
+    {
+      'options'    => Department.options,
+      'default'    => '',
+      'null'       => true,
+      'nulloption' => true,
+      'multiple'   => false,
+      'translate'  => false,
+      'maxlength'  => 200,
+      'note'       => note,
+      **(half ? { 'item_class' => 'formGroup--halfSize' } : {}),
+    }
+  end
+
+  # Older migrations call it by its earlier names.
+  def self.department_text_field
+    department_dropdown
+  end
+
+  def self.user_department_dropdown
+    department_dropdown
   end
 
   # A closed state the HR app shows as "Rejected".
@@ -462,24 +482,18 @@ module HrPortal::Setup # rubocop:disable Metrics/ModuleLength
     Ticket.reset_column_information
   end
 
-  # Employees use Zammad itself for now; the HR app is connected later. Until then the Department
-  # dropdown also takes a typed name (kept for reuse, see User::RemembersDepartment), and the HR
-  # app's overview (empty without it) stays off. Once HR app tickets exist, both are left alone.
+  # Employees use Zammad itself for now; the HR app is connected later. Until then the HR app's
+  # overview (empty without it) stays off. Once HR app tickets exist, it is left alone.
   def self.without_hr_app
     item = Tag::Item.find_by(name: 'hr-portal')
     return if item && Tag.exists?(tag_item_id: item.id)
 
-    department_free_entry
-
     Overview.find_by(link: 'hr_portal_open')&.update!(active: false)
   end
 
+  # Older migrations call it by its earlier name.
   def self.department_free_entry
-    department = ObjectManager::Attribute.get(object: 'User', name: 'department')
-    return if !department
-
-    data_option = department.data_option.merge('note' => DEPARTMENT_NOTE, 'unknown' => true)
-    department.update!(data_option: data_option) if data_option != department.data_option
+    department_text_field
   end
 
   # { key => name } of a select's options, stored as a hash or (after editing in Admin > Objects)
@@ -497,5 +511,207 @@ module HrPortal::Setup # rubocop:disable Metrics/ModuleLength
     return if !attribute || attribute.data_option['flatten_single_branch']
 
     attribute.update!(data_option: attribute.data_option.merge('flatten_single_branch' => true))
+  end
+
+  MANAGER_ROLE = 'Manager'.freeze
+
+  # A "Manager" role that tracks the agents' work: Reporting and overviews of each agent's open and
+  # recently closed tickets. The role itself grants no group: each manager gets the groups they
+  # oversee on their user (Admin > Users > the user > Group permissions: Read, Overview, Change),
+  # and sees only those groups' tickets, in the overviews, search and Reporting alike. Users whose
+  # only agent role is Manager aren't offered as owners (User::AssigneeOptions).
+  def self.manager_role
+    role = Role.find_by(name: MANAGER_ROLE) || Role.create!(
+      name:              MANAGER_ROLE,
+      note:              __('Tracks the work of the agents in the groups set on each manager (Admin > Users > Group permissions: Read, Overview, Change): Reporting and the "Team" overviews. Not offered as an owner unless the user is also an Agent.'),
+      permissions:       Permission.where(name: %w[ticket.agent report user_preferences]),
+      active:            true,
+      default_at_signup: false,
+      created_by_id:     1,
+      updated_by_id:     1,
+    )
+    manager_overviews(role)
+    User::AssigneeOptions.refresh
+  end
+
+  def self.manager_overviews(role)
+    open    = Ticket::State.by_category_ids(:work_on_all)
+    closed  = Ticket::State.where(state_type: Ticket::StateType.where(name: 'closed')).pluck(:id)
+    columns = %w[number title customer department group owner state priority updated_at]
+
+    {
+      'wcl_team_open'       => [__('Team: open tickets by agent'), 1200,
+                                { 'ticket.state_id' => { 'operator' => 'is', 'value' => open } },
+                                { by: 'updated_at', direction: 'DESC' }, 'owner'],
+      'wcl_team_unassigned' => [__('Team: unassigned tickets'), 1210,
+                                { 'ticket.state_id' => { 'operator' => 'is', 'value' => open },
+                                  'ticket.owner_id' => { 'operator' => 'is', 'pre_condition' => 'not_set' } },
+                                { by: 'created_at', direction: 'ASC' }, 'group'],
+      'wcl_team_stale'      => [__('Team: no update for 3 days'), 1220,
+                                { 'ticket.state_id'   => { 'operator' => 'is', 'value' => open },
+                                  'ticket.updated_at' => { 'operator' => 'before (relative)', 'value' => 3, 'range' => 'day' } },
+                                { by: 'updated_at', direction: 'ASC' }, 'owner'],
+      'wcl_team_closed'     => [__('Team: closed in the last 7 days'), 1230,
+                                { 'ticket.state_id' => { 'operator' => 'is', 'value' => closed },
+                                  'ticket.close_at' => { 'operator' => 'within last (relative)', 'value' => 7, 'range' => 'day' } },
+                                { by: 'close_at', direction: 'DESC' }, 'owner'],
+    }.each do |link, (name, prio, condition, order, group_by)|
+      next if Overview.exists?(link: link)
+
+      Overview.create!(
+        name: name, link: link, prio: prio, role_ids: [role.id], condition: condition, order: order,
+        view: { d: columns, s: columns, m: columns, view_mode_default: 's' },
+        group_by: group_by, group_direction: 'ASC', active: true, created_by_id: 1, updated_by_id: 1
+      )
+    end
+  end
+
+  # Work states between open and closed, for agents: "in progress" (being worked on) and "on hold"
+  # (waiting, e.g. for parts; no escalation while on hold). Both are open states, so they count
+  # as open work everywhere; Completed is the existing "closed".
+  WORK_STATES = {
+    'in progress' => [false, __('Being worked on (WCL).')],
+    'on hold'     => [true,  __('Waiting, e.g. for parts or a supplier; does not escalate (WCL).')],
+  }.freeze
+
+  def self.work_states
+    open_type = Ticket::StateType.find_by!(name: 'open')
+    WORK_STATES.each do |name, (ignore_escalation, note)|
+      next if Ticket::State.exists?(name: name)
+
+      Ticket::State.create!(
+        name: name, state_type: open_type, active: true, ignore_escalation: ignore_escalation,
+        default_create: false, default_follow_up: false, note: note, created_by_id: 1, updated_by_id: 1
+      )
+    end
+    Ticket::State.update_state_field_configuration
+
+    ids = Ticket::State.where(name: WORK_STATES.keys).pluck(:id)
+    work_states_in_open_overviews(ids)
+    customers_cannot_set_work_states(ids)
+  end
+
+  # Overviews keep the state ids they list: every overview listing "open" tickets also lists the
+  # work states, so tickets in progress or on hold don't drop out of "Open", "My assigned", ...
+  def self.work_states_in_open_overviews(ids)
+    open = Ticket::State.find_by(name: 'open')&.id.to_s
+    Overview.find_each do |overview|
+      condition = overview.condition.deep_dup
+      rule      = condition['ticket.state_id']
+      next if !rule.is_a?(Hash) || rule['operator'] != 'is'
+
+      values = Array(rule['value']).map(&:to_s)
+      next if values.exclude?(open)
+
+      missing = ids.map(&:to_s) - values
+      next if missing.empty?
+
+      rule['value'] = Array(rule['value']) + missing.map { |id| rule['value'].first.is_a?(Integer) ? id.to_i : id }
+      overview.update!(condition: condition)
+    end
+  end
+
+  # Like Rejected, only agents move a ticket to In Progress or On Hold.
+  def self.customers_cannot_set_work_states(ids)
+    agent = Permission.find_by(name: 'ticket.agent')
+    return if !agent || ids.empty?
+
+    CoreWorkflow.create_if_not_exists(
+      name:               'WCL: Customers cannot set In Progress or On Hold',
+      object:             'Ticket',
+      condition_saved:    {},
+      condition_selected: { 'session.permission_ids' => { 'operator' => 'is not', 'value' => [agent.id.to_s] } },
+      perform:            { 'ticket.state_id' => { 'operator' => 'remove_option', 'remove_option' => ids.map(&:to_s) } },
+      active:             true,
+      stop_after_match:   false,
+      changeable:         true,
+      priority:           512,
+      created_by_id:      1,
+      updated_by_id:      1,
+    )
+  end
+
+  # The requester's department, stored on the ticket (Ticket::StampsDepartment). Agents see and
+  # can correct it; it isn't on the new-ticket form, as it comes from the employee's profile.
+  def self.ticket_department
+    ticket_department_attribute
+    ticket_department_backfill
+    ticket_department_in_team_overviews
+  end
+
+  def self.ticket_department_attribute
+    return if ObjectManager::Attribute.get(object: 'Ticket', name: 'department')
+
+    ObjectManager::Attribute.add(
+      force:         true,
+      object:        'Ticket',
+      name:          'department',
+      display:       __('Department'),
+      data_type:     'tree_select',
+      data_option:   department_data_option(TICKET_DEPARTMENT_NOTE),
+      editable:      true,
+      active:        true,
+      screens:       {
+        create_middle: {
+          'ticket.customer' => { 'shown' => false, 'required' => false },
+          'ticket.agent'    => { 'shown' => false, 'required' => false },
+        },
+        edit:          { 'ticket.agent' => { 'shown' => true, 'required' => false } },
+      },
+      to_create:     true,
+      to_migrate:    false,
+      to_delete:     false,
+      position:      33,
+      created_by_id: 1,
+      updated_by_id: 1,
+    )
+    ObjectManager::Attribute.migration_execute
+    Ticket.reset_column_information
+  end
+
+  # Tickets from before the field existed get their requester's current department.
+  def self.ticket_department_backfill
+    return if Ticket.column_names.exclude?('department')
+
+    Ticket.where(department: [nil, '']).includes(:customer).find_each do |ticket|
+      department = ticket.customer&.department.presence
+      next if !department
+
+      ticket.update_columns(department: department) # rubocop:disable Rails/SkipsModelValidations
+      SearchIndexJob.perform_later('Ticket', ticket.id)
+    end
+  end
+
+  # Managers see each ticket's department in their Team overviews.
+  def self.ticket_department_in_team_overviews
+    Overview.where(link: %w[wcl_team_open wcl_team_unassigned wcl_team_stale wcl_team_closed]).find_each do |overview|
+      view = overview.view.to_h.deep_stringify_keys
+      changed = false
+      %w[d s m].each do |mode|
+        columns = Array(view[mode]).dup
+        next if columns.empty? || columns.include?('department')
+
+        index = columns.index('customer')
+        columns.insert(index ? index + 1 : columns.size, 'department')
+        view[mode] = columns
+        changed = true
+      end
+      overview.update!(view: view) if changed
+    end
+  end
+
+  # Admin > Manage > Departments starts with the departments people already have. Run once, when
+  # the list is created (CreateDepartments), so a department deleted later stays deleted.
+  def self.departments
+    return if !Department.table_exists?
+
+    names = User.where.not(department: [nil, '']).distinct.pluck(:department).map { |name| name.strip.squeeze(' ') }
+    known = Department.pluck(:name).map(&:downcase)
+    names.compact_blank.uniq(&:downcase).each do |name|
+      next if known.include?(name.downcase)
+
+      Department.create!(name: name, active: true, created_by_id: 1, updated_by_id: 1)
+    end
+    Department.refresh_dropdowns
   end
 end
