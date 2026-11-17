@@ -5,8 +5,8 @@
 #
 # - The switch drives Zammad's "Customer selectable groups" setting, which the HR app reads
 #   its categories from. Change it on the group, not in the setting.
-# - A new group with the switch on also gives the agent role(s) full access, so every agent sees
-#   and answers its tickets without further setup.
+# - Every new group gives the agent role(s) full access, so agents can answer its tickets (and
+#   tickets handed to it) without further setup.
 #
 # Imports and the initial seed are left alone.
 module Group::CustomerSelectable
@@ -42,7 +42,6 @@ module Group::CustomerSelectable
 
   def give_agents_access
     return if !customer_selectable_enabled?
-    return if !hr_portal
 
     # Every role that answers tickets, whatever it is called ("Agent" by default).
     Role.with_permissions('ticket.agent').each do |role|

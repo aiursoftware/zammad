@@ -1128,5 +1128,19 @@ class CreateBase < ActiveRecord::Migration[4.2]
       t.index :action_type
       t.index :created_at
     end
+
+    # WCL customization: Admin > Manage > Departments.
+    create_table :departments do |t|
+      t.string  :name,          limit: 200, null: false
+      t.string  :email,         limit: 250, null: true
+      t.string  :note,          limit: 250, null: true
+      t.boolean :active,        null: false, default: true
+      t.integer :updated_by_id, null: false
+      t.integer :created_by_id, null: false
+      t.timestamps limit: 3, null: false
+    end
+    add_index :departments, :name, unique: true
+    add_foreign_key :departments, :users, column: :created_by_id
+    add_foreign_key :departments, :users, column: :updated_by_id
   end
 end

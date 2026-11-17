@@ -35,7 +35,7 @@ class Wcl::ManagerSummary
   end
 
   def deliver
-    return false if report.data[:groups].empty?
+    return false if report.data[:groups].empty? # no groups to report on
 
     file = report.file
     NotificationFactory::Mailer.deliver(
@@ -66,7 +66,7 @@ class Wcl::ManagerSummary
       ['Rejected',                 summary[:rejected]],
       [__('Outstanding now'),          summary[:outstanding_now]],
       [__('Avg. completion (days)'),   summary[:average_days] || '-'],
-      [__('Oldest open ticket'),       oldest_text(data[:oldest_open])],
+      [__('Oldest open ticket'),       report.oldest_open_text.presence || '-'],
     ]
 
     <<~HTML
@@ -83,12 +83,6 @@ class Wcl::ManagerSummary
   end
 
   private
-
-  def oldest_text(oldest)
-    return '-' if !oldest
-
-    "##{oldest[:number]} #{oldest[:title]} (#{oldest[:days_open]} days, #{oldest[:owner]})"
-  end
 
   def section(title, headers, rows)
     return '' if rows.empty?

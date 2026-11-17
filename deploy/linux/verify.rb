@@ -153,10 +153,11 @@ begin
   check('API: reply, owners and subscribers') do
     code, = http.call(:post, 'ticket_articles', from: customer_email,
                                                 body: { ticket_id: ticket_id, body: 'More details', type: 'web', internal: false, content_type: 'text/plain' })
-    # Agents who may already work in the group; nothing about them is changed.
-    agents = User.with_permissions('ticket.agent').where(active: true).where.not(id: 1)
-      .select { |agent| agent.group_access?(group.id, 'full') }.first(2)
-    next [false, "no agent has full access to group #{group.name}"] if agents.empty?
+    # Two temporary agents without an email address, so no real agent is notified.
+    agents = Array.new(2) do |index|
+      User.create!(login: "wcl-verify-agent-#{index}-#{SecureRandom.hex(3)}", firstname: 'Verify', lastname: "Agent #{index + 1}",
+                   roles: Role.with_permissions('ticket.agent').where.not(name: 'Manager').limit(1), group_names_access_map: { group.name => ['full'] })
+    end
 
     ucode, json = http.call(:put, "tickets/#{ticket_id}", body: { assignees: agents.map { |a| a.id.to_s } })
     _, mentions = http.call(:get, "mentions?mentionable_type=Ticket&mentionable_id=#{ticket_id}")
@@ -203,6 +204,7 @@ ensure
   Ticket.find_by(id: ticket_id)&.destroy if ticket_id
   User.find_by(email: customer_email)&.destroy
   User.where('email LIKE ?', 'wcl-verify-other-%@example.invalid').find_each(&:destroy)
+  User.where('login LIKE ?', 'wcl-verify-agent-%').find_each(&:destroy)
   Department.find_by(name: 'WCL Verify Dept')&.destroy if defined?(Department) && Department.table_exists?
   Organization.find_by(name: 'ZZ: WCL Verify')&.destroy
   attribute = ObjectManager::Attribute.get(object: 'User', name: 'department')

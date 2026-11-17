@@ -29,6 +29,10 @@ class TicketsMassController < ApplicationController
   def update
     clean_params = clean_update_params
 
+    # WCL customization: closing needs a note, rejecting a public one (see Wcl::CloseNote).
+    close_note_problem = clean_params && @tickets.lazy.filter_map { |ticket| Wcl::CloseNote.problem(ticket, clean_params[:state_id], params[:article]) }.first
+    raise Exceptions::UnprocessableContent, close_note_problem if close_note_problem
+
     execute_transaction(@tickets) do |ticket|
       ticket.update!(clean_params) if clean_params
       if params[:article].present?

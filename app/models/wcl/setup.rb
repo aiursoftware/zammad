@@ -39,7 +39,7 @@ module Wcl::Setup # rubocop:disable Metrics/ModuleLength
   # Employees file tickets in Zammad itself for now (the HR app comes later), so the switch says
   # what it does there.
   GROUP_FLAG_DISPLAY = __('Customers can create tickets here')
-  GROUP_FLAG_NOTE    = __('Employees can pick this group when they create a ticket (and later in the HR app), and every agent gets access to it. Switch off for teams tickets are only handed to (e.g. Dev, Network).')
+  GROUP_FLAG_NOTE    = __('Employees can pick this group when they create a ticket (and later in the HR app). Switch off for teams tickets are only handed to (e.g. Dev, Network).')
 
   # The customer-selectable switch on groups (attribute hr_portal, see Group::CustomerSelectable).
   def self.group_customer_selectable_attribute
@@ -87,7 +87,7 @@ module Wcl::Setup # rubocop:disable Metrics/ModuleLength
   # An install made while the switch was called "Show in HR app" gets the new wording.
   def self.group_customer_selectable_label
     attribute = ObjectManager::Attribute.get(object: 'Group', name: 'hr_portal')
-    return if !attribute || attribute.display == GROUP_FLAG_DISPLAY
+    return if !attribute || (attribute.display == GROUP_FLAG_DISPLAY && attribute.data_option.with_indifferent_access[:note] == GROUP_FLAG_NOTE)
 
     attribute.update!(display: GROUP_FLAG_DISPLAY, data_option: attribute.data_option.merge(note: GROUP_FLAG_NOTE))
   end

@@ -262,7 +262,7 @@ class TicketsController < ApplicationController
     end
 
     # WCL customization: closing a ticket needs a note, rejecting a public one (see Wcl::CloseNote).
-    close_note_problem = params['macro.id'].blank? && Wcl::CloseNote.problem(ticket, clean_params[:state_id], params[:article])
+    close_note_problem = Wcl::CloseNote.problem(ticket, clean_params[:state_id], params[:article], macro: Wcl::CloseNote.macro_for(current_user, params['macro.id']))
     raise Exceptions::UnprocessableContent, close_note_problem if close_note_problem
 
     Transaction.execute do

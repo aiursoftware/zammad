@@ -46,12 +46,17 @@ class Department < ApplicationModel
 
   def rename_on_users_and_tickets
     from, to = saved_change_to_name
-    User.where(department: from).update_all(department: to, updated_at: Time.zone.now) # rubocop:disable Rails/SkipsModelValidations
-    return if Ticket.column_names.exclude?('department')
+    rename_in(User, from, to)
+    rename_in(Ticket, from, to) if Ticket.column_names.include?('department')
+  end
 
-    Ticket.where(department: from).find_each do |ticket|
-      ticket.update_columns(department: to) # rubocop:disable Rails/SkipsModelValidations
-      SearchIndexJob.perform_later('Ticket', ticket.id)
+  # Without callbacks (no history or notifications), then reindexed for search. Tickets keep their
+  # updated_at so the "no update for 3 days" overview isn't reset.
+  def rename_in(model, from, to)
+    changes = model == Ticket ? { department: to } : { department: to, updated_at: Time.zone.now }
+    model.where(department: from).find_each do |record|
+      record.update_columns(changes) # rubocop:disable Rails/SkipsModelValidations
+      SearchIndexJob.perform_later(model.name, record.id)
     end
   end
 end

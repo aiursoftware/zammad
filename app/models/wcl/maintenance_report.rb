@@ -29,13 +29,21 @@ class Wcl::MaintenanceReport
       summary:       summary,
       by_week:       by_period(:week),
       by_month:      by_period(:month),
-      by_department: breakdown(&:department),
-      by_location:   breakdown { |ticket| ticket.location.to_s.strip.presence },
+      by_department: breakdown { |ticket| ticket[:department] if ticket.has_attribute?(:department) },
+      by_location:   breakdown { |ticket| location_name(ticket) },
       by_category:   breakdown { |ticket| category_name(ticket) },
       by_person:     by_person,
       repeats:       repeats,
       oldest_open:   oldest_open,
     }
+  end
+
+  # "#123 Title (7 days, Owner)", or '' when nothing is open.
+  def oldest_open_text
+    oldest = data[:oldest_open]
+    return '' if !oldest
+
+    "##{oldest[:number]} #{oldest[:title]} (#{oldest[:days_open]} days, #{oldest[:owner]})"
   end
 
   def filename
@@ -75,9 +83,16 @@ class Wcl::MaintenanceReport
 
   def scope_group_ids
     @scope_group_ids ||= begin
-      readable = TicketPolicy::ReadScope.new(user).resolve.distinct.pluck(:group_id)
+      readable = readable_group_ids
       group_ids.present? ? (readable & group_ids) : readable
     end
+  end
+
+  # Agents (managers): every group they may read, even one without tickets yet.
+  def readable_group_ids
+    return user.group_ids_access('read') if user.permissions?('ticket.agent')
+
+    TicketPolicy::ReadScope.new(user).resolve.distinct.pluck(:group_id)
   end
 
   def closed_state_ids
@@ -183,15 +198,15 @@ class Wcl::MaintenanceReport
   # the period: a sign of a recurring problem.
   def repeats # rubocop:disable Metrics/AbcSize
     submitted
-      .select { |ticket| location_name(ticket) }
-      .group_by { |ticket| [location_name(ticket).downcase.squish, category_name(ticket).to_s.downcase] }
+      .select { |ticket| location_name(ticket) && category_name(ticket) }
+      .group_by { |ticket| [location_name(ticket).downcase, ticket.category.to_s.downcase] }
       .values
       .select { |tickets| tickets.size > 1 }
       .sort_by { |tickets| [-tickets.size, location_name(tickets.first).downcase] }
       .map do |tickets|
         {
           location:   location_name(tickets.first),
-          category:   category_name(tickets.first) || '(none)',
+          category:   category_name(tickets.first),
           count:      tickets.size,
           still_open: tickets.count { |ticket| open_state_ids.include?(ticket.state_id) },
           tickets:    tickets.sort_by(&:created_at).map { |ticket| "##{ticket.number}" }.join(', '),
@@ -281,13 +296,6 @@ class Wcl::MaintenanceReport
         end
       end
     end
-  end
-
-  def oldest_open_text
-    oldest = data[:oldest_open]
-    return '' if !oldest
-
-    "##{oldest[:number]} #{oldest[:title]} (#{oldest[:days_open]} days, #{oldest[:owner]})"
   end
 
   def write_repeats(sheet, formats)
