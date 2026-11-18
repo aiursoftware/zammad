@@ -26,6 +26,31 @@ class Department < ApplicationModel
     where(active: true).pluck(:name).sort_by(&:downcase).map { |name| { 'value' => name, 'name' => name } }
   end
 
+  # Active users in this department, A to Z.
+  def members
+    User.where(active: true, department: name).where.not(id: 1).reorder(:firstname, :lastname).to_a
+  end
+
+  # Up to 15 active users not in this department whose name, email or login matches the query.
+  def candidates(query, limit: 15)
+    term = "%#{User.sanitize_sql_like(query.to_s.strip.downcase)}%"
+    return [] if query.to_s.strip.length < 2
+
+    User.where(active: true).where.not(id: 1)
+      .where('department IS NULL OR department != ?', name)
+      .where("LOWER(firstname) LIKE :t OR LOWER(lastname) LIKE :t OR LOWER(CONCAT(firstname, ' ', lastname)) LIKE :t OR LOWER(email) LIKE :t OR LOWER(login) LIKE :t", t: term)
+      .reorder(:firstname, :lastname).limit(limit).to_a
+  end
+
+  # Through the user's normal save, so history and search stay right.
+  def add_member(user)
+    user.update!(department: name)
+  end
+
+  def remove_member(user)
+    user.update!(department: nil) if user.department == name
+  end
+
   def self.refresh_dropdowns
     options = self.options
     DROPDOWNS.each do |object, name|

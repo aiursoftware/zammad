@@ -120,21 +120,33 @@ begin
 
   attachment_text = "wclverify#{SecureRandom.hex(3)} payslip discrepancy"
 
+  # A group with categories (e.g. Maintenance) needs one on new tickets: the first of its own.
+  category = begin
+    options = Array(ObjectManager::Attribute.get(object: 'Ticket', name: 'category')&.data_option&.dig('options'))
+    names   = [group.name, group.name_last].compact.map { |name| name.to_s.strip.downcase }
+    branch  = options.find { |option| names.include?(option['name'].to_s.strip.downcase) }
+    leaf    = ->(children) { Array(children).lazy.map { |c| c['children'].present? ? leaf.call(c['children']) : c['value'] }.find(&:present?) }
+    branch && leaf.call(branch['children'])
+  end
+
   check('API: employee files a ticket with an attachment (urgent, tagged)') do
     urgent = Ticket::Priority.find_by(name: '4 urgent')
     code, json = http.call(:post, 'tickets?expand=true', from: customer_email, body: {
                              title: 'WCL verify ticket', group_id: group.id, priority_id: urgent&.id, tags: 'hr-portal',
-                             location: 'WCL verify location',
+                             location: 'WCL verify location', category: category,
                              article: { subject: 'WCL verify', body: 'Please check the attached file.', type: 'web',
                                         internal: false, content_type: 'text/plain',
                                         attachments: [{ 'filename' => 'verify.txt', 'mime-type' => 'text/plain',
                                                         'data' => Base64.strict_encode64(attachment_text) }] },
                            })
     ticket_id = json['id'] if code == 201
-    [code == 201 && json['priority'] == '4 urgent', "HTTP #{code} group=#{group.name} #{json['error'] if json.is_a?(Hash)}".strip]
+    error = json.is_a?(Hash) ? (json['error_human'] || json['error']) : nil
+    [code == 201 && json['priority'] == '4 urgent', "HTTP #{code} group=#{group.name}#{" category=#{category}" if category} #{error}".strip]
   end
 
   check('API: employee reads the thread and downloads the file') do
+    next [false, 'skipped: the test ticket was not created (see above)'] if !ticket_id
+
     code, articles = http.call(:get, "ticket_articles/by_ticket/#{ticket_id}?expand=true", from: customer_email)
     article = articles.first
     file = article['attachments'].first
@@ -143,6 +155,8 @@ begin
   end
 
   check('API: another employee is refused the ticket') do
+    next [false, 'skipped: the test ticket was not created (see above)'] if !ticket_id
+
     other = "wcl-verify-other-#{SecureRandom.hex(3)}@example.invalid"
     User.create!(firstname: 'Other', lastname: 'Verify', email: other, roles: Role.where(name: 'Customer'))
     code, = http.call(:get, "tickets/#{ticket_id}", from: other)
@@ -151,6 +165,8 @@ begin
   end
 
   check('API: reply, owners and subscribers') do
+    next [false, 'skipped: the test ticket was not created (see above)'] if !ticket_id
+
     code, = http.call(:post, 'ticket_articles', from: customer_email,
                                                 body: { ticket_id: ticket_id, body: 'More details', type: 'web', internal: false, content_type: 'text/plain' })
     # Two temporary agents without an email address, so no real agent is notified.
@@ -167,11 +183,15 @@ begin
   end
 
   check('closing needs a note: refused without one') do
+    next [false, 'skipped: the test ticket was not created (see above)'] if !ticket_id
+
     code, = http.call(:put, "tickets/#{ticket_id}", body: { state: 'rejected' })
     [code == 422 && Ticket.uncached { Ticket.find(ticket_id).state.name } != 'rejected', "HTTP #{code}"]
   end
 
   check('API: Rejected state (needs a public note)') do
+    next [false, 'skipped: the test ticket was not created (see above)'] if !ticket_id
+
     internal = { body: 'verify: internal reason', type: 'note', internal: true }
     code_internal, = http.call(:put, "tickets/#{ticket_id}", body: { state: 'rejected', article: internal })
     next [false, "an internal note was accepted for Rejected (HTTP #{code_internal})"] if code_internal != 422
@@ -182,6 +202,8 @@ begin
   end
 
   check('search: finds the ticket by text inside its attachment') do
+    next [false, 'skipped: the test ticket was not created (see above)'] if !ticket_id
+
     SearchIndexBackend.refresh if SearchIndexBackend.respond_to?(:refresh)
     found = false
     20.times do

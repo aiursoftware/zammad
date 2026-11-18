@@ -668,7 +668,7 @@ msgstr ""
 msgid "A test ticket has been created, you can find it in your overview \"%s\" %l."
 msgstr ""
 
-#: app/models/ticket.rb:305
+#: app/models/ticket.rb:306
 msgid "A ticket cannot be merged into itself."
 msgstr ""
 
@@ -1223,6 +1223,7 @@ msgstr ""
 #: app/assets/javascripts/app/views/channel/email_account_overview.jst.eco:143
 #: app/assets/javascripts/app/views/channel/topics.jst.eco:37
 #: app/assets/javascripts/app/views/channel_account/list.jst.eco:113
+#: app/assets/javascripts/app/views/department/members.jst.eco:3
 #: app/assets/javascripts/app/views/generic/application_selector_row.jst.eco:32
 #: app/assets/javascripts/app/views/generic/checklist_item.jst.eco:26
 #: app/assets/javascripts/app/views/generic/object_attribute_options_context.jst.eco:58
@@ -1431,6 +1432,10 @@ msgstr ""
 #: app/frontend/apps/desktop/components/Form/fields/FieldEditor/useEditorActions.ts:244
 #: app/frontend/apps/mobile/components/Form/fields/FieldEditor/useEditorActions.ts:235
 msgid "Add ordered list"
+msgstr ""
+
+#: app/assets/javascripts/app/views/department/members.jst.eco:3
+msgid "Add people"
 msgstr ""
 
 #: app/frontend/shared/entities/ticket-article/action/plugins/phone.ts:13
@@ -2902,7 +2907,7 @@ msgstr ""
 msgid "Begin forwarded message"
 msgstr ""
 
-#: app/models/wcl/setup.rb:544
+#: app/models/wcl/setup.rb:554
 msgid "Being worked on (WCL)."
 msgstr ""
 
@@ -3383,7 +3388,7 @@ msgstr ""
 #: app/assets/javascripts/app/views/ticket_zoom/knowledge_base_ai_draft_modal.jst.eco:78
 #: app/frontend/apps/desktop/components/KnowledgeBase/KnowledgeBaseAnswer/KnowledgeBaseAnswerAttributes.vue:85
 #: app/frontend/apps/desktop/entities/knowledge-base/composables/useAnswerFormSchema.ts:170
-#: app/models/wcl/setup.rb:341
+#: app/models/wcl/setup.rb:351
 msgid "Category"
 msgstr ""
 
@@ -6763,6 +6768,7 @@ msgstr ""
 msgid "Don't synchronize"
 msgstr ""
 
+#: app/assets/javascripts/app/lib/app_post/wcl_department_members.coffee:5
 #: app/frontend/apps/mobile/components/CommonDialog/CommonDialog.vue:141
 #: app/frontend/apps/mobile/components/Form/fields/FieldAutoComplete/FieldAutoCompleteInputDialog.vue:261
 #: app/frontend/apps/mobile/pages/account/views/PersonalSettingAvatar.vue:169
@@ -7920,7 +7926,7 @@ msgstr ""
 msgid "Event summary"
 msgstr ""
 
-#: app/models/wcl/setup.rb:689
+#: app/models/wcl/setup.rb:699
 msgid "Every Monday at 07:00, send each user with the Manager role a summary of last week's tickets for their groups, with the Excel report attached."
 msgstr ""
 
@@ -8369,7 +8375,7 @@ msgstr ""
 msgid "First article (oldest)"
 msgstr ""
 
-#: app/models/wcl/setup.rb:353
+#: app/models/wcl/setup.rb:363
 msgid "First level: the name of a group. Under it: the categories offered for that group."
 msgstr ""
 
@@ -8707,7 +8713,7 @@ msgstr ""
 msgid "General communication error, maybe internet is not available!"
 msgstr ""
 
-#: app/models/wcl/setup.rb:300
+#: app/models/wcl/setup.rb:310
 msgid "General facility repairs"
 msgstr ""
 
@@ -9111,7 +9117,7 @@ msgstr ""
 msgid "HR app: maximum attachments per message"
 msgstr ""
 
-#: app/models/wcl/setup.rb:276
+#: app/models/wcl/setup.rb:286
 msgid "HR portal – open requests"
 msgstr ""
 
@@ -9802,6 +9808,10 @@ msgstr ""
 msgid "In the trigger context, the last article will always be the one that activated the trigger."
 msgstr ""
 
+#: app/assets/javascripts/app/views/department/members.jst.eco:26
+msgid "In this department"
+msgstr ""
+
 #: app/frontend/apps/desktop/pages/personal-setting/views/PersonalSettingOutOfOffice.vue:74
 msgid "Inactive"
 msgstr ""
@@ -10374,7 +10384,7 @@ msgstr ""
 msgid "It is not possible to delete your current account."
 msgstr ""
 
-#: app/models/ticket.rb:303
+#: app/models/ticket.rb:304
 msgid "It is not possible to merge into an already merged ticket."
 msgstr ""
 
@@ -11137,7 +11147,7 @@ msgstr ""
 #: app/assets/javascripts/app/views/profile/devices.jst.eco:13
 #: app/assets/javascripts/app/views/session.jst.eco:10
 #: app/frontend/apps/desktop/pages/personal-setting/views/PersonalSettingDevices.vue:100
-#: app/models/wcl/setup.rb:404
+#: app/models/wcl/setup.rb:414
 msgid "Location"
 msgstr ""
 
@@ -12879,6 +12889,10 @@ msgstr ""
 msgid "No members found"
 msgstr ""
 
+#: app/assets/javascripts/app/views/department/members.jst.eco:9
+msgid "No one else matches."
+msgstr ""
+
 #: app/frontend/apps/desktop/components/CommonSimpleEntityList/plugins/organization.ts:9
 msgid "No organizations found"
 msgstr ""
@@ -13024,7 +13038,7 @@ msgstr ""
 msgid "No translation service is configured."
 msgstr ""
 
-#: app/models/ticket.rb:436
+#: app/models/ticket.rb:437
 msgid "No triggers active"
 msgstr ""
 
@@ -13067,6 +13081,10 @@ msgstr ""
 
 #: app/frontend/shared/composables/form/useCheckBodyAttachmentReference.ts:54
 msgid "No, thanks"
+msgstr ""
+
+#: app/assets/javascripts/app/views/department/members.jst.eco:28
+msgid "Nobody yet. Search above to add people."
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/knowledge_base/permissions_dialog.coffee:9
@@ -13446,7 +13464,7 @@ msgstr ""
 msgid "October"
 msgstr ""
 
-#: app/models/wcl/setup.rb:299
+#: app/models/wcl/setup.rb:309
 msgid "Office maintenance"
 msgstr ""
 
@@ -14314,6 +14332,15 @@ msgstr ""
 #: app/graphql/gql/types/overview_type.rb:98
 #: db/seeds/object_manager_attributes.rb:316
 msgid "Pending till"
+msgstr ""
+
+#: app/assets/javascripts/app/controllers/department.coffee:25
+#: app/assets/javascripts/app/lib/app_post/wcl_department_members.coffee:6
+msgid "People"
+msgstr ""
+
+#: app/assets/javascripts/app/lib/app_post/wcl_department_members.coffee:16
+msgid "People in %s"
 msgstr ""
 
 #: db/seeds/roles.rb:24
@@ -15385,6 +15412,7 @@ msgstr ""
 #: app/assets/javascripts/app/views/calendar/holiday_selector.jst.eco:23
 #: app/assets/javascripts/app/views/calendar/holiday_selector_placeholder.jst.eco:12
 #: app/assets/javascripts/app/views/channel/topics.jst.eco:32
+#: app/assets/javascripts/app/views/department/members.jst.eco:37
 #: app/assets/javascripts/app/views/generic/application_selector_row.jst.eco:28
 #: app/assets/javascripts/app/views/generic/application_selector_subclause.jst.eco:15
 #: app/assets/javascripts/app/views/generic/object_attribute_options_context.jst.eco:34
@@ -15465,6 +15493,10 @@ msgstr ""
 #: app/frontend/apps/desktop/components/Form/fields/FieldEditor/useEditorActions.ts:208
 #: app/frontend/apps/mobile/components/Form/fields/FieldEditor/useEditorActions.ts:199
 msgid "Remove formatting"
+msgstr ""
+
+#: app/assets/javascripts/app/views/department/members.jst.eco:37
+msgid "Remove from department"
 msgstr ""
 
 #: app/frontend/apps/desktop/pages/ticket/components/TicketDetailView/TicketDetailTopBar/components/HighlightMenu.vue:93
@@ -15678,7 +15710,7 @@ msgstr ""
 msgid "Request the password login here."
 msgstr ""
 
-#: app/models/wcl/setup.rb:206
+#: app/models/wcl/setup.rb:216
 msgid "Request turned down (WCL). Shown to the employee as \"Rejected\" in the HR app."
 msgstr ""
 
@@ -18372,19 +18404,19 @@ msgstr ""
 msgid "Target ticket"
 msgstr ""
 
-#: app/models/wcl/setup.rb:526
+#: app/models/wcl/setup.rb:536
 msgid "Team: closed in the last 7 days"
 msgstr ""
 
-#: app/models/wcl/setup.rb:522
+#: app/models/wcl/setup.rb:532
 msgid "Team: no update for 3 days"
 msgstr ""
 
-#: app/models/wcl/setup.rb:515
+#: app/models/wcl/setup.rb:525
 msgid "Team: open tickets by agent"
 msgstr ""
 
-#: app/models/wcl/setup.rb:518
+#: app/models/wcl/setup.rb:528
 msgid "Team: unassigned tickets"
 msgstr ""
 
@@ -21556,7 +21588,7 @@ msgstr ""
 msgid "Tracked as checklist item in"
 msgstr ""
 
-#: app/models/wcl/setup.rb:498
+#: app/models/wcl/setup.rb:508
 msgid "Tracks the work of the agents in the groups set on each manager (Admin > Users > Group permissions: Read, Overview, Change): Reporting and the \"Team\" overviews. Not offered as an owner unless the user is also an Agent."
 msgstr ""
 
@@ -21681,7 +21713,7 @@ msgstr ""
 msgid "Triggers activated by actions are executed whenever a ticket is created or updated, while triggers activated by time events are executed when certain times are reached (e.g. pending time, escalation)."
 msgstr ""
 
-#: app/models/wcl/setup.rb:298
+#: app/models/wcl/setup.rb:308
 msgid "Trucking / vehicle maintenance"
 msgstr ""
 
@@ -21870,6 +21902,10 @@ msgstr ""
 #: app/frontend/apps/desktop/pages/ticket/components/TicketSidebar/TicketSidebarExternalReferences/TicketSidebarIdoit/TicketSidebarIdoitContent.vue:216
 #: db/seeds/object_manager_attributes.rb:129
 msgid "Type"
+msgstr ""
+
+#: app/assets/javascripts/app/views/department/members.jst.eco:4
+msgid "Type a name or email (at least 2 letters)"
 msgstr ""
 
 #: app/assets/javascripts/app/views/ticket_zoom/sidebar_idoit.jst.eco:11
@@ -22952,7 +22988,7 @@ msgstr ""
 msgid "Waiting in %s"
 msgstr ""
 
-#: app/models/wcl/setup.rb:545
+#: app/models/wcl/setup.rb:555
 msgid "Waiting, e.g. for parts or a supplier; does not escalate (WCL)."
 msgstr ""
 
@@ -22960,7 +22996,7 @@ msgstr ""
 msgid "Want to join the BETA UI feedback program?"
 msgstr ""
 
-#: app/models/wcl/setup.rb:297
+#: app/models/wcl/setup.rb:307
 msgid "Warehouse maintenance"
 msgstr ""
 
@@ -23066,7 +23102,7 @@ msgstr ""
 msgid "Week(s)"
 msgstr ""
 
-#: app/models/wcl/setup.rb:686
+#: app/models/wcl/setup.rb:696
 msgid "Weekly summary email to managers"
 msgstr ""
 
@@ -23158,7 +23194,7 @@ msgstr ""
 msgid "Where"
 msgstr ""
 
-#: app/models/wcl/setup.rb:383
+#: app/models/wcl/setup.rb:393
 msgid "Where is it? e.g. Warehouse A, Office 2nd floor, Truck 51C-12345"
 msgstr ""
 
@@ -24156,6 +24192,10 @@ msgstr ""
 
 #: app/frontend/apps/desktop/pages/personal-setting/views/PersonalSetting/plugins/password.ts:28
 msgid "current,new,confirm,change,current password,new password,confirm password,change password"
+msgstr ""
+
+#: app/assets/javascripts/app/views/department/members.jst.eco:17
+msgid "currently: %s"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/translation.coffee:280

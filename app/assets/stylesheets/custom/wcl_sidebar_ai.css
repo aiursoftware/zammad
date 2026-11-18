@@ -1,0 +1,28 @@
+/* WCL customization: make the AI (summary) tab in the ticket sidebar easy to spot. */
+
+.tabsSidebar-tab[data-tab='summary'] {
+  --wcl-ai: hsl(262, 72%, 58%);
+  --wcl-ai-tint: hsla(262, 72%, 58%, 0.12);
+
+  background: linear-gradient(var(--wcl-ai-tint), var(--wcl-ai-tint)), var(--background-primary-alt);
+}
+
+[data-theme='dark'] .tabsSidebar-tab[data-tab='summary'] {
+  --wcl-ai: hsl(262, 90%, 76%);
+  --wcl-ai-tint: hsla(262, 90%, 70%, 0.16);
+}
+
+.tabsSidebar-tab[data-tab='summary'] .icon {
+  width: 26px;
+  height: 26px;
+  fill: var(--wcl-ai);
+}
+
+.tabsSidebar-tab[data-tab='summary']:hover .icon,
+.tabsSidebar-tab[data-tab='summary'].active .icon {
+  filter: drop-shadow(0 0 4px var(--wcl-ai));
+}
+
+.tabsSidebar-tab[data-tab='summary'].active {
+  box-shadow: inset 3px 0 0 var(--wcl-ai);
+}

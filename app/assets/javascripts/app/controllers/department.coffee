@@ -18,6 +18,20 @@ class Department extends App.ControllerSubContent
         buttons: [
           { name: __('New Department'), 'data-type': 'new', class: 'btn--success' }
         ]
+        tableExtend:
+          customActions: [
+            {
+              name:     'members'
+              display:  __('People')
+              icon:     'user'
+              class:    'js-members'
+              callback: (id) =>
+                new App.WclDepartmentMembers(
+                  department: App.Department.find(id)
+                  container:  @el.closest('.content')
+                )
+            }
+          ]
       container: @el.closest('.content')
     )
 
