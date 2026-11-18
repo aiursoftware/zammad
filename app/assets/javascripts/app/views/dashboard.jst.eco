@@ -29,6 +29,7 @@
 <% if @activityStream: %>
 <div class="sidebar optional">
   <h2><%- @T('Activity Stream') %></h2>
+  <div class="js-activityFilter"></div>
   <div class="activity-description">
     <p><%- @T('Here you will find the latest activities of your system.') %></p>
     <p><%- @T('For example, recently changed tickets, users, or organizations.') %></p>

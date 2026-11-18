@@ -123,11 +123,12 @@ only the ones the user created while it is limited to their own activities
 
 =end
 
-  def self.list(user, limit)
+  def self.list(user, limit, filter: nil)
     return none if !enabled?
 
     scope = ActivityStreamPolicy::Scope.new(user, self).resolve
     scope = scope.where(created_by_id: user.id) if Setting.get('dashboard_activity_stream_own')
+    scope = Wcl::ActivityStreamFilter.apply(scope, user, filter) # WCL customization: dashboard filters
 
     scope.reorder(created_at: :desc).limit(limit)
   end

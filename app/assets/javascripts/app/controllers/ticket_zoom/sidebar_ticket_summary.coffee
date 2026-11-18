@@ -230,6 +230,7 @@ class App.SidebarTicketSummary extends App.Controller
 
     summarization
       .on('click', '.js-retry', @retrySummarization)
+      .on('click', '.js-generate', @generateSummarization)
 
     @stopStripeAnimation() if not @isSummarizationLoading()
 
@@ -246,12 +247,18 @@ class App.SidebarTicketSummary extends App.Controller
     @elSidebar.html(summarization)
 
   isSummarizationLoading: =>
-    not @summaryData?.error and App.Config.get('ai_provider') and not @summaryData?.result
+    not @summaryData?.not_generated and not @summaryData?.error and App.Config.get('ai_provider') and not @summaryData?.result
 
   retrySummarization: (e) =>
     @preventDefaultAndStopPropagation(e)
     @renderSummarization({})
-    @loadSummarization()
+    @loadSummarization(null, null, true)
+
+  # WCL customization: the only way (besides "regenerate"/"retry") to start a paid AI run.
+  generateSummarization: (e) =>
+    @preventDefaultAndStopPropagation(e)
+    @renderSummarization({})
+    @loadSummarization(null, null, true)
 
   summaryReloadNeeded: =>
     ticket = App.Ticket.find(@ticket.id)
@@ -270,7 +277,7 @@ class App.SidebarTicketSummary extends App.Controller
 
       sender.name != 'System' && article.body?.length > 0
 
-  loadSummarization: (regenerationOfId = null, ai_analytics_run_id = null) =>
+  loadSummarization: (regenerationOfId = null, ai_analytics_run_id = null, generate = false) =>
     return if !@sidebarIsEnabled()
 
     @waitingSummarization = false
@@ -279,6 +286,7 @@ class App.SidebarTicketSummary extends App.Controller
 
     data.regeneration_of_id = regenerationOfId if regenerationOfId
     data.ai_analytics_run_error_id = ai_analytics_run_id if ai_analytics_run_id
+    data.generate = true if generate
 
     @startStripeAnimation()
 

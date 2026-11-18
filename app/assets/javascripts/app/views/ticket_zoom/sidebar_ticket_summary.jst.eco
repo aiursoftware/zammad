@@ -16,6 +16,13 @@
       <div class="alert alert--danger">
         <%- @T('No AI provider is currently set up. Please contact your administrator.') %>
       </div>
+    <% else if @data?.not_generated: %>
+      <%# WCL customization: summaries are generated on demand only, to save AI costs. %>
+      <div class="wcl-summary-ondemand">
+        <p><%- @T('No summary yet for this conversation.') %></p>
+        <p class="wcl-summary-ondemand-hint"><%- @T('Summaries use the AI provider and are created only when you ask for one. New replies need a new summary.') %></p>
+        <button type="button" class="btn btn--primary js-generate"><%- @T('Generate summary') %></button>
+      </div>
     <% else if @data?.result: %>
       <% for item in @structure: %>
         <% values = [] %>

@@ -117,6 +117,11 @@ RSpec.describe 'Ticket Summary', authenticated_as: :authenticate, type: :system 
 
         create(:ticket_article, ticket:)
 
+        # WCL customization: summaries are generated on demand only.
+        within '.sidebar[data-tab="summary"]' do
+          click '.js-generate'
+        end
+
         # This will wait for the job to be enqueued.
         expect(page).to have_text 'Summary is being generated…'
 
@@ -136,6 +141,11 @@ RSpec.describe 'Ticket Summary', authenticated_as: :authenticate, type: :system 
 
         create(:ticket_article, ticket:)
 
+        # WCL customization: summaries are generated on demand only.
+        within '.sidebar[data-tab="summary"]' do
+          click '.js-generate'
+        end
+
         expect(page).to have_text 'Summary is being generated…'
 
         perform_enqueued_jobs(only: TicketAIAssistanceSummarizeJob)
@@ -154,6 +164,11 @@ RSpec.describe 'Ticket Summary', authenticated_as: :authenticate, type: :system 
         end
 
         create(:ticket_article, ticket:)
+
+        # WCL customization: summaries are generated on demand only.
+        within '.sidebar[data-tab="summary"]' do
+          click '.js-generate'
+        end
 
         expect(page).to have_text 'Summary is being generated…'
 
@@ -175,6 +190,11 @@ RSpec.describe 'Ticket Summary', authenticated_as: :authenticate, type: :system 
 
         create(:ticket_article, ticket:)
 
+        # WCL customization: summaries are generated on demand only.
+        within '.sidebar[data-tab="summary"]' do
+          click '.js-generate'
+        end
+
         expect(page).to have_text 'Summary is being generated…'
 
         perform_enqueued_jobs(only: TicketAIAssistanceSummarizeJob)
@@ -194,6 +214,11 @@ RSpec.describe 'Ticket Summary', authenticated_as: :authenticate, type: :system 
         end
 
         create(:ticket_article, ticket:)
+
+        # WCL customization: summaries are generated on demand only.
+        within '.sidebar[data-tab="summary"]' do
+          click '.js-generate'
+        end
 
         expect(page).to have_text 'Summary is being generated…'
 
@@ -320,6 +345,9 @@ RSpec.describe 'Ticket Summary', authenticated_as: :authenticate, type: :system 
 
         expect(page).to have_no_css('.tabsSidebar-tab[data-tab=summary] .tabsSidebar-tab-dot')
 
+        # WCL customization: summaries are generated on demand only - simulate the "Generate" click.
+        TicketAIAssistanceSummarizeJob.perform_later(ticket, agent.locale, current_user: agent, regeneration_of: nil)
+
         wait.until do
           enqueued_jobs.any? { |job| job[:job] == TicketAIAssistanceSummarizeJob }
         end
@@ -335,6 +363,11 @@ RSpec.describe 'Ticket Summary', authenticated_as: :authenticate, type: :system 
         create(:ticket_article, ticket:)
 
         expect(page).to have_no_css('.tabsSidebar-tab[data-tab=summary] .tabsSidebar-tab-dot')
+
+        # WCL customization: summaries are generated on demand only.
+        within '.sidebar[data-tab="summary"]' do
+          click '.js-generate'
+        end
 
         wait.until do
           enqueued_jobs.any? { |job| job[:job] == TicketAIAssistanceSummarizeJob }
@@ -356,6 +389,9 @@ RSpec.describe 'Ticket Summary', authenticated_as: :authenticate, type: :system 
         create(:ticket_article, ticket:, origin_by: agent)
 
         expect(page).to have_no_css('.tabsSidebar-tab[data-tab=summary] .tabsSidebar-tab-dot')
+
+        # WCL customization: summaries are generated on demand only - simulate the "Generate" click.
+        TicketAIAssistanceSummarizeJob.perform_later(ticket, agent.locale, current_user: agent, regeneration_of: nil)
 
         wait.until do
           enqueued_jobs.any? { |job| job[:job] == TicketAIAssistanceSummarizeJob }

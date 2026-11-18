@@ -26,3 +26,24 @@
 .tabsSidebar-tab[data-tab='summary'].active {
   box-shadow: inset 3px 0 0 var(--wcl-ai);
 }
+
+/* AI summary is generated on demand only: empty state with a Generate button. */
+.wcl-summary-ondemand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.wcl-summary-ondemand p {
+  margin: 0;
+}
+
+.wcl-summary-ondemand-hint {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.wcl-summary-ondemand .btn {
+  margin-top: 6px;
+}

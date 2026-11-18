@@ -35,6 +35,11 @@ class Ticket::SummarizeController < ApplicationController
           error:         true,
           error_message: ai_analytics_run_error.error['error_message'],
         }
+      elsif !generate_requested?
+        # WCL customization: summaries are generated on demand only (AI calls cost money).
+        #   Without an explicit "Generate" click, report that none exists yet instead of
+        #   starting a paid AI job just because the sidebar was opened.
+        render json: { result: nil, not_generated: true }
       else
         enqueue_job
       end
@@ -55,6 +60,10 @@ class Ticket::SummarizeController < ApplicationController
     return @regeneration_of if defined?(@regeneration_of)
 
     @regeneration_of = AI::Analytics::Run.find(params[:regeneration_of_id]) if params[:regeneration_of_id].present?
+  end
+
+  def generate_requested?
+    ActiveModel::Type::Boolean.new.cast(params[:generate]) == true
   end
 
   def enqueue_job

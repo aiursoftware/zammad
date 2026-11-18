@@ -63,8 +63,9 @@ class App.Dashboard extends App.Controller
 
     if activityStream
       new App.DashboardActivityStream(
-        el:    localEl.find('.js-activityContent')
-        limit: 25
+        el:       localEl.find('.js-activityContent')
+        filterEl: localEl.find('.js-activityFilter')
+        limit:    25
       )
 
     if firstSteps

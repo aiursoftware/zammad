@@ -1,0 +1,55 @@
+<div class="wcl-activity-filter">
+  <div class="wcl-activity-filter-search">
+    <%- @Icon('magnifier') %>
+    <input type="search" class="js-filterText" value="<%= @filter.text %>" placeholder="<%- @Ti('Search activity…') %>" autocomplete="off" aria-label="<%- @Ti('Search activity') %>">
+  </div>
+
+  <div class="wcl-activity-filter-chips" role="group" aria-label="<%- @Ti('What') %>">
+    <% for option in @objects: %>
+      <button type="button" class="wcl-activity-chip js-filterObject <% if option.value is @filter.object: %>is-active<% end %>" data-value="<%= option.value %>" aria-pressed="<%= option.value is @filter.object %>"><%- @T(option.name) %></button>
+    <% end %>
+  </div>
+
+  <div class="wcl-activity-filter-selects">
+    <label>
+      <span><%- @T('Who') %></span>
+      <select class="form-control form-control--small js-filterSelect" name="actor">
+        <% for option in @actors: %>
+          <option value="<%= option.value %>" <% if option.value is @filter.actor: %>selected<% end %>><%- @T(option.name) %></option>
+        <% end %>
+      </select>
+    </label>
+    <label>
+      <span><%- @T('Action') %></span>
+      <select class="form-control form-control--small js-filterSelect" name="action">
+        <% for option in @actions: %>
+          <option value="<%= option.value %>" <% if option.value is @filter.action: %>selected<% end %>><%- @T(option.name) %></option>
+        <% end %>
+      </select>
+    </label>
+    <label>
+      <span><%- @T('When') %></span>
+      <select class="form-control form-control--small js-filterSelect" name="since">
+        <% for option in @sinces: %>
+          <option value="<%= option.value %>" <% if option.value is @filter.since: %>selected<% end %>><%- @T(option.name) %></option>
+        <% end %>
+      </select>
+    </label>
+    <% if @groups.length > 1: %>
+      <label>
+        <span><%- @T('Group') %></span>
+        <select class="form-control form-control--small js-filterSelect" name="group">
+          <option value=""><%- @T('All groups') %></option>
+          <% for group in @groups: %>
+            <option value="<%= group.id %>" <% if String(group.id) is String(@filter.group): %>selected<% end %>><%= group.displayName() %></option>
+          <% end %>
+        </select>
+      </label>
+    <% end %>
+  </div>
+
+  <div class="wcl-activity-filter-status">
+    <span class="js-filterCount"></span>
+    <button type="button" class="btn btn--text btn--small js-filterReset <% if !@active: %>hide<% end %>"><%- @T('Clear filters') %></button>
+  </div>
+</div>

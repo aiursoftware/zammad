@@ -5,7 +5,13 @@ class ActivityStreamController < ApplicationController
 
   # GET /api/v1/activity_stream
   def show
-    activity_stream = current_user.activity_stream(params[:limit])
+    # WCL customization: optional dashboard filters (object, action, actor, group, since).
+    filter = Wcl::ActivityStreamFilter.sanitize(params[:filter])
+    activity_stream = if filter
+                        ActivityStream.list(current_user, Wcl::ActivityStreamFilter.limit(params[:limit]), filter: filter)
+                      else
+                        current_user.activity_stream(params[:limit])
+                      end
 
     if response_expand?
       list = activity_stream.map(&:attributes_with_association_names)

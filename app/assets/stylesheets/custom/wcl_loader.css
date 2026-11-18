@@ -1,0 +1,64 @@
+/*
+ * WCL customization: in-app loading indicator.
+ *
+ * Zammad shows a flipping green square (.loading.icon) wherever something loads
+ * (51 places). This turns it into a small version of the start-up logo loader
+ * (app/views/init/_logo_loader.html.erb): the WCL globe, gently breathing,
+ * inside a spinning blue ring. Same element, same sizes, CSS only.
+ */
+
+.loading.icon {
+  position: relative;
+  background: url('/assets/images/logo.png') center / 78% no-repeat;
+  border-radius: 50%;
+  animation: wcl-loader-breathe 1.8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+}
+
+/* the spinning ring */
+.loading.icon::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 0 55%, hsla(199, 72%, 49%, 0.15) 70%, hsl(199, 72%, 49%) 92%, hsl(198, 80%, 78%) 100%);
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1.5px));
+  animation: wcl-loader-spin 0.9s linear infinite;
+}
+
+.tiny.loading.icon::after {
+  inset: -2px;
+}
+
+/* muted variant (e.g. inside quiet panels): same motion, no color */
+.loading.icon.muted {
+  background-color: transparent;
+  filter: grayscale(1);
+  opacity: 0.6;
+}
+
+@keyframes wcl-loader-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes wcl-loader-breathe {
+  0%,
+  100% {
+    transform: scale(0.92);
+  }
+
+  50% {
+    transform: scale(1.04);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading.icon {
+    animation: none;
+  }
+
+  .loading.icon::after {
+    animation-duration: 2.4s;
+  }
+}

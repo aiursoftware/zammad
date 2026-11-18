@@ -184,17 +184,34 @@ RSpec.describe 'Ticket Summarize API endpoints', authenticated_as: :user, perfor
       end
 
       context 'when cache is not present' do
-        it 'enqueues summary generation job' do
+        # WCL customization: summaries are generated on demand only (AI calls cost money).
+        it 'does not enqueue summary generation job without an explicit request' do
           make_request
 
-          expect(TicketAIAssistanceSummarizeJob)
-            .to have_been_enqueued.with(ticket, user.locale, current_user: user, regeneration_of: nil)
+          expect(TicketAIAssistanceSummarizeJob).not_to have_been_enqueued
         end
 
-        it 'returns empty result' do
+        it 'reports that no summary was generated yet' do
           make_request
 
-          expect(json_response).to eq({ 'result' => nil })
+          expect(json_response).to eq({ 'result' => nil, 'not_generated' => true })
+        end
+
+        context 'when the user asks to generate it' do
+          let(:params) { { generate: true } }
+
+          it 'enqueues summary generation job' do
+            make_request
+
+            expect(TicketAIAssistanceSummarizeJob)
+              .to have_been_enqueued.with(ticket, user.locale, current_user: user, regeneration_of: nil)
+          end
+
+          it 'returns empty result' do
+            make_request
+
+            expect(json_response).to eq({ 'result' => nil })
+          end
         end
 
         context 'when passing ai_analytics_run_error_id param' do

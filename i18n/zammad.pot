@@ -381,6 +381,10 @@ msgstr ""
 msgid "%s selected. Use arrow keys to choose drop position, then press Space."
 msgstr ""
 
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:185
+msgid "%s shown"
+msgstr ""
+
 #: app/assets/javascripts/app/models/user.coffee:224
 #: app/frontend/shared/composables/activity-message/activityMessageBuilder/builders/user.ts:25
 msgid "%s started a new session"
@@ -1064,6 +1068,7 @@ msgstr ""
 #: app/assets/javascripts/app/models/trigger.coffee:7
 #: app/assets/javascripts/app/views/api.jst.eco:62
 #: app/assets/javascripts/app/views/calendar/holiday_selector.jst.eco:7
+#: app/assets/javascripts/app/views/dashboard/activity_filter.jst.eco:23
 #: app/assets/javascripts/app/views/generic/actions.jst.eco:5
 #: app/assets/javascripts/app/views/generic/object_attribute_options_context.jst.eco:24
 #: app/assets/javascripts/app/views/generic/user_permission_group.jst.eco:7
@@ -1676,6 +1681,10 @@ msgstr ""
 msgid "Alarm"
 msgstr ""
 
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:125
+msgid "All"
+msgstr ""
+
 #: app/frontend/apps/desktop/components/CommonTable/TableHeader.vue:409
 msgid "All %s result(s) selected"
 msgstr ""
@@ -1687,6 +1696,10 @@ msgstr ""
 #: app/assets/javascripts/app/views/generic/notification_matrix.jst.eco:8
 #: app/assets/javascripts/app/views/profile/notification.jst.eco:30
 msgid "All Tickets"
+msgstr ""
+
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:139
+msgid "All actions"
 msgstr ""
 
 #: app/assets/javascripts/app/views/settings/dashboard_views.jst.eco:9
@@ -1727,6 +1740,10 @@ msgstr ""
 
 #: app/assets/javascripts/app/views/profile/devices.jst.eco:7
 msgid "All computers and browsers that have access to your Zammad appear here."
+msgstr ""
+
+#: app/assets/javascripts/app/views/dashboard/activity_filter.jst.eco:42
+msgid "All groups"
 msgstr ""
 
 #: app/models/ai/agent/type/ticket_group_dispatcher.rb:24
@@ -1989,6 +2006,14 @@ msgstr ""
 
 #: app/assets/javascripts/app/controllers/_ui_element/postmaster_match.coffee:22
 msgid "Any recipient"
+msgstr ""
+
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:145
+msgid "Any time"
+msgstr ""
+
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:132
+msgid "Anyone"
 msgstr ""
 
 #: lib/whatsapp/webhook/concerns/handles_error.rb:49
@@ -3851,6 +3876,10 @@ msgstr ""
 msgid "Clear filter"
 msgstr ""
 
+#: app/assets/javascripts/app/views/dashboard/activity_filter.jst.eco:53
+msgid "Clear filters"
+msgstr ""
+
 #: app/frontend/apps/desktop/components/Search/QuickSearch/QuickSearch.vue:194
 msgid "Clear recent searches"
 msgstr ""
@@ -4806,6 +4835,7 @@ msgstr ""
 msgid "Create:"
 msgstr ""
 
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:140
 #: app/assets/javascripts/app/models/application.coffee:10
 #: app/assets/javascripts/app/models/calendar.coffee:12
 #: app/assets/javascripts/app/models/chat.coffee:258
@@ -8482,7 +8512,7 @@ msgstr ""
 msgid "For additional support, consult our migration guide."
 msgstr ""
 
-#: app/assets/javascripts/app/views/dashboard.jst.eco:34
+#: app/assets/javascripts/app/views/dashboard.jst.eco:35
 msgid "For example, recently changed tickets, users, or organizations."
 msgstr ""
 
@@ -8997,6 +9027,7 @@ msgstr ""
 #: app/assets/javascripts/app/models/ticket.coffee:10
 #: app/assets/javascripts/app/views/agent_ticket_view/detail.jst.eco:26
 #: app/assets/javascripts/app/views/channel/sms_account_overview.jst.eco:54
+#: app/assets/javascripts/app/views/dashboard/activity_filter.jst.eco:40
 #: app/assets/javascripts/app/views/generic/user_permission_group.jst.eco:3
 #: app/assets/javascripts/app/views/integration/pgp_group.jst.eco:4
 #: app/assets/javascripts/app/views/integration/smime_group.jst.eco:4
@@ -9091,6 +9122,10 @@ msgstr ""
 #: app/frontend/apps/desktop/pages/guided-setup/components/GuidedSetupImport/GuidedSetupImportSource/plugins/zendesk.ts:15
 #: db/seeds/permissions.rb:17
 msgid "Groups"
+msgstr ""
+
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:129
+msgid "Groups & roles"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/group.coffee:30
@@ -9318,7 +9353,7 @@ msgstr ""
 msgid "Here you find your ticket overviews for open, assigned, and escalated tickets."
 msgstr ""
 
-#: app/assets/javascripts/app/views/dashboard.jst.eco:33
+#: app/assets/javascripts/app/views/dashboard.jst.eco:34
 msgid "Here you will find the latest activities of your system."
 msgstr ""
 
@@ -10691,6 +10726,14 @@ msgstr ""
 msgid "Languages you understand"
 msgstr ""
 
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:148
+msgid "Last 30 days"
+msgstr ""
+
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:147
+msgid "Last 7 days"
+msgstr ""
+
 #: app/assets/javascripts/app/controllers/widget/placeholder.coffee:109
 msgid "Last Article"
 msgstr ""
@@ -11754,6 +11797,7 @@ msgstr ""
 msgid "Maybe later"
 msgstr ""
 
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:133
 #: app/frontend/apps/mobile/pages/ticket/components/TicketDetailView/ArticleBubble.vue:83
 msgid "Me"
 msgstr ""
@@ -12725,6 +12769,10 @@ msgstr ""
 
 #: app/assets/javascripts/app/controllers/_plugin/translation_support.coffee:37
 msgid "No Thanks!"
+msgstr ""
+
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:185
+msgid "No activity matches these filters."
 msgstr ""
 
 #: app/frontend/shared/entities/ticket-article/action/plugins/whatsapp.ts:112
@@ -13896,6 +13944,7 @@ msgstr ""
 msgid "Organization with specified ID was not found. Try checking the URL for errors."
 msgstr ""
 
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:128
 #: app/assets/javascripts/app/controllers/agent_ticket_create/sidebar_organization.coffee:40
 #: app/assets/javascripts/app/controllers/organization.coffee:3
 #: app/assets/javascripts/app/controllers/organization_profile/action_row.coffee:18
@@ -14334,6 +14383,7 @@ msgstr ""
 msgid "Pending till"
 msgstr ""
 
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:127
 #: app/assets/javascripts/app/controllers/department.coffee:25
 #: app/assets/javascripts/app/lib/app_post/wcl_department_members.coffee:6
 msgid "People"
@@ -14341,6 +14391,10 @@ msgstr ""
 
 #: app/assets/javascripts/app/lib/app_post/wcl_department_members.coffee:16
 msgid "People in %s"
+msgstr ""
+
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:135
+msgid "People only (hide system)"
 msgstr ""
 
 #: db/seeds/roles.rb:24
@@ -16390,6 +16444,14 @@ msgstr ""
 msgid "Search URL is unsafe."
 msgstr ""
 
+#: app/assets/javascripts/app/views/dashboard/activity_filter.jst.eco:4
+msgid "Search activity"
+msgstr ""
+
+#: app/assets/javascripts/app/views/dashboard/activity_filter.jst.eco:4
+msgid "Search activity…"
+msgstr ""
+
 #: app/frontend/apps/desktop/pages/organization/components/OrganizationDetailViewContent.vue:175
 #: app/frontend/apps/desktop/pages/organization/components/OrganizationRelatedTickets/OrganizationTicketList.vue:94
 #: app/frontend/apps/desktop/pages/user/components/UserRelatedCustomerTickets/CustomerTicketList.vue:100
@@ -17571,6 +17633,10 @@ msgstr ""
 msgid "Signed"
 msgstr ""
 
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:142
+msgid "Signed in"
+msgstr ""
+
 #: db/seeds/settings.rb:2043
 msgid "Signing & Encrypting"
 msgstr ""
@@ -18297,6 +18363,10 @@ msgstr ""
 msgid "System information"
 msgstr ""
 
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:136
+msgid "System only"
+msgstr ""
+
 #: app/models/knowledge_base.rb:52
 msgid "System supports only one locale for knowledge base. Upgrade your plan to use more locales."
 msgstr ""
@@ -18418,6 +18488,10 @@ msgstr ""
 
 #: app/models/wcl/setup.rb:528
 msgid "Team: unassigned tickets"
+msgstr ""
+
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:134
+msgid "Teammates"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/_channel/telegram.coffee:13
@@ -21199,6 +21273,7 @@ msgstr ""
 msgid "TicketID"
 msgstr ""
 
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:126
 #: app/assets/javascripts/app/controllers/_plugin/keyboard_shortcuts.coffee:456
 #: app/assets/javascripts/app/controllers/maintenance_report.coffee:86
 #: app/assets/javascripts/app/controllers/widget/user.coffee:87
@@ -21463,6 +21538,7 @@ msgstr ""
 msgid "To work on Tickets."
 msgstr ""
 
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:146
 #: app/frontend/apps/desktop/components/Form/fields/FieldDate/FieldDateTimeInput.vue:70
 #: app/frontend/apps/mobile/components/Form/fields/FieldDate/FieldDateTimeInput.vue:61
 #: public/assets/chat/chat-no-jquery.coffee:215
@@ -22230,6 +22306,7 @@ msgstr ""
 msgid "Update to %s"
 msgstr ""
 
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:141
 #: app/assets/javascripts/app/models/ai_agent.coffee:11
 #: app/assets/javascripts/app/models/ai_provider_connection.coffee:10
 #: app/assets/javascripts/app/models/application.coffee:11
@@ -23139,6 +23216,10 @@ msgstr ""
 msgid "Welcome! Feel free to ask me a question!"
 msgstr ""
 
+#: app/assets/javascripts/app/views/dashboard/activity_filter.jst.eco:7
+msgid "What"
+msgstr ""
+
 #: app/assets/javascripts/app/controllers/customer_ticket_create/sidebar_customer_default.coffee:15
 msgid "What can you do here?"
 msgstr ""
@@ -23174,6 +23255,10 @@ msgstr ""
 msgid "WhatsApp message"
 msgstr ""
 
+#: app/assets/javascripts/app/views/dashboard/activity_filter.jst.eco:31
+msgid "When"
+msgstr ""
+
 #: app/assets/javascripts/app/models/trigger.coffee:8
 msgid "When at least one field from conditions was updated or article was added and conditions match"
 msgstr ""
@@ -23200,6 +23285,10 @@ msgstr ""
 
 #: app/assets/javascripts/app/controllers/_channel/chat.coffee:49
 msgid "Where to append the chat to."
+msgstr ""
+
+#: app/assets/javascripts/app/views/dashboard/activity_filter.jst.eco:15
+msgid "Who"
 msgstr ""
 
 #: app/assets/javascripts/app/views/channel/chat.jst.eco:209
