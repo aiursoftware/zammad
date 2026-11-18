@@ -171,9 +171,21 @@ module Wcl::Setup # rubocop:disable Metrics/ModuleLength
     Department.refresh_dropdowns
   end
 
+  # Settings from earlier versions of the field: free typing (unknown), the HR app sync, suggestions.
+  RETIRED_DEPARTMENT_OPTIONS = %w[unknown hr_departments suggestions].freeze
+
   def self.department_dropdown_field(object, name)
     attribute = ObjectManager::Attribute.get(object: object, name: name)
-    return if !attribute || attribute.data_type == 'tree_select'
+    return if !attribute
+
+    if attribute.data_type == 'tree_select'
+      retired = attribute.data_option.to_h.stringify_keys.keys & RETIRED_DEPARTMENT_OPTIONS
+      return if retired.empty?
+
+      # No new names typed into the dropdown: only Admin > Manage > Departments adds them.
+      attribute.update_columns(data_option: attribute.data_option.to_h.stringify_keys.except(*retired), updated_at: Time.zone.now) # rubocop:disable Rails/SkipsModelValidations
+      return
+    end
 
     # The column stays a string; only the way it is edited changes.
     attribute.update_columns( # rubocop:disable Rails/SkipsModelValidations
