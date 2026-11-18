@@ -1,0 +1,320 @@
+/*
+ * WCL customization: Worldcraft Logistics look & feel.
+ *
+ * Brand layer on top of Zammad's own theme variables (zammad.scss). One accent
+ * (the WCL logo blue), one cool gray family (hue ~212) and a navy menu instead of
+ * Zammad's charcoal. Loaded after zammad.scss, so variables here win; component
+ * rules below only adjust spacing, shape, case and states - no markup changes.
+ */
+
+:root {
+  /* brand */
+  --wcl-accent: hsl(201, 78%, 36%);
+  --wcl-accent-strong: hsl(201, 80%, 29%);
+  --wcl-accent-bright: hsl(199, 82%, 52%);
+  --wcl-accent-tint: hsla(201, 78%, 40%, 0.1);
+  --wcl-accent-ring: hsla(201, 78%, 45%, 0.28);
+  --wcl-navy: hsl(212, 46%, 15%);
+  --wcl-navy-deep: hsl(212, 50%, 11%);
+  --wcl-radius: 6px;
+  --wcl-radius-lg: 10px;
+  --wcl-ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+
+  /* text */
+  --header-primary: hsl(212, 38%, 16%);
+  --header-secondary: hsl(212, 14%, 58%);
+  --text-normal: hsl(212, 16%, 27%);
+  --text-muted: hsl(212, 10%, 48%);
+  --text-muted-alt: hsl(212, 12%, 55%);
+  --text-link: var(--wcl-accent);
+  --text-nav: var(--text-normal);
+  --highlight: var(--wcl-accent-bright);
+
+  /* buttons */
+  --button-primary-background: var(--wcl-accent);
+  --button-primary-background-active: var(--wcl-accent-strong);
+  --button-active: var(--wcl-navy);
+
+  /* surfaces */
+  --background-primary: hsl(210, 28%, 97.5%);
+  --background-primary-alt: hsl(210, 24%, 94.5%);
+  --background-secondary-hover: hsl(210, 30%, 95.5%);
+  --background-tertiary: var(--wcl-navy);
+  --background-quaternary: var(--wcl-navy-deep);
+  --background-active: var(--wcl-navy);
+  --background-highlight: hsl(200, 85%, 92%);
+  --background-article-customer: hsl(201, 52%, 94%);
+  --background-article-customer-meta: hsl(201, 48%, 96.5%);
+  --background-modifier-hover: hsla(212, 30%, 40%, 0.08);
+
+  /* lines & focus */
+  --border: hsl(212, 20%, 89%);
+  --border-alt: hsl(212, 20%, 85%);
+  --border-highlight: var(--wcl-accent);
+  --border-article-customer: hsl(201, 38%, 87%);
+  --shadow-highlight: var(--wcl-accent-ring);
+
+  /* elevation: shadows carry the navy hue instead of plain black */
+  --elevation-stroke: 0 1px hsl(212, 20%, 92%);
+  --elevation-low: 0 1px 2px hsla(212, 45%, 20%, 0.06), 0 2px 8px hsla(212, 45%, 20%, 0.06);
+  --elevation-high: 0 4px 12px hsla(212, 50%, 12%, 0.12), 0 12px 32px hsla(212, 50%, 12%, 0.14);
+  --fullscreen-drop-shadow: 0 10px 30px hsla(212, 60%, 5%, 0.35), 0 2px 6px hsla(212, 60%, 5%, 0.2);
+
+  /* main menu (left bar) */
+  --menu-text: hsl(212, 22%, 80%);
+  --menu-icon: hsl(212, 18%, 62%);
+  --menu-background-active: var(--wcl-accent);
+  --menu-background-primary-hover: hsla(212, 60%, 4%, 0.35);
+  --menu-switch-background: hsl(212, 50%, 6%);
+
+  /* tags */
+  --tag-text: hsl(212, 22%, 32%);
+  --tag-background: hsl(210, 26%, 91%);
+}
+
+[data-theme='dark'] {
+  --wcl-accent: hsl(201, 72%, 42%);
+  --wcl-accent-strong: hsl(201, 74%, 35%);
+  --wcl-accent-bright: hsl(199, 80%, 60%);
+  --wcl-accent-tint: hsla(199, 80%, 60%, 0.14);
+  --wcl-accent-ring: hsla(199, 80%, 60%, 0.3);
+  --wcl-navy: hsl(214, 30%, 11%);
+  --wcl-navy-deep: hsl(214, 32%, 8%);
+  --header-primary: hsl(210, 30%, 96%);
+  --header-secondary: hsl(212, 12%, 66%);
+  --text-normal: hsl(212, 16%, 85%);
+  --text-muted: hsl(212, 10%, 62%);
+  --text-muted-alt: hsl(212, 10%, 60%);
+  --text-link: hsl(199, 80%, 64%);
+  --text-nav: var(--text-normal);
+  --highlight: var(--wcl-accent-bright);
+  --background-primary: hsl(214, 22%, 14%);
+  --background-primary-alt: hsl(214, 20%, 16%);
+  --background-secondary: hsl(214, 20%, 18%);
+  --background-secondary-hover: hsl(214, 20%, 21%);
+  --background-tertiary: var(--wcl-navy);
+  --background-quaternary: var(--wcl-navy-deep);
+  --background-quaternary-alt: hsl(214, 14%, 30%);
+  --background-popover: hsl(214, 18%, 23%);
+  --background-active: var(--wcl-accent);
+  --background-highlight: hsl(201, 40%, 25%);
+  --background-article-meta: hsl(214, 18%, 20%);
+  --background-article-customer: hsl(207, 24%, 22%);
+  --background-article-customer-meta: hsl(207, 22%, 20%);
+  --border: hsl(214, 18%, 23%);
+  --border-alt: hsl(214, 18%, 21%);
+  --border-article-customer: hsl(207, 18%, 28%);
+  --shadow-highlight: var(--wcl-accent-ring);
+  --elevation-stroke: 0 1px hsla(214, 40%, 4%, 0.4);
+  --elevation-low: 0 1px 2px hsla(214, 40%, 4%, 0.3), 0 2px 8px hsla(214, 40%, 4%, 0.25);
+  --elevation-high: 0 4px 12px hsla(214, 40%, 4%, 0.35), 0 12px 32px hsla(214, 40%, 4%, 0.35);
+  --tag-text: var(--text-normal);
+  --tag-background: hsl(214, 16%, 27%);
+}
+
+/* ---------- Typography ---------- */
+
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+.page-header-title h1 {
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+/* Field labels and table headers: sentence case instead of letter-spaced capitals. */
+label,
+.checkbox.form-group label,
+.label {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+
+.table > thead > tr > th {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 500;
+  font-size: 13px;
+  color: var(--text-muted);
+  border-top-color: var(--border);
+}
+
+/* Counts, dates and ticket numbers line up. */
+.table,
+.nav-pills .badge,
+.nav-pills .count,
+.stat-widget {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Main menu (left bar) ---------- */
+
+.navigation .menu-item,
+.tasks-navigation .nav-tab {
+  transition: background-color 150ms var(--wcl-ease);
+}
+
+.navigation .menu-item.is-active {
+  box-shadow: inset 3px 0 0 var(--wcl-accent-bright);
+}
+
+/* ---------- Secondary sidebar (overviews, admin, profile) ---------- */
+
+.sidebar .nav-pills.nav-stacked > li > a {
+  border-radius: var(--wcl-radius);
+  transition:
+    background-color 150ms var(--wcl-ease),
+    color 150ms var(--wcl-ease);
+}
+
+.sidebar .nav-pills.nav-stacked > li > a {
+  border-top-color: transparent;
+}
+
+.sidebar .nav-pills > li.active > a,
+.sidebar .nav-pills > li.active > a:hover,
+.sidebar .nav-pills > li.active > a:focus {
+  color: var(--wcl-accent);
+  background: var(--wcl-accent-tint);
+  font-weight: 500;
+  box-shadow: inset 3px 0 0 var(--wcl-accent);
+}
+
+.sidebar .nav-pills > li.active > a .badge {
+  color: inherit;
+}
+
+[data-theme='dark'] .sidebar .nav-pills > li.active > a,
+[data-theme='dark'] .sidebar .nav-pills > li.active > a:hover,
+[data-theme='dark'] .sidebar .nav-pills > li.active > a:focus {
+  color: var(--wcl-accent-bright);
+  box-shadow: inset 3px 0 0 var(--wcl-accent-bright);
+}
+
+/* ---------- Buttons ---------- */
+
+.btn {
+  border-radius: var(--wcl-radius);
+  transition:
+    background-color 150ms var(--wcl-ease),
+    border-color 150ms var(--wcl-ease),
+    box-shadow 150ms var(--wcl-ease),
+    transform 100ms var(--wcl-ease);
+}
+
+.btn:not(.btn--text, [disabled]):active {
+  transform: translateY(1px);
+}
+
+.btn--primary:not([disabled]):hover {
+  background: var(--button-primary-background-active);
+}
+
+.btn:focus-visible {
+  box-shadow: 0 0 0 3px var(--shadow-highlight);
+}
+
+/* ---------- Form fields ---------- */
+
+.form-control,
+.form-group .checkbox,
+.form-group .radio {
+  border-radius: var(--wcl-radius);
+  transition:
+    border-color 150ms var(--wcl-ease),
+    box-shadow 150ms var(--wcl-ease);
+}
+
+.form-control:hover:not(:focus, .focus, [disabled], [readonly]) {
+  border-color: var(--border-alt);
+}
+
+/* ---------- Tables ---------- */
+
+.table > thead > tr > th:first-child {
+  border-top-left-radius: var(--wcl-radius);
+}
+
+.table > thead > tr > th:last-child {
+  border-top-right-radius: var(--wcl-radius);
+}
+
+.table > tbody > tr {
+  transition: background-color 120ms var(--wcl-ease);
+}
+
+.table > tbody > tr:hover > td {
+  background: var(--background-modifier-hover);
+}
+
+/* ---------- Cards: dashboard widgets, boxes, tags ---------- */
+
+.dashboard .stat-widget {
+  border-color: transparent;
+  border-radius: var(--wcl-radius-lg);
+  box-shadow: var(--elevation-low);
+}
+
+.box {
+  border-radius: var(--wcl-radius-lg);
+}
+
+.tag {
+  border-radius: 4px;
+}
+
+/* Popovers and dropdowns get the same soft, tinted elevation. */
+.popover,
+.dropdown-menu {
+  border-radius: var(--wcl-radius);
+  box-shadow: var(--elevation-high);
+}
+
+/* ---------- Login and other full-screen pages ---------- */
+
+.login,
+.reset_password,
+.request_admin_password_auth,
+.signup,
+.getstarted {
+  background:
+    radial-gradient(1100px 600px at 15% -10%, hsla(199, 82%, 45%, 0.28), transparent 60%),
+    radial-gradient(900px 600px at 110% 110%, hsla(212, 70%, 35%, 0.45), transparent 60%),
+    var(--wcl-navy-deep);
+}
+
+.login .hero-unit,
+.reset_password .hero-unit,
+.signup .hero-unit {
+  border: none;
+  border-radius: 14px;
+  padding: 32px 32px 26px;
+}
+
+.login .hero-unit .btn--primary {
+  height: 44px;
+  font-weight: 500;
+}
+
+/* ---------- Motion preferences ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .form-control,
+  .table > tbody > tr,
+  .sidebar .nav-pills.nav-stacked > li > a,
+  .navigation .menu-item,
+  .tasks-navigation .nav-tab {
+    transition: none;
+  }
+
+  .btn:not(.btn--text, [disabled]):active {
+    transform: none;
+  }
+}

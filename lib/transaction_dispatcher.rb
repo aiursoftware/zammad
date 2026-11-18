@@ -154,7 +154,10 @@ class TransactionDispatcher
       if event[:object] == 'Ticket::Article'
         article = Ticket::Article.find_by(id: event[:id])
         next if !article
-        next if event[:type] == 'update'
+
+        # WCL customization: an article switched from internal to public counts as a new
+        #   reply, so triggers (e.g. "notify customer on agent reply") fire for it too.
+        next if event[:type] == 'update' && event[:changes]&.dig('internal') != [true, false]
 
         # set new event infos
         ticket = Ticket.find_by(id: article.ticket_id)
