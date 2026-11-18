@@ -133,7 +133,7 @@ class App.DashboardActivityStream extends App.CollectionController
         { value: '',       name: __('Anyone') }
         { value: 'me',     name: __('Me') }
         { value: 'others', name: __('Teammates') }
-        { value: 'people', name: __('People only (hide system)') }
+        { value: 'people', name: __('People only') }
         { value: 'system', name: __('System only') }
       ]
       actions: [

@@ -24,33 +24,33 @@ class Ticket::SummarizeController < ApplicationController
         persistence_strategy: :stored_only,
       )
 
-    if ai_result&.content.blank?
-      # When AI analytics error ID is present, return this error message instead of enqueuing a new job.
-      if params[:ai_analytics_run_error_id].present?
-        ai_analytics_run_error = AI::Analytics::Run.find(params[:ai_analytics_run_error_id])
-        authorize!(ai_analytics_run_error, :show?)
-
-        render json: {
-          result:        nil,
-          error:         true,
-          error_message: ai_analytics_run_error.error['error_message'],
-        }
-      elsif !generate_requested?
-        # WCL customization: summaries are generated on demand only (AI calls cost money).
-        #   Without an explicit "Generate" click, report that none exists yet instead of
-        #   starting a paid AI job just because the sidebar was opened.
-        render json: { result: nil, not_generated: true }
-      else
-        enqueue_job
-      end
-
-      return
-    end
+    return render_missing_summary if ai_result&.content.blank?
 
     return_stored_result(ai_result)
   end
 
   private
+
+  def render_missing_summary
+    # When AI analytics error ID is present, return this error message instead of enqueuing a new job.
+    if params[:ai_analytics_run_error_id].present?
+      ai_analytics_run_error = AI::Analytics::Run.find(params[:ai_analytics_run_error_id])
+      authorize!(ai_analytics_run_error, :show?)
+
+      render json: {
+        result:        nil,
+        error:         true,
+        error_message: ai_analytics_run_error.error['error_message'],
+      }
+    elsif !generate_requested?
+      # WCL customization: summaries are generated on demand only (AI calls cost money).
+      #   Without an explicit "Generate" click, report that none exists yet instead of
+      #   starting a paid AI job just because the sidebar was opened.
+      render json: { result: nil, not_generated: true }
+    else
+      enqueue_job
+    end
+  end
 
   def ticket
     @ticket ||= Ticket.find(params[:id])

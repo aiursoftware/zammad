@@ -381,7 +381,7 @@ msgstr ""
 msgid "%s selected. Use arrow keys to choose drop position, then press Space."
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:185
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:186
 msgid "%s shown"
 msgstr ""
 
@@ -1681,7 +1681,7 @@ msgstr ""
 msgid "Alarm"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:125
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:126
 msgid "All"
 msgstr ""
 
@@ -1698,7 +1698,7 @@ msgstr ""
 msgid "All Tickets"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:139
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:140
 msgid "All actions"
 msgstr ""
 
@@ -2008,11 +2008,11 @@ msgstr ""
 msgid "Any recipient"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:145
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:146
 msgid "Any time"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:132
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:133
 msgid "Anyone"
 msgstr ""
 
@@ -4835,7 +4835,7 @@ msgstr ""
 msgid "Create:"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:140
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:141
 #: app/assets/javascripts/app/models/application.coffee:10
 #: app/assets/javascripts/app/models/calendar.coffee:12
 #: app/assets/javascripts/app/models/chat.coffee:258
@@ -8779,6 +8779,10 @@ msgstr ""
 msgid "Generate recovery codes: %s"
 msgstr ""
 
+#: app/assets/javascripts/app/views/ticket_zoom/sidebar_ticket_summary.jst.eco:24
+msgid "Generate summary"
+msgstr ""
+
 #: db/seeds/schedulers.rb:142
 msgid "Generate user-based stats."
 msgstr ""
@@ -9124,7 +9128,7 @@ msgstr ""
 msgid "Groups"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:129
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:130
 msgid "Groups & roles"
 msgstr ""
 
@@ -10726,11 +10730,11 @@ msgstr ""
 msgid "Languages you understand"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:148
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:149
 msgid "Last 30 days"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:147
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:148
 msgid "Last 7 days"
 msgstr ""
 
@@ -11797,7 +11801,7 @@ msgstr ""
 msgid "Maybe later"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:133
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:134
 #: app/frontend/apps/mobile/pages/ticket/components/TicketDetailView/ArticleBubble.vue:83
 msgid "Me"
 msgstr ""
@@ -12771,7 +12775,7 @@ msgstr ""
 msgid "No Thanks!"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:185
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:186
 msgid "No activity matches these filters."
 msgstr ""
 
@@ -13049,6 +13053,10 @@ msgstr ""
 #: app/models/ai/agent/type/ticket_categorizer.rb:28
 #: app/models/ai/agent/type/ticket_text_extractor.rb:38
 msgid "No suitable object attributes found, please add one of the supported types first: %s"
+msgstr ""
+
+#: app/assets/javascripts/app/views/ticket_zoom/sidebar_ticket_summary.jst.eco:22
+msgid "No summary yet for this conversation."
 msgstr ""
 
 #: app/frontend/shared/entities/ticket-article/composables/useTicketArticleTranslation.ts:25
@@ -13944,7 +13952,7 @@ msgstr ""
 msgid "Organization with specified ID was not found. Try checking the URL for errors."
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:128
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:129
 #: app/assets/javascripts/app/controllers/agent_ticket_create/sidebar_organization.coffee:40
 #: app/assets/javascripts/app/controllers/organization.coffee:3
 #: app/assets/javascripts/app/controllers/organization_profile/action_row.coffee:18
@@ -14383,7 +14391,7 @@ msgstr ""
 msgid "Pending till"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:127
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:128
 #: app/assets/javascripts/app/controllers/department.coffee:25
 #: app/assets/javascripts/app/lib/app_post/wcl_department_members.coffee:6
 msgid "People"
@@ -14393,8 +14401,8 @@ msgstr ""
 msgid "People in %s"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:135
-msgid "People only (hide system)"
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:136
+msgid "People only"
 msgstr ""
 
 #: db/seeds/roles.rb:24
@@ -17633,7 +17641,7 @@ msgstr ""
 msgid "Signed"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:142
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:143
 msgid "Signed in"
 msgstr ""
 
@@ -18245,6 +18253,10 @@ msgstr ""
 msgid "Suggested searches"
 msgstr ""
 
+#: app/assets/javascripts/app/views/ticket_zoom/sidebar_ticket_summary.jst.eco:23
+msgid "Summaries use the AI provider and are created only when you ask for one. New replies need a new summary."
+msgstr ""
+
 #: db/seeds/ai/text_tools.rb:98
 msgid "Summarize section to about half its current size"
 msgstr ""
@@ -18262,7 +18274,7 @@ msgstr ""
 msgid "Summary Services"
 msgstr ""
 
-#: app/assets/javascripts/app/views/ticket_zoom/sidebar_ticket_summary.jst.eco:53
+#: app/assets/javascripts/app/views/ticket_zoom/sidebar_ticket_summary.jst.eco:60
 #: app/frontend/apps/desktop/pages/ticket/components/TicketSidebar/TicketSidebarSummary/TicketSidebarSummaryContent.vue:144
 msgid "Summary is being generated…"
 msgstr ""
@@ -18363,7 +18375,7 @@ msgstr ""
 msgid "System information"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:136
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:137
 msgid "System only"
 msgstr ""
 
@@ -18490,7 +18502,7 @@ msgstr ""
 msgid "Team: unassigned tickets"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:134
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:135
 msgid "Teammates"
 msgstr ""
 
@@ -21273,7 +21285,7 @@ msgstr ""
 msgid "TicketID"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:126
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:127
 #: app/assets/javascripts/app/controllers/_plugin/keyboard_shortcuts.coffee:456
 #: app/assets/javascripts/app/controllers/maintenance_report.coffee:86
 #: app/assets/javascripts/app/controllers/widget/user.coffee:87
@@ -21538,7 +21550,7 @@ msgstr ""
 msgid "To work on Tickets."
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:146
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:147
 #: app/frontend/apps/desktop/components/Form/fields/FieldDate/FieldDateTimeInput.vue:70
 #: app/frontend/apps/mobile/components/Form/fields/FieldDate/FieldDateTimeInput.vue:61
 #: public/assets/chat/chat-no-jquery.coffee:215
@@ -22306,7 +22318,7 @@ msgstr ""
 msgid "Update to %s"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:141
+#: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:142
 #: app/assets/javascripts/app/models/ai_agent.coffee:11
 #: app/assets/javascripts/app/models/ai_provider_connection.coffee:10
 #: app/assets/javascripts/app/models/application.coffee:11
