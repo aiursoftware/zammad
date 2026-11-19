@@ -34,10 +34,18 @@ module Ticket::Assignees
     ids = assignee_ids
     if will_save_change_to_attribute?(:assignees)
       self.owner_id = ids.first if ids.any?
-    elsif will_save_change_to_owner_id? && ids.any? && owner_id.to_i > 1 && ids.exclude?(owner_id)
-      ids.delete(owner_id_in_database)
-      self.assignees = [owner_id, *ids].map(&:to_s)
+    elsif will_save_change_to_owner_id? && owner_id.to_i > 1
+      assignees_take_in_owner(ids)
     end
+  end
+
+  # The owner changed on its own (the hidden Owner field, a trigger, Zammad's auto assignment,
+  #   the API): an empty "Owners" gets the owner, otherwise the new owner replaces the old one.
+  def assignees_take_in_owner(ids)
+    return if ids.include?(owner_id)
+
+    ids.delete(owner_id_in_database)
+    self.assignees = [owner_id, *ids].map(&:to_s)
   end
 
   # A request may save the ticket more than once in a transaction, and after_commit only sees the
