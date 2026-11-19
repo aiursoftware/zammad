@@ -115,8 +115,20 @@ begin
   end
 
   # A group employees may pick that the checking admin also works in (agents' side of the checks).
-  group = Group.where(active: true).find { |g| (!g.respond_to?(:hr_portal) || g.hr_portal) && admin.group_access?(g.id, 'full') }
-  abort 'No group that customers can pick and the admin works in: create one (Admin → Groups) first.' if !group
+  #   Zammad enforces the "customer selectable groups" setting, not the "Show in HR app" switch,
+  #   so pick from the setting (empty setting = every group). Flag any group where the two disagree,
+  #   e.g. Zammad's built-in "Users" group, which predates the switch and was never synced.
+  selectable = Array(Setting.get('customer_ticket_create_group_ids')).compact_blank.map(&:to_s)
+  employee_groups = Group.where(active: true).reorder(:id).select { |g| selectable.empty? || selectable.include?(g.id.to_s) }
+  if Group.new.respond_to?(:hr_portal)
+    out_of_sync = Group.where(active: true).reorder(:id).reject { |g| g.hr_portal == (selectable.empty? || selectable.include?(g.id.to_s)) }
+    out_of_sync.each do |g|
+      puts "NOTE  group #{g.name}: 'Show in HR app' is #{g.hr_portal ? 'yes' : 'no'}, but employees #{g.hr_portal ? 'can NOT' : 'CAN'} pick it. Fix: Admin > Groups > #{g.name}, switch 'Show in HR app' off and save, then on and save (or leave it off if employees should not use it)."
+    end
+  end
+  group = employee_groups.find { |g| admin.group_access?(g.id, 'full') }
+  abort 'No group that employees can pick and the admin works in: switch "Show in HR app" on for one (Admin → Groups) and give the admin access.' if !group
+  puts "INFO  testing with group #{group.name}"
 
   attachment_text = "wclverify#{SecureRandom.hex(3)} payslip discrepancy"
 
