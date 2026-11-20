@@ -1195,7 +1195,7 @@ msgstr ""
 msgid "Activity"
 msgstr ""
 
-#: app/assets/javascripts/app/views/dashboard.jst.eco:31
+#: app/assets/javascripts/app/views/dashboard.jst.eco:40
 #: app/assets/javascripts/app/views/settings/dashboard_views.jst.eco:4
 msgid "Activity Stream"
 msgstr ""
@@ -2932,7 +2932,7 @@ msgstr ""
 msgid "Begin forwarded message"
 msgstr ""
 
-#: app/models/wcl/setup.rb:554
+#: app/models/wcl/setup.rb:555
 msgid "Being worked on (WCL)."
 msgstr ""
 
@@ -3413,7 +3413,7 @@ msgstr ""
 #: app/assets/javascripts/app/views/ticket_zoom/knowledge_base_ai_draft_modal.jst.eco:78
 #: app/frontend/apps/desktop/components/KnowledgeBase/KnowledgeBaseAnswer/KnowledgeBaseAnswerAttributes.vue:85
 #: app/frontend/apps/desktop/entities/knowledge-base/composables/useAnswerFormSchema.ts:170
-#: app/models/wcl/setup.rb:351
+#: app/models/wcl/setup.rb:352
 msgid "Category"
 msgstr ""
 
@@ -5135,7 +5135,7 @@ msgstr ""
 msgid "Customer tickets of the user will get deleted on execution of the task. No rollback possible."
 msgstr ""
 
-#: app/models/wcl/setup.rb:39
+#: app/models/wcl/setup.rb:40
 msgid "Customers can create tickets here"
 msgstr ""
 
@@ -5395,6 +5395,7 @@ msgstr ""
 
 #: app/assets/javascripts/app/models/ticket_priority.coffee:26
 #: app/assets/javascripts/app/models/ticket_state.coffee:28
+#: app/models/wcl/setup.rb:728
 msgid "Default for new tickets"
 msgstr ""
 
@@ -6415,12 +6416,12 @@ msgstr ""
 
 #: app/assets/javascripts/app/controllers/department.coffee:3
 #: app/assets/javascripts/app/controllers/maintenance_report.coffee:82
-#: app/models/wcl/setup.rb:156
+#: app/models/wcl/setup.rb:157
 #: db/seeds/object_manager_attributes.rb:1234
 msgid "Department"
 msgstr ""
 
-#: app/models/wcl/setup.rb:156
+#: app/models/wcl/setup.rb:157
 msgid "Department of the requester when the ticket was created; filled in automatically."
 msgstr ""
 
@@ -7335,7 +7336,7 @@ msgstr ""
 msgid "Embedding provider returned no usable vector"
 msgstr ""
 
-#: app/models/wcl/setup.rb:40
+#: app/models/wcl/setup.rb:41
 msgid "Employees can pick this group when they create a ticket (and later in the HR app). Switch off for teams tickets are only handed to (e.g. Dev, Network)."
 msgstr ""
 
@@ -7348,7 +7349,7 @@ msgstr ""
 msgid "Empty caller log"
 msgstr ""
 
-#: app/assets/javascripts/app/views/dashboard.jst.eco:21
+#: app/assets/javascripts/app/views/dashboard.jst.eco:30
 msgid "Empty dashboard illustration"
 msgstr ""
 
@@ -7956,7 +7957,7 @@ msgstr ""
 msgid "Event summary"
 msgstr ""
 
-#: app/models/wcl/setup.rb:699
+#: app/models/wcl/setup.rb:700
 msgid "Every Monday at 07:00, send each user with the Manager role a summary of last week's tickets for their groups, with the Excel report attached."
 msgstr ""
 
@@ -7968,7 +7969,7 @@ msgstr ""
 msgid "Every time a customer creates a new ticket, they automatically receive a confirmation email to assure them that their issue has been submitted successfully. This behavior is built into Zammad, but it’s also highly customizable, and you can set up other automated actions just like it.\n\nMaybe you want to set a higher priority on any ticket with the word “urgent” in the title. Maybe you want to avoid sending auto-reply emails to customers from certain organizations. Maybe you want mark a ticket as “pending” whenever someone adds an internal note to a ticket.\n\nWhatever it is, you can do it with triggers: actions that watch tickets for certain changes, and then fire off whenever those changes occur."
 msgstr ""
 
-#: app/models/wcl/setup.rb:118
+#: app/models/wcl/setup.rb:119
 msgid "Everyone working on the ticket. The first is its main owner (\"My Assigned Tickets\"); all of them are notified, and the others find it under \"My Subscribed Tickets\"."
 msgstr ""
 
@@ -8392,7 +8393,7 @@ msgid "First Solution"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/_manage/dashboard.coffee:28
-#: app/assets/javascripts/app/views/dashboard.jst.eco:8
+#: app/assets/javascripts/app/views/dashboard.jst.eco:17
 msgid "First Steps"
 msgstr ""
 
@@ -8405,7 +8406,7 @@ msgstr ""
 msgid "First article (oldest)"
 msgstr ""
 
-#: app/models/wcl/setup.rb:363
+#: app/models/wcl/setup.rb:364
 msgid "First level: the name of a group. Under it: the categories offered for that group."
 msgstr ""
 
@@ -8512,7 +8513,7 @@ msgstr ""
 msgid "For additional support, consult our migration guide."
 msgstr ""
 
-#: app/assets/javascripts/app/views/dashboard.jst.eco:35
+#: app/assets/javascripts/app/views/dashboard.jst.eco:44
 msgid "For example, recently changed tickets, users, or organizations."
 msgstr ""
 
@@ -8743,7 +8744,7 @@ msgstr ""
 msgid "General communication error, maybe internet is not available!"
 msgstr ""
 
-#: app/models/wcl/setup.rb:310
+#: app/models/wcl/setup.rb:311
 msgid "General facility repairs"
 msgstr ""
 
@@ -9156,7 +9157,7 @@ msgstr ""
 msgid "HR app: maximum attachments per message"
 msgstr ""
 
-#: app/models/wcl/setup.rb:286
+#: app/models/wcl/setup.rb:287
 msgid "HR portal – open requests"
 msgstr ""
 
@@ -9357,7 +9358,7 @@ msgstr ""
 msgid "Here you find your ticket overviews for open, assigned, and escalated tickets."
 msgstr ""
 
-#: app/assets/javascripts/app/views/dashboard.jst.eco:34
+#: app/assets/javascripts/app/views/dashboard.jst.eco:43
 msgid "Here you will find the latest activities of your system."
 msgstr ""
 
@@ -11194,7 +11195,7 @@ msgstr ""
 #: app/assets/javascripts/app/views/profile/devices.jst.eco:13
 #: app/assets/javascripts/app/views/session.jst.eco:10
 #: app/frontend/apps/desktop/pages/personal-setting/views/PersonalSettingDevices.vue:100
-#: app/models/wcl/setup.rb:414
+#: app/models/wcl/setup.rb:415
 msgid "Location"
 msgstr ""
 
@@ -12195,7 +12196,7 @@ msgstr ""
 msgid "My Replacement Tickets"
 msgstr ""
 
-#: app/assets/javascripts/app/views/dashboard.jst.eco:5
+#: app/assets/javascripts/app/views/dashboard.jst.eco:14
 msgid "My Stats"
 msgstr ""
 
@@ -12629,6 +12630,10 @@ msgstr ""
 msgid "New ticket: %s"
 msgstr ""
 
+#: app/models/wcl/setup.rb:719
+msgid "New tickets start in this group (for everyone who may create tickets in it). Only one group can be the default."
+msgstr ""
+
 #: app/frontend/apps/desktop/entities/user/composables/useUserCreate.ts:70
 #: app/frontend/apps/desktop/pages/cti/components/CallerLogParticipant.vue:220
 #: app/frontend/apps/desktop/pages/organization/components/OrganizationDetailTopBar/actions/newUser.ts:13
@@ -12852,7 +12857,7 @@ msgstr ""
 msgid "No customer assigned yet."
 msgstr ""
 
-#: app/models/group.rb:43
+#: app/models/group.rb:44
 msgid "No double colons (::) allowed, reserved delimiter"
 msgstr ""
 
@@ -13520,7 +13525,7 @@ msgstr ""
 msgid "October"
 msgstr ""
 
-#: app/models/wcl/setup.rb:309
+#: app/models/wcl/setup.rb:310
 msgid "Office maintenance"
 msgstr ""
 
@@ -13662,7 +13667,7 @@ msgstr ""
 msgid "Only when shared organization member"
 msgstr ""
 
-#: app/assets/javascripts/app/views/dashboard.jst.eco:23
+#: app/assets/javascripts/app/views/dashboard.jst.eco:32
 msgid "Oops, seems like all the dashboard widgets have been turned off for you. Please contact your administrator."
 msgstr ""
 
@@ -14511,7 +14516,7 @@ msgstr ""
 msgid "Pick a name for the application, and we'll give you a unique token."
 msgstr ""
 
-#: app/models/wcl/setup.rb:155
+#: app/models/wcl/setup.rb:156
 msgid "Pick the department. The list is managed in Admin > Manage > Departments."
 msgstr ""
 
@@ -15772,7 +15777,7 @@ msgstr ""
 msgid "Request the password login here."
 msgstr ""
 
-#: app/models/wcl/setup.rb:216
+#: app/models/wcl/setup.rb:217
 msgid "Request turned down (WCL). Shown to the employee as \"Rejected\" in the HR app."
 msgstr ""
 
@@ -17645,6 +17650,10 @@ msgstr ""
 msgid "Signed in"
 msgstr ""
 
+#: app/assets/javascripts/app/views/dashboard.jst.eco:5
+msgid "Signed in as"
+msgstr ""
+
 #: db/seeds/settings.rb:2043
 msgid "Signing & Encrypting"
 msgstr ""
@@ -18486,19 +18495,19 @@ msgstr ""
 msgid "Target ticket"
 msgstr ""
 
-#: app/models/wcl/setup.rb:536
+#: app/models/wcl/setup.rb:537
 msgid "Team: closed in the last 7 days"
 msgstr ""
 
-#: app/models/wcl/setup.rb:532
+#: app/models/wcl/setup.rb:533
 msgid "Team: no update for 3 days"
 msgstr ""
 
-#: app/models/wcl/setup.rb:525
+#: app/models/wcl/setup.rb:526
 msgid "Team: open tickets by agent"
 msgstr ""
 
-#: app/models/wcl/setup.rb:528
+#: app/models/wcl/setup.rb:529
 msgid "Team: unassigned tickets"
 msgstr ""
 
@@ -19026,7 +19035,7 @@ msgstr ""
 msgid "The checklist feature is not active"
 msgstr ""
 
-#: app/models/group.rb:113
+#: app/models/group.rb:114
 msgid "The chosen parent group is part of a circular reference."
 msgstr ""
 
@@ -20567,15 +20576,15 @@ msgstr ""
 msgid "This field was configured incorrectly and can't be submitted."
 msgstr ""
 
-#: app/models/group.rb:86
+#: app/models/group.rb:87
 msgid "This group cannot be moved into itself."
 msgstr ""
 
-#: app/models/group.rb:87
+#: app/models/group.rb:88
 msgid "This group cannot be moved into one of its children."
 msgstr ""
 
-#: app/models/group.rb:93
+#: app/models/group.rb:94
 msgid "This group exceeds the allowed nesting depth."
 msgstr ""
 
@@ -20585,7 +20594,7 @@ msgstr ""
 msgid "This group has no email address configured for outgoing communication."
 msgstr ""
 
-#: app/models/group.rb:99
+#: app/models/group.rb:100
 msgid "This group's children would exceed the allowed nesting depth."
 msgstr ""
 
@@ -21676,7 +21685,7 @@ msgstr ""
 msgid "Tracked as checklist item in"
 msgstr ""
 
-#: app/models/wcl/setup.rb:508
+#: app/models/wcl/setup.rb:509
 msgid "Tracks the work of the agents in the groups set on each manager (Admin > Users > Group permissions: Read, Overview, Change): Reporting and the \"Team\" overviews. Not offered as an owner unless the user is also an Agent."
 msgstr ""
 
@@ -21801,7 +21810,7 @@ msgstr ""
 msgid "Triggers activated by actions are executed whenever a ticket is created or updated, while triggers activated by time events are executed when certain times are reached (e.g. pending time, escalation)."
 msgstr ""
 
-#: app/models/wcl/setup.rb:308
+#: app/models/wcl/setup.rb:309
 msgid "Trucking / vehicle maintenance"
 msgstr ""
 
@@ -23077,7 +23086,7 @@ msgstr ""
 msgid "Waiting in %s"
 msgstr ""
 
-#: app/models/wcl/setup.rb:555
+#: app/models/wcl/setup.rb:556
 msgid "Waiting, e.g. for parts or a supplier; does not escalate (WCL)."
 msgstr ""
 
@@ -23085,7 +23094,7 @@ msgstr ""
 msgid "Want to join the BETA UI feedback program?"
 msgstr ""
 
-#: app/models/wcl/setup.rb:307
+#: app/models/wcl/setup.rb:308
 msgid "Warehouse maintenance"
 msgstr ""
 
@@ -23191,7 +23200,7 @@ msgstr ""
 msgid "Week(s)"
 msgstr ""
 
-#: app/models/wcl/setup.rb:696
+#: app/models/wcl/setup.rb:697
 msgid "Weekly summary email to managers"
 msgstr ""
 
@@ -23291,7 +23300,7 @@ msgstr ""
 msgid "Where"
 msgstr ""
 
-#: app/models/wcl/setup.rb:393
+#: app/models/wcl/setup.rb:394
 msgid "Where is it? e.g. Warehouse A, Office 2nd floor, Truck 51C-12345"
 msgstr ""
 

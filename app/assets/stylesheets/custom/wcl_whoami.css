@@ -1,0 +1,48 @@
+/* WCL customization: "Signed in as" with role badges (dashboard and avatar menu). */
+
+.wcl-whoami {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+
+.wcl-whoami-name {
+  font-weight: 600;
+  color: var(--header-primary);
+}
+
+.wcl-roles {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.wcl-role {
+  padding: 2px 8px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--wcl-accent-bright, var(--text-link));
+  background: var(--wcl-accent-tint, var(--background-modifier-accent));
+  border: 1px solid hsla(199, 80%, 55%, 0.25);
+}
+
+.wcl-whoami--dashboard {
+  align-self: stretch;
+  justify-content: center;
+  margin: 0 0 14px;
+  font-size: 13.5px;
+  color: var(--text-muted);
+}
+
+.dropdown-menu > li.wcl-whoami {
+  flex-direction: column;
+  align-items: flex-start;
+  padding: 10px 15px 8px;
+  cursor: default;
+}
+
+.dropdown-menu > li.wcl-whoami .wcl-whoami-name {
+  font-size: 14px;
+}

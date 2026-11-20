@@ -10,6 +10,16 @@
         <% end %>
       </a>
       <ul class="dropdown-menu dropdown-menu--light" role="menu">
+        <% if item.class is 'user' and App.User.current(): %>
+          <%# WCL customization: who is signed in, and with which roles %>
+          <li class="wcl-whoami">
+            <span class="wcl-whoami-name"><%= App.User.current().displayName() %></span>
+            <span class="wcl-roles">
+              <% for role in App.WclUserRoles.names(): %><span class="wcl-role"><%= role %></span><% end %>
+            </span>
+          </li>
+          <li class="divider"></li>
+        <% end %>
         <% for item, id in item.child: %>
           <% if item.divider and id > 0: %>
             <li class="divider"></li>

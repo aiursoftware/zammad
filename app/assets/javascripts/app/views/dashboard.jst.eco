@@ -1,4 +1,13 @@
 <div class="dashboard main flex center">
+  <% if App.User.current(): %>
+  <%# WCL customization: who is signed in, and with which roles %>
+  <div class="wcl-whoami wcl-whoami--dashboard">
+    <span><%- @T('Signed in as') %> <strong class="wcl-whoami-name"><%= App.User.current().displayName() %></strong></span>
+    <span class="wcl-roles">
+      <% for role in App.WclUserRoles.names(): %><span class="wcl-role"><%= role %></span><% end %>
+    </span>
+  </div>
+  <% end %>
   <% if @stats or @firstSteps: %>
   <div class="tabs tabs--big">
     <% if @stats: %>

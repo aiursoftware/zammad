@@ -33,6 +33,7 @@ module Wcl::Setup # rubocop:disable Metrics/ModuleLength
     work_states
     ticket_department
     manager_summary
+    default_group
     true
   end
 
@@ -751,6 +752,59 @@ module Wcl::Setup # rubocop:disable Metrics/ModuleLength
       timeplan:      { 'days' => { 'Mon' => true }, 'hours' => { '7' => true }, 'minutes' => { '0' => true } },
       updated_by_id: 1,
       created_by_id: scheduler.created_by_id || 1,
+    )
+  end
+
+  DEFAULT_GROUP_NOTE = __('New tickets start in this group (for everyone who may create tickets in it). Only one group can be the default.')
+
+  # "Default for new tickets" on groups and the form rule that preselects it
+  #   (see Group::DefaultForNewTickets and CoreWorkflow::Custom::WclDefaultGroup).
+  def self.default_group
+    if !ObjectManager::Attribute.exists?(object_lookup_id: ObjectLookup.by_name('Group'), name: Group::DefaultForNewTickets::ATTRIBUTE)
+      ObjectManager::Attribute.add(
+        force:         true,
+        object:        'Group',
+        name:          Group::DefaultForNewTickets::ATTRIBUTE,
+        display:       __('Default for new tickets'),
+        data_type:     'boolean',
+        data_option:   {
+          null:       true,
+          default:    false,
+          note:       DEFAULT_GROUP_NOTE,
+          item_class: 'formGroup--halfSize',
+          options:    { true => 'yes', false => 'no' },
+          translate:  true,
+        },
+        editable:      true,
+        active:        true,
+        screens:       {
+          create: { '-all-' => { null: true } },
+          edit:   { '-all-' => { null: true } },
+          view:   { '-all-' => { shown: true } },
+        },
+        to_create:     true,
+        to_migrate:    false,
+        to_delete:     false,
+        position:      1510,
+        created_by_id: 1,
+        updated_by_id: 1,
+      )
+      ObjectManager::Attribute.migration_execute
+      Group.reset_column_information
+    end
+
+    CoreWorkflow.create_if_not_exists(
+      name:               'WCL: New tickets start in the default group',
+      object:             'Ticket',
+      condition_saved:    {},
+      condition_selected: {},
+      perform:            { 'custom.module' => { 'execute' => ['CoreWorkflow::Custom::WclDefaultGroup'] } },
+      active:             true,
+      stop_after_match:   false,
+      changeable:         false,
+      priority:           510,
+      created_by_id:      1,
+      updated_by_id:      1,
     )
   end
 end

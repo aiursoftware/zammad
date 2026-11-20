@@ -49,6 +49,22 @@ class App.UiElement.group_permissions extends Spine.Module
       .on('click', '.js-remove', (e) => @onRemoveGroup(e, item, groups))
       .on('click', '.js-add', (e) => @onAddGroup(e, item, groups))
 
+    # WCL customization: the input row adds itself once a group and a permission are chosen.
+    #   Its checkboxes carry no field name, so an input row nobody clicked "Add" on was
+    #   silently dropped on Submit. Deferred, because the full/partial permission switch
+    #   adjusts the checkboxes after the click.
+    autoAdd = => setTimeout((=> @autoAddGroup(item, groups)), 0)
+    item
+      .on('click', '.js-groupListNewItemRow .checkbox-replacement', autoAdd)
+      .on('change', '.js-groupListNewItemRow .js-shadow', autoAdd)
+
+  @autoAddGroup: (item, groups) ->
+    row = item.find('.js-groupListNewItemRow')
+    return if !parseInt(row.find('.js-shadow').val())
+    return if !row.find('.js-groupListItem:checked').length
+
+    @addGroup(row, item, groups)
+
   @onRemoveGroup: (e, item, groups) ->
     e.stopPropagation()
     e.preventDefault()
@@ -63,9 +79,12 @@ class App.UiElement.group_permissions extends Spine.Module
     e.stopPropagation()
     e.preventDefault()
 
-    newGroupId = parseInt(item.find('.js-shadow').val())
+    @addGroup($(e.target.closest('tr')), item, groups)
 
-    $(e.target.closest('tr')).find('.js-input').toggleClass('has-error', !newGroupId)
+  @addGroup: (row, item, groups) ->
+    newGroupId = parseInt(row.find('.js-shadow').val())
+
+    row.find('.js-input').toggleClass('has-error', !newGroupId)
 
     return if !newGroupId
 
@@ -79,7 +98,7 @@ class App.UiElement.group_permissions extends Spine.Module
 
     newRow.find('td:first-child').text(group.displayName())
 
-    $(e.target.closest('tr'))
+    row
       .find('.js-groupListItem')
       .each((i, elem) ->
         isChecked = elem.checked
