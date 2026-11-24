@@ -2,6 +2,11 @@
   <div class="form-group js-deleteOrganzation">
     <%- @delete_organization_html %>
   </div>
+  <% if @block_email_html: %>
+  <div class="form-group js-blockEmail">
+    <%- @block_email_html %>
+  </div>
+  <% end %>
   <div class="form-group">
       <h3><%- @T('Preview customer tickets') %> <span class="subtitle js-previewCounterContainer">(<span class="js-previewCounter"><%= @customer_count %></span> <%- @T('matches found') %>)</span></h3>
       <p><%- @T('Customer tickets of the user will get deleted on execution of the task. No rollback possible.') %></p>

@@ -937,6 +937,10 @@ msgstr ""
 msgid "Accept Data Privacy Policy & Acceptable Use Policy"
 msgstr ""
 
+#: app/models/wcl/setup.rb:826
+msgid "Accept email only from existing users"
+msgstr ""
+
 #: app/frontend/apps/desktop/components/CommonTicketLabel/CommonTicketLabel.vue:44
 #: app/frontend/apps/desktop/components/UserTaskbarTabs/UserTaskbarTabForbidden.vue:36
 msgid "Access denied"
@@ -2222,7 +2226,7 @@ msgstr ""
 #: app/assets/javascripts/app/controllers/_integration/pgp.coffee:239
 #: app/assets/javascripts/app/controllers/_profile/token_access.coffee:66
 #: app/assets/javascripts/app/controllers/_ui_element/_application_selector_expert.coffee:130
-#: app/assets/javascripts/app/controllers/data_privacy.coffee:191
+#: app/assets/javascripts/app/controllers/data_privacy.coffee:197
 #: app/assets/javascripts/app/controllers/maintenance.coffee:55
 #: app/assets/javascripts/app/controllers/ssl_certificate.coffee:61
 #: app/assets/javascripts/app/controllers/ticket_shared_draft_modal.coffee:123
@@ -2938,7 +2942,7 @@ msgstr ""
 msgid "Begin forwarded message"
 msgstr ""
 
-#: app/models/wcl/setup.rb:556
+#: app/models/wcl/setup.rb:558
 msgid "Being worked on (WCL)."
 msgstr ""
 
@@ -2966,6 +2970,10 @@ msgstr ""
 msgid "Block caller IDs based on sender caller ID."
 msgstr ""
 
+#: app/assets/javascripts/app/controllers/data_privacy.coffee:194
+msgid "Block their email address?"
+msgstr ""
+
 #: app/assets/javascripts/app/models/chat.coffee:254
 msgid "Blocked IPs (separated by ;)"
 msgstr ""
@@ -2976,6 +2984,10 @@ msgstr ""
 
 #: app/assets/javascripts/app/models/chat.coffee:256
 msgid "Blocked countries"
+msgstr ""
+
+#: app/models/wcl/setup.rb:848
+msgid "Blocked email addresses"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/ticket_zoom/highlighter.coffee:20
@@ -3419,7 +3431,7 @@ msgstr ""
 #: app/assets/javascripts/app/views/ticket_zoom/knowledge_base_ai_draft_modal.jst.eco:78
 #: app/frontend/apps/desktop/components/KnowledgeBase/KnowledgeBaseAnswer/KnowledgeBaseAnswerAttributes.vue:85
 #: app/frontend/apps/desktop/entities/knowledge-base/composables/useAnswerFormSchema.ts:170
-#: app/models/wcl/setup.rb:353
+#: app/models/wcl/setup.rb:355
 msgid "Category"
 msgstr ""
 
@@ -5137,11 +5149,11 @@ msgstr ""
 msgid "Customer tickets"
 msgstr ""
 
-#: app/assets/javascripts/app/views/data_privacy/preview.jst.eco:7
+#: app/assets/javascripts/app/views/data_privacy/preview.jst.eco:12
 msgid "Customer tickets of the user will get deleted on execution of the task. No rollback possible."
 msgstr ""
 
-#: app/models/wcl/setup.rb:41
+#: app/models/wcl/setup.rb:43
 msgid "Customers can create tickets here"
 msgstr ""
 
@@ -5401,7 +5413,7 @@ msgstr ""
 
 #: app/assets/javascripts/app/models/ticket_priority.coffee:26
 #: app/assets/javascripts/app/models/ticket_state.coffee:28
-#: app/models/wcl/setup.rb:729
+#: app/models/wcl/setup.rb:731
 msgid "Default for new tickets"
 msgstr ""
 
@@ -5790,6 +5802,10 @@ msgstr ""
 msgid "Defines postmaster filter to check if the email is a self-created notification email, then ignore it to prevent email loops."
 msgstr ""
 
+#: app/models/wcl/setup.rb:872
+msgid "Defines postmaster filter to drop email from senders without a user account."
+msgstr ""
+
 #: db/seeds/settings.rb:4464
 msgid "Defines postmaster filter to handle secure mailing."
 msgstr ""
@@ -5878,6 +5894,7 @@ msgstr ""
 msgid "Defines postmaster filter which sets the articles visibility to internal if it is a rely to an internal article or the last outgoing email is internal."
 msgstr ""
 
+#: app/models/wcl/setup.rb:869
 #: db/seeds/settings.rb:4362
 msgid "Defines postmaster filter."
 msgstr ""
@@ -6422,12 +6439,12 @@ msgstr ""
 
 #: app/assets/javascripts/app/controllers/department.coffee:3
 #: app/assets/javascripts/app/controllers/maintenance_report.coffee:82
-#: app/models/wcl/setup.rb:158
+#: app/models/wcl/setup.rb:160
 #: db/seeds/object_manager_attributes.rb:1234
 msgid "Department"
 msgstr ""
 
-#: app/models/wcl/setup.rb:158
+#: app/models/wcl/setup.rb:160
 msgid "Department of the requester when the ticket was created; filled in automatically."
 msgstr ""
 
@@ -7280,6 +7297,18 @@ msgstr ""
 msgid "Email could not be verified. Please contact your administrator."
 msgstr ""
 
+#: app/models/wcl/setup.rb:829
+msgid "Email from senders without a user account is dropped, and addresses in To/Cc are not added as users. Create the user first to let them email in."
+msgstr ""
+
+#: app/models/wcl/setup.rb:851
+msgid "Email from these addresses is always dropped, one address per line. Deleting a user can add their address here; remove a line to unblock it."
+msgstr ""
+
+#: app/assets/javascripts/app/controllers/data_privacy.coffee:194
+msgid "Email from this address will be dropped, even if the address gets a new account. Unblock it in Channels > Email > Settings."
+msgstr ""
+
 #: app/frontend/apps/desktop/entities/channel-email/composables/useEmailChannelConfiguration.ts:63
 msgid "Email inbound"
 msgstr ""
@@ -7342,7 +7371,7 @@ msgstr ""
 msgid "Embedding provider returned no usable vector"
 msgstr ""
 
-#: app/models/wcl/setup.rb:42
+#: app/models/wcl/setup.rb:44
 msgid "Employees can pick this group when they create a ticket (and later in the HR app). Switch off for teams tickets are only handed to (e.g. Dev, Network)."
 msgstr ""
 
@@ -7963,7 +7992,7 @@ msgstr ""
 msgid "Event summary"
 msgstr ""
 
-#: app/models/wcl/setup.rb:701
+#: app/models/wcl/setup.rb:703
 msgid "Every Monday at 07:00, send each user with the Manager role a summary of last week's tickets for their groups, with the Excel report attached."
 msgstr ""
 
@@ -7975,7 +8004,7 @@ msgstr ""
 msgid "Every time a customer creates a new ticket, they automatically receive a confirmation email to assure them that their issue has been submitted successfully. This behavior is built into Zammad, but it’s also highly customizable, and you can set up other automated actions just like it.\n\nMaybe you want to set a higher priority on any ticket with the word “urgent” in the title. Maybe you want to avoid sending auto-reply emails to customers from certain organizations. Maybe you want mark a ticket as “pending” whenever someone adds an internal note to a ticket.\n\nWhatever it is, you can do it with triggers: actions that watch tickets for certain changes, and then fire off whenever those changes occur."
 msgstr ""
 
-#: app/models/wcl/setup.rb:120
+#: app/models/wcl/setup.rb:122
 msgid "Everyone working on the ticket. The first is its main owner (\"My Assigned Tickets\"); all of them are notified, and the others find it under \"My Subscribed Tickets\"."
 msgstr ""
 
@@ -8416,7 +8445,7 @@ msgstr ""
 msgid "First article (oldest)"
 msgstr ""
 
-#: app/models/wcl/setup.rb:365
+#: app/models/wcl/setup.rb:367
 msgid "First level: the name of a group. Under it: the categories offered for that group."
 msgstr ""
 
@@ -8754,7 +8783,7 @@ msgstr ""
 msgid "General communication error, maybe internet is not available!"
 msgstr ""
 
-#: app/models/wcl/setup.rb:312
+#: app/models/wcl/setup.rb:314
 msgid "General facility repairs"
 msgstr ""
 
@@ -9167,7 +9196,7 @@ msgstr ""
 msgid "HR app: maximum attachments per message"
 msgstr ""
 
-#: app/models/wcl/setup.rb:288
+#: app/models/wcl/setup.rb:290
 msgid "HR portal – open requests"
 msgstr ""
 
@@ -10508,7 +10537,7 @@ msgid "Kayako"
 msgstr ""
 
 #: app/assets/javascripts/app/views/settings/dashboard_views.jst.eco:22
-#: app/models/wcl/setup.rb:775
+#: app/models/wcl/setup.rb:777
 msgid "Keep activities for"
 msgstr ""
 
@@ -11210,7 +11239,7 @@ msgstr ""
 #: app/assets/javascripts/app/views/profile/devices.jst.eco:13
 #: app/assets/javascripts/app/views/session.jst.eco:10
 #: app/frontend/apps/desktop/pages/personal-setting/views/PersonalSettingDevices.vue:100
-#: app/models/wcl/setup.rb:416
+#: app/models/wcl/setup.rb:418
 msgid "Location"
 msgstr ""
 
@@ -12645,7 +12674,7 @@ msgstr ""
 msgid "New ticket: %s"
 msgstr ""
 
-#: app/models/wcl/setup.rb:720
+#: app/models/wcl/setup.rb:722
 msgid "New tickets start in this group (for everyone who may create tickets in it). Only one group can be the default."
 msgstr ""
 
@@ -13423,7 +13452,7 @@ msgstr ""
 msgid "Number"
 msgstr ""
 
-#: app/models/wcl/setup.rb:778
+#: app/models/wcl/setup.rb:780
 msgid "Number of days the activity stream keeps its entries. Older entries are deleted once a day."
 msgstr ""
 
@@ -13544,7 +13573,7 @@ msgstr ""
 msgid "October"
 msgstr ""
 
-#: app/models/wcl/setup.rb:311
+#: app/models/wcl/setup.rb:313
 msgid "Office maintenance"
 msgstr ""
 
@@ -14175,7 +14204,7 @@ msgstr ""
 msgid "Owner"
 msgstr ""
 
-#: app/assets/javascripts/app/views/data_privacy/preview.jst.eco:11
+#: app/assets/javascripts/app/views/data_privacy/preview.jst.eco:16
 msgid "Owner tickets of the user will not get deleted. The owner will be mapped to the system user (ID 1)."
 msgstr ""
 
@@ -14539,7 +14568,7 @@ msgstr ""
 msgid "Pick a name for the application, and we'll give you a unique token."
 msgstr ""
 
-#: app/models/wcl/setup.rb:157
+#: app/models/wcl/setup.rb:159
 msgid "Pick the department. The list is managed in Admin > Manage > Departments."
 msgstr ""
 
@@ -14863,11 +14892,11 @@ msgstr ""
 msgid "Preview calendar"
 msgstr ""
 
-#: app/assets/javascripts/app/views/data_privacy/preview.jst.eco:6
+#: app/assets/javascripts/app/views/data_privacy/preview.jst.eco:11
 msgid "Preview customer tickets"
 msgstr ""
 
-#: app/assets/javascripts/app/views/data_privacy/preview.jst.eco:10
+#: app/assets/javascripts/app/views/data_privacy/preview.jst.eco:15
 msgid "Preview owner tickets"
 msgstr ""
 
@@ -15800,7 +15829,7 @@ msgstr ""
 msgid "Request the password login here."
 msgstr ""
 
-#: app/models/wcl/setup.rb:218
+#: app/models/wcl/setup.rb:220
 msgid "Request turned down (WCL). Shown to the employee as \"Rejected\" in the HR app."
 msgstr ""
 
@@ -18510,6 +18539,10 @@ msgstr ""
 msgid "Target Language"
 msgstr ""
 
+#: app/models/wcl/setup.rb:796
+msgid "Target date"
+msgstr ""
+
 #: app/frontend/apps/desktop/pages/ticket/components/TicketDetailView/TicketDetailTopBar/components/ArticleTranslationTargetMenu.vue:131
 msgid "Target language"
 msgstr ""
@@ -18518,19 +18551,19 @@ msgstr ""
 msgid "Target ticket"
 msgstr ""
 
-#: app/models/wcl/setup.rb:538
+#: app/models/wcl/setup.rb:540
 msgid "Team: closed in the last 7 days"
 msgstr ""
 
-#: app/models/wcl/setup.rb:534
+#: app/models/wcl/setup.rb:536
 msgid "Team: no update for 3 days"
 msgstr ""
 
-#: app/models/wcl/setup.rb:527
+#: app/models/wcl/setup.rb:529
 msgid "Team: open tickets by agent"
 msgstr ""
 
-#: app/models/wcl/setup.rb:530
+#: app/models/wcl/setup.rb:532
 msgid "Team: unassigned tickets"
 msgstr ""
 
@@ -19444,7 +19477,7 @@ msgstr ""
 #: app/assets/javascripts/app/controllers/_channel/_email_signature.coffee:93
 #: app/assets/javascripts/app/controllers/agent_ticket_create.coffee:828
 #: app/assets/javascripts/app/controllers/customer_ticket_create.coffee:193
-#: app/assets/javascripts/app/controllers/data_privacy.coffee:272
+#: app/assets/javascripts/app/controllers/data_privacy.coffee:279
 #: app/assets/javascripts/app/controllers/object_manager.coffee:271
 #: app/assets/javascripts/app/lib/app_post/user_organization_autocompletion.coffee:94
 msgid "The object could not be created."
@@ -20276,7 +20309,7 @@ msgstr ""
 msgid "There is no match for your search."
 msgstr ""
 
-#: app/assets/javascripts/app/views/data_privacy/preview.jst.eco:17
+#: app/assets/javascripts/app/views/data_privacy/preview.jst.eco:22
 msgid "There is no rollback of this deletion possible. If you are sure that you wish to proceed, please type \"%s\" into the input."
 msgstr ""
 
@@ -21708,7 +21741,7 @@ msgstr ""
 msgid "Tracked as checklist item in"
 msgstr ""
 
-#: app/models/wcl/setup.rb:510
+#: app/models/wcl/setup.rb:512
 msgid "Tracks the work of the agents in the groups set on each manager (Admin > Users > Group permissions: Read, Overview, Change): Reporting and the \"Team\" overviews. Not offered as an owner unless the user is also an Agent."
 msgstr ""
 
@@ -21833,7 +21866,7 @@ msgstr ""
 msgid "Triggers activated by actions are executed whenever a ticket is created or updated, while triggers activated by time events are executed when certain times are reached (e.g. pending time, escalation)."
 msgstr ""
 
-#: app/models/wcl/setup.rb:310
+#: app/models/wcl/setup.rb:312
 msgid "Trucking / vehicle maintenance"
 msgstr ""
 
@@ -23109,7 +23142,7 @@ msgstr ""
 msgid "Waiting in %s"
 msgstr ""
 
-#: app/models/wcl/setup.rb:557
+#: app/models/wcl/setup.rb:559
 msgid "Waiting, e.g. for parts or a supplier; does not escalate (WCL)."
 msgstr ""
 
@@ -23117,11 +23150,11 @@ msgstr ""
 msgid "Want to join the BETA UI feedback program?"
 msgstr ""
 
-#: app/models/wcl/setup.rb:309
+#: app/models/wcl/setup.rb:311
 msgid "Warehouse maintenance"
 msgstr ""
 
-#: app/assets/javascripts/app/views/data_privacy/preview.jst.eco:16
+#: app/assets/javascripts/app/views/data_privacy/preview.jst.eco:21
 msgid "Warning"
 msgstr ""
 
@@ -23223,7 +23256,7 @@ msgstr ""
 msgid "Week(s)"
 msgstr ""
 
-#: app/models/wcl/setup.rb:698
+#: app/models/wcl/setup.rb:700
 msgid "Weekly summary email to managers"
 msgstr ""
 
@@ -23315,6 +23348,10 @@ msgstr ""
 msgid "When should the job run?"
 msgstr ""
 
+#: app/models/wcl/setup.rb:798
+msgid "When this needs to be done by (optional)."
+msgstr ""
+
 #: app/assets/javascripts/app/views/channel/chat.jst.eco:218
 msgid "When you turn on debugging by setting the option §debug§ to §true§ the reason gets printed to the JavaScript console."
 msgstr ""
@@ -23323,7 +23360,7 @@ msgstr ""
 msgid "Where"
 msgstr ""
 
-#: app/models/wcl/setup.rb:395
+#: app/models/wcl/setup.rb:397
 msgid "Where is it? e.g. Warehouse A, Office 2nd floor, Truck 51C-12345"
 msgstr ""
 
@@ -24373,9 +24410,9 @@ msgstr ""
 msgid "default"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/data_privacy.coffee:191
+#: app/assets/javascripts/app/controllers/data_privacy.coffee:197
 #: app/assets/javascripts/app/controllers/ticket_zoom/article_action/delete.coffee:8
-#: app/assets/javascripts/app/views/data_privacy/preview.jst.eco:17
+#: app/assets/javascripts/app/views/data_privacy/preview.jst.eco:22
 msgid "delete"
 msgstr ""
 
@@ -24980,7 +25017,7 @@ msgstr ""
 msgid "matches"
 msgstr ""
 
-#: app/assets/javascripts/app/views/data_privacy/preview.jst.eco:6
+#: app/assets/javascripts/app/views/data_privacy/preview.jst.eco:11
 #: app/assets/javascripts/app/views/generic/application_selector.jst.eco:15
 #: app/assets/javascripts/app/views/translation/form.jst.eco:5
 msgid "matches found"

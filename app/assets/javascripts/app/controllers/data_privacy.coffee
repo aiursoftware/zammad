@@ -188,6 +188,12 @@ class Index extends App.ControllerSubContent
                 attribute          = { name: 'preferences::delete_organization',  display: __('Delete organization?'), tag: 'boolean', default: true, translate: true }
                 deleteOrganization = ui.formGenItem(attribute, DataPrivacyTask, form).html()
 
+            # WCL customization: also block the user's email address (see Wcl::UnknownEmailSenders)
+            blockEmail = ''
+            if user.email
+              block_attribute = { name: 'preferences::block_email', display: __('Block their email address?'), tag: 'boolean', default: false, translate: true, note: __('Email from this address will be dropped, even if the address gets a new account. Unblock it in Channels > Email > Settings.') }
+              blockEmail      = ui.formGenItem(block_attribute, DataPrivacyTask, form).html()
+
             sure_attribute = { name: 'preferences::sure',  display: __('Are you sure?'), tag: 'input', translate: false, placeholder: App.i18n.translateInline('delete').toUpperCase() }
             sureInput      = ui.formGenItem(sure_attribute, DataPrivacyTask, form).html()
 
@@ -195,6 +201,7 @@ class Index extends App.ControllerSubContent
               customer_count:           dataCustomer.object_count || 0
               owner_count:              dataOwner.object_count    || 0
               delete_organization_html: deleteOrganization
+              block_email_html:         blockEmail
               sure_html:                sureInput
               user_id:                  userID
             )

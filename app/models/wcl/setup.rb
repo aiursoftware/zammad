@@ -36,6 +36,7 @@ module Wcl::Setup # rubocop:disable Metrics/ModuleLength
     activity_stream_retention
     default_group
     ticket_target_date
+    email_only_existing_users
     true
   end
 
@@ -858,5 +859,63 @@ module Wcl::Setup # rubocop:disable Metrics/ModuleLength
     )
     ObjectManager::Attribute.migration_execute
     Ticket.reset_column_information
+  end
+
+  # Admin > Channels > Email > Settings > "Accept email only from existing users", and the
+  #   postmaster filter that drops the rest (see Wcl::UnknownEmailSenders). Off by default so the
+  #   stock email specs keep working; the WclEmailOnlyExistingUsers migration switches it on.
+  def self.email_only_existing_users
+    Setting.create_if_not_exists(
+      title:       __('Accept email only from existing users'),
+      name:        Wcl::UnknownEmailSenders::SETTING,
+      area:        'Email::Base',
+      description: __('Email from senders without a user account is dropped, and addresses in To/Cc are not added as users. Create the user first to let them email in.'),
+      options:     {
+        form: [
+          {
+            display: '',
+            null:    true,
+            name:    Wcl::UnknownEmailSenders::SETTING,
+            tag:     'boolean',
+            options: { true => 'yes', false => 'no' },
+          },
+        ],
+      },
+      state:       false,
+      preferences: {
+        permission: ['admin.channel_email', 'admin.channel_google', 'admin.channel_microsoft365', 'admin.channel_microsoft_graph'],
+      },
+      frontend:    false,
+    )
+    Setting.create_if_not_exists(
+      title:       __('Blocked email addresses'),
+      name:        Wcl::UnknownEmailSenders::BLOCKED_SETTING,
+      area:        'Email::Base',
+      description: __('Email from these addresses is always dropped, one address per line. Deleting a user can add their address here; remove a line to unblock it.'),
+      options:     {
+        form: [
+          {
+            display: '',
+            null:    true,
+            name:    Wcl::UnknownEmailSenders::BLOCKED_SETTING,
+            tag:     'textarea',
+          },
+        ],
+      },
+      state:       '',
+      preferences: {
+        permission: ['admin.channel_email', 'admin.channel_google', 'admin.channel_microsoft365', 'admin.channel_microsoft_graph'],
+      },
+      frontend:    false,
+    )
+    Setting.create_if_not_exists(
+      title:       __('Defines postmaster filter.'),
+      name:        Wcl::UnknownEmailSenders::FILTER,
+      area:        'Postmaster::PreFilter',
+      description: __('Defines postmaster filter to drop email from senders without a user account.'),
+      options:     {},
+      state:       'Channel::Filter::WclBlockUnknownSenders',
+      frontend:    false,
+    )
   end
 end

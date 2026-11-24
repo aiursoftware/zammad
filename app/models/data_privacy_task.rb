@@ -73,6 +73,9 @@ class DataPrivacyTask < ApplicationModel
   end
 
   def perform_user_or_organization
+    # WCL customization: Delete user > "Block their email address?"
+    Wcl::UnknownEmailSenders.block!(deletable.email) if %w[true 1].include?(preferences[:block_email].to_s)
+
     if delete_organization?
       perform_organization(deletable.organization)
 

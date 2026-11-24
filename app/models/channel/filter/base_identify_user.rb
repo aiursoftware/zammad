@@ -39,6 +39,10 @@ class Channel::Filter::BaseIdentifyUser
         user.name_from_channel_import = true
         user.update!(attrs.slice(:firstname))
       end
+    elsif Wcl::UnknownEmailSenders.enabled?
+      # WCL customization: email doesn't create accounts; the system user stands in
+      #   (mail from unknown senders is dropped by Channel::Filter::WclBlockUnknownSenders).
+      user = User.find(1)
     elsif (user = User.create!(attrs.merge(name_from_channel_import: true)))
       user.update!(updated_by_id: user.id, created_by_id: user.id)
     end
