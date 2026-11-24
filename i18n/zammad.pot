@@ -629,6 +629,14 @@ msgstr ""
 msgid "A **calendar** is needed to calculate escalations based on business hours and to send out escalation notifications.\n\nDefine a **\"standard\"** calendar which is valid system-wide. The escalation notifications will only be sent to your agents during the defined business hours.\n\nIf you have customers with different business hours, you can create multiple calendars. Tickets are linked to calendars using **SLAs**."
 msgstr ""
 
+#: app/models/wcl/backup.rb:44
+msgid "A backup is already being made."
+msgstr ""
+
+#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:15
+msgid "A backup is being made. This page updates when it is done."
+msgstr ""
+
 #: app/frontend/apps/desktop/pages/personal-setting/views/PersonalSettingAppearance.vue:45
 msgid "A color scheme that uses dark-colored elements on a light background."
 msgstr ""
@@ -2481,6 +2489,10 @@ msgstr ""
 msgid "Attachments are stored in the filesystem."
 msgstr ""
 
+#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:40
+msgid "Attachments only (incomplete)"
+msgstr ""
+
 #: app/assets/javascripts/app/views/generic/calender_preview.jst.eco:28
 msgid "Attendees"
 msgstr ""
@@ -2878,6 +2890,23 @@ msgstr ""
 
 #: app/models/report.rb:38
 msgid "Backlog"
+msgstr ""
+
+#: app/assets/javascripts/app/controllers/wcl_backup.coffee:70
+msgid "Backup deleted."
+msgstr ""
+
+#: app/assets/javascripts/app/controllers/wcl_backup.coffee:33
+msgid "Backup finished."
+msgstr ""
+
+#: app/assets/javascripts/app/controllers/wcl_backup.coffee:51
+msgid "Backup started. This can take a few minutes."
+msgstr ""
+
+#: app/assets/javascripts/app/controllers/wcl_backup.coffee:4
+#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:3
+msgid "Backups"
 msgstr ""
 
 #: app/frontend/apps/desktop/components/Ticket/TicketBarChart/useTicketStatsChart.ts:47
@@ -4438,6 +4467,7 @@ msgid "Content written in any of these languages is shown in its original form i
 msgstr ""
 
 #: app/assets/javascripts/app/views/system_report.jst.eco:11
+#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:25
 msgid "Contents"
 msgstr ""
 
@@ -4789,6 +4819,10 @@ msgstr ""
 msgid "Create and set up Knowledge Base."
 msgstr ""
 
+#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:7
+msgid "Create backup now"
+msgstr ""
+
 #: app/assets/javascripts/app/views/signup.jst.eco:8
 #: app/frontend/apps/desktop/pages/authentication/views/Signup.vue:146
 msgid "Create my account"
@@ -4873,6 +4907,7 @@ msgstr ""
 #: app/assets/javascripts/app/views/popover/ticket.jst.eco:34
 #: app/assets/javascripts/app/views/profile/token_access.jst.eco:18
 #: app/assets/javascripts/app/views/ssl_certificates_list.jst.eco:14
+#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:24
 #: app/assets/javascripts/app/views/widget/ticket_stats_frequency.jst.eco:20
 #: app/frontend/apps/desktop/components/Ticket/TicketBarChart/useTicketStatsChart.ts:94
 #: app/frontend/apps/desktop/pages/personal-setting/views/PersonalSettingTokenAccess.vue:94
@@ -5263,6 +5298,14 @@ msgstr ""
 
 #: app/assets/javascripts/app/views/object_manager/index.jst.eco:15
 msgid "Database Update Required"
+msgstr ""
+
+#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:36
+msgid "Database and attachments"
+msgstr ""
+
+#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:38
+msgid "Database only"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/knowledge_base/content_can_be_published_form.coffee:129
@@ -6244,6 +6287,7 @@ msgstr ""
 #: app/assets/javascripts/app/views/ssl_certificates_list.jst.eco:44
 #: app/assets/javascripts/app/views/tag/table.jst.eco:14
 #: app/assets/javascripts/app/views/telegram/index.jst.eco:38
+#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:44
 #: app/assets/javascripts/app/views/whatsapp/index.jst.eco:45
 #: app/assets/javascripts/app/views/widget/text_module.jst.eco:13
 #: app/frontend/apps/desktop/pages/ticket/components/TicketSharedDraftFlyout.vue:226
@@ -6390,6 +6434,10 @@ msgstr ""
 
 #: app/frontend/apps/desktop/pages/personal-setting/views/PersonalSettingAvatar.vue:346
 msgid "Delete this avatar"
+msgstr ""
+
+#: app/assets/javascripts/app/controllers/wcl_backup.coffee:61
+msgid "Delete this backup? This cannot be undone."
 msgstr ""
 
 #: app/frontend/apps/desktop/pages/personal-setting/views/PersonalSettingDevices.vue:113
@@ -6999,6 +7047,10 @@ msgstr ""
 
 #: app/frontend/apps/desktop/pages/guided-setup/components/GuidedSetupImport/GuidedSetupImportSource/plugins/otrs.ts:25
 msgid "Dynamic fields are not that common in Zammad, as it takes a different approach to ticket attributes. Zammad also uses tags in addition to custom fields to classify tickets. This difference can create a new philosophy of your ticket attributes/tags compared to your current use of dynamic fields in OTRS."
+msgstr ""
+
+#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:12
+msgid "Each backup holds the database and the attachments. A backup is also made every night; backups older than the server's hold time (14 days by default) are removed automatically."
 msgstr ""
 
 #: app/assets/javascripts/app/models/user.coffee:346
@@ -11378,6 +11430,10 @@ msgstr ""
 msgid "Maintenance report"
 msgstr ""
 
+#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:7
+msgid "Making backup…"
+msgstr ""
+
 #: app/assets/javascripts/app/controllers/manage.coffee:20
 #: app/assets/javascripts/app/views/object_manager/index.jst.eco:85
 msgid "Manage"
@@ -12842,6 +12898,10 @@ msgstr ""
 
 #: app/frontend/apps/desktop/pages/ticket/components/TicketSidebar/TicketSidebarAttachment/TicketSidebarAttachmentContent.vue:54
 msgid "No attached files"
+msgstr ""
+
+#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:19
+msgid "No backups yet."
 msgstr ""
 
 #: app/frontend/apps/desktop/pages/cti/views/CallerLog.vue:82
@@ -17778,6 +17838,10 @@ msgstr ""
 msgid "Site key"
 msgstr ""
 
+#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:26
+msgid "Size"
+msgstr ""
+
 #: app/assets/javascripts/app/controllers/_channel/email_archive.coffee:9
 #: app/assets/javascripts/app/controllers/ticket_zoom/time_accounting_modal.coffee:10
 #: app/assets/javascripts/app/views/channel/email_account_wizard.jst.eco:127
@@ -17817,6 +17881,7 @@ msgstr ""
 msgid "Some system settings have changed, please restart all Zammad processes!"
 msgstr ""
 
+#: app/assets/javascripts/app/controllers/wcl_backup.coffee:79
 #: app/frontend/shared/errors/useErrorHandler.ts:35
 msgid "Something went wrong."
 msgstr ""
@@ -20431,6 +20496,10 @@ msgstr ""
 
 #: app/models/ticket/time_accounting.rb:44
 msgid "This article is not part of the ticket."
+msgstr ""
+
+#: app/models/wcl/backup.rb:63
+msgid "This backup does not exist."
 msgstr ""
 
 #: lib/telegram_helper.rb:47

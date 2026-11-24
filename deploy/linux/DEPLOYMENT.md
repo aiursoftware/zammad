@@ -400,7 +400,8 @@ The `./backup` folder is not a Docker volume, so it survives this.
 
 - **Automatic:** every night at 03:00, into `~/zammad/deploy/linux/backup`. Backups are kept for
   14 days.
-- **On demand:** `docker compose run --rm -e BACKUP_ONCE=true zammad-backup`
+- **On demand:** Admin → System → **Backups** → _Create backup now_ (it also lists and deletes
+  backups), or `docker compose run --rm -e BACKUP_ONCE=true zammad-backup`.
 - **Off-site:** a backup on the same disk doesn't survive a dead server. Copy the folder off the
   server regularly, for example nightly with `rsync` or `rclone` to another machine or to cloud
   storage.

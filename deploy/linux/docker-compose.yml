@@ -34,6 +34,8 @@ x-zammad: &zammad
     ZAMMAD_SESSION_JOBS_CONCURRENT: ${ZAMMAD_SESSION_JOBS_CONCURRENT:-2}
   volumes:
     - zammad-storage:/opt/zammad/storage
+    # Admin > System > Backups makes, lists and deletes backups here (same folder as zammad-backup).
+    - ./backup:/var/tmp/zammad
   depends_on:
     - zammad-postgresql
     - zammad-redis

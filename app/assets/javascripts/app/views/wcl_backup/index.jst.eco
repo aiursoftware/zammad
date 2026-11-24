@@ -1,0 +1,50 @@
+<div class="page-header">
+  <div class="page-header-title">
+    <h1><%- @T('Backups') %></h1>
+  </div>
+  <div class="page-header-meta">
+    <button class="btn btn--primary js-create" <% if @running: %>disabled<% end %>>
+      <% if @running: %><%- @T('Making backup…') %><% else: %><%- @T('Create backup now') %><% end %>
+    </button>
+  </div>
+</div>
+<div class="page-content">
+  <p class="text-muted"><%- @T('Each backup holds the database and the attachments. A backup is also made every night; backups older than the server\'s hold time (14 days by default) are removed automatically.') %></p>
+
+  <% if @running: %>
+    <div class="alert alert--info" role="alert"><%- @T('A backup is being made. This page updates when it is done.') %></div>
+  <% end %>
+
+  <% if _.isEmpty(@backups): %>
+    <p><%- @T('No backups yet.') %></p>
+  <% else: %>
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th><%- @T('Created') %></th>
+          <th><%- @T('Contents') %></th>
+          <th><%- @T('Size') %></th>
+          <th style="width: 110px"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% for backup in @backups: %>
+          <tr>
+            <td><%- @humanTime(backup.created_at) %> <span class="text-muted">(<%- @datetime(backup.created_at) %>)</span></td>
+            <td>
+              <% if backup.database && backup.files: %>
+                <%- @T('Database and attachments') %>
+              <% else if backup.database: %>
+                <%- @T('Database only') %>
+              <% else: %>
+                <span class="danger-color"><%- @T('Attachments only (incomplete)') %></span>
+              <% end %>
+            </td>
+            <td><%= App.Utils.humanFileSize(backup.size) %></td>
+            <td style="white-space: nowrap; text-align: right"><button class="btn btn--danger btn--small js-delete" data-id="<%= backup.id %>"><%- @T('Delete') %></button></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+  <% end %>
+</div>
