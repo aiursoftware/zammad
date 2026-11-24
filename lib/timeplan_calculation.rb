@@ -13,9 +13,12 @@ class TimeplanCalculation
 
   attr_reader :timeplan
 
-  def initialize(timeplan, timezone)
+  # exact: (WCL customization) match the exact minute (e.g. 24) instead of 10-minute slots;
+  #   used by admin schedulers (Job). System schedulers keep the 10-minute slots.
+  def initialize(timeplan, timezone, exact: false)
     @timeplan = timeplan.deep_transform_keys(&:to_s)
     @timezone = timezone
+    @exact    = exact
   end
 
   # Checks if given time matches timeplan
@@ -61,7 +64,17 @@ class TimeplanCalculation
     timeplan.key?('days') && timeplan.key?('hours') && timeplan.key?('minutes')
   end
 
+  def minute_step
+    @exact ? 1 : 10
+  end
+
+  def last_minute
+    @exact ? 59 : 50
+  end
+
   def match_minutes(minutes)
+    return minutes if @exact
+
     minutes / 10 * 10
   end
 
@@ -78,11 +91,11 @@ class TimeplanCalculation
   end
 
   def next_loop_minutes(base_time)
-    loop_minutes base_time, range: 0.step(50, 10)
+    loop_minutes base_time, range: 0.step(last_minute, minute_step)
   end
 
   def previous_loop_minutes(base_time)
-    loop_minutes base_time, range: 50.step(0, -10)
+    loop_minutes base_time, range: last_minute.step(0, -minute_step)
   end
 
   def loop_minutes(base_time, range:)
@@ -112,11 +125,11 @@ class TimeplanCalculation
   end
 
   def next_loop_partial_hour(base_time)
-    loop_partial_hour base_time, range: base_time.min.step(50, 10)
+    loop_partial_hour base_time, range: base_time.min.step(last_minute, minute_step)
   end
 
   def previous_loop_partial_hour(base_time)
-    loop_partial_hour base_time, range: base_time.min.step(0, -10)
+    loop_partial_hour base_time, range: base_time.min.step(0, -minute_step)
   end
 
   def loop_partial_hour(base_time, range:)

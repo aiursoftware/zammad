@@ -14,3 +14,21 @@
     <p class="help-text"><%- @T('Shows recent changes to tickets, users and organizations on the dashboard.') %></p>
   </div>
 </div>
+
+<%# WCL customization: how long activities are kept %>
+<div class="settings-entry no-margin js-activityRetention">
+  <div class="form-group">
+    <div class="formGroup-label">
+      <label for="wcl_activity_stream_retention_days"><%- @T('Keep activities for') %></label>
+    </div>
+    <div class="controls controls--select">
+      <select id="wcl_activity_stream_retention_days" class="form-control" name="wcl_activity_stream_retention_days">
+        <% for option in @retentionOptions: %>
+          <option value="<%= option.days %>" <% if option.days is @retention: %>selected<% end %>><%- option.label %></option>
+        <% end %>
+      </select>
+      <%- @Icon('arrow-down') %>
+    </div>
+    <p class="help-text"><%- @T('Older activities are deleted automatically once a day. Tickets and their history are not affected.') %></p>
+  </div>
+</div>

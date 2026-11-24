@@ -81,10 +81,19 @@ class App.UiElement.timer
       attribute.value.minutes =
         0: true
 
-    timer = $( App.view('generic/timer')( attribute: attribute, days: days, hours: hours, minutes: minutes ) )
+    # WCL customization: minutes outside the 10-minute buttons (e.g. 24, 32), typed in a field
+    exactMinutes = _.sortBy(
+      (parseInt(minute, 10) for minute, active of attribute.value.minutes when active and parseInt(minute, 10) % 10 isnt 0),
+      (minute) -> minute
+    )
+
+    timer = $( App.view('generic/timer')( attribute: attribute, days: days, hours: hours, minutes: minutes, exactMinutes: exactMinutes ) )
     timer.find('.js-boolean').data('field-type', 'boolean')
     timer.find('.select-value').on('click', (e) =>
       @select(e)
+    )
+    timer.find('.js-exactMinutes').on('change', (e) =>
+      @exactMinutesChanged(e)
     )
     @createOutputString(timer)
 
@@ -94,8 +103,9 @@ class App.UiElement.timer
     target = $(e.currentTarget)
 
     if target.hasClass('is-selected')
-      # prevent zero selections
-      if target.siblings('.is-selected').length > 0
+      # prevent zero selections (exact minutes count as a selection too)
+      exactMinutes = target.closest('.select-boxes').find('.js-exactMinutesValues input').length
+      if target.siblings('.is-selected').length > 0 || (target.data('type') is 'minute' && exactMinutes > 0)
         target.removeClass('is-selected')
         target.next().val('false')
     else
@@ -105,10 +115,47 @@ class App.UiElement.timer
     formGroup = $(e.currentTarget).closest('.form-group')
     @createOutputString(formGroup)
 
+  # Typed minutes: round ones select their button, the others are kept as exact minutes.
+  @exactMinutesChanged: (e) =>
+    input     = $(e.currentTarget)
+    box       = input.closest('.js-minute')
+    name      = input.data('attribute-name')
+    tokens    = _.compact(input.val().split(/[^0-9]+/))
+    values    = _.uniq((parseInt(token, 10) for token in tokens))
+    invalid   = _.filter(values, (minute) -> _.isNaN(minute) || minute < 0 || minute > 59)
+    input.closest('.timer-exact').toggleClass('has-error', invalid.length > 0)
+    values    = _.sortBy(_.difference(values, invalid), (minute) -> minute)
+
+    exact = []
+    for minute in values
+      if minute % 10 is 0
+        button = box.find("[data-type=minute][data-value=#{minute}]")
+        button.addClass('is-selected')
+        button.next().val('true')
+      else
+        exact.push minute
+
+    container = box.find('.js-exactMinutesValues').empty()
+    for minute in exact
+      hidden = $('<input type="hidden" class="js-boolean" value="true">').attr('name', "#{name}::minutes::#{minute}")
+      hidden.data('field-type', 'boolean')
+      container.append(hidden)
+
+    # keep at least one minute: fall back to :00 when everything was cleared
+    if exact.length is 0 && box.find('[data-type=minute].is-selected').length is 0
+      button = box.find('[data-type=minute][data-value=0]')
+      button.addClass('is-selected')
+      button.next().val('true')
+
+    input.val(_.map(exact, (minute) -> minute.toString()).join(', '))
+    @createOutputString(input.closest('.form-group'))
+
   @createOutputString: (formGroup) =>
     days = $.map(formGroup.find('[data-type=day]').filter('.is-selected'), (el) -> return $(el).text() )
     hours = $.map(formGroup.find('[data-type=hour]').filter('.is-selected'), (el) -> return $(el).text() )
     minutes = $.map(formGroup.find('[data-type=minute]').filter('.is-selected'), (el) -> return $(el).text() )
+    exact = $.map(formGroup.find('.js-exactMinutesValues input'), (el) -> return $(el).attr('name').split('::').pop() )
+    minutes = _.sortBy(_.uniq(minutes.concat(_.map(exact, (minute) -> if minute.length is 1 then "0#{minute}" else minute))), (minute) -> parseInt(minute, 10))
 
     hours = @injectMinutes(hours, minutes)
 

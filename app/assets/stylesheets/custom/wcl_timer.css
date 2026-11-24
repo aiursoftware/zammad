@@ -1,0 +1,19 @@
+/* WCL customization: scheduler "Exact minutes" field under the minute buttons. */
+
+.timer-exact {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 10px 0 0;
+  padding: 0 4px;
+  font-size: 12px;
+}
+
+.timer-exact .form-control {
+  width: 100%;
+  min-width: 0;
+}
+
+.timer-exact.has-error .form-control {
+  border-color: var(--danger-color);
+}

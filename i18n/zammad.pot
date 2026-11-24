@@ -224,6 +224,7 @@ msgstr ""
 msgid "%s credentials"
 msgstr ""
 
+#: app/assets/javascripts/app/controllers/_manage/dashboard.coffee:49
 #: app/assets/javascripts/app/controllers/maintenance_report.coffee:68
 msgid "%s days"
 msgstr ""
@@ -535,6 +536,7 @@ msgstr ""
 msgid "+ %s more"
 msgstr ""
 
+#: app/assets/javascripts/app/controllers/_manage/dashboard.coffee:47
 #: app/assets/javascripts/app/controllers/maintenance_report.coffee:68
 #: db/seeds/settings.rb:1173
 msgid "1 day"
@@ -572,6 +574,10 @@ msgstr ""
 
 #: app/frontend/shared/i18n/dates.ts:95
 msgid "1 week ago"
+msgstr ""
+
+#: app/assets/javascripts/app/controllers/_manage/dashboard.coffee:48
+msgid "1 year"
 msgstr ""
 
 #: app/frontend/shared/i18n/dates.ts:81
@@ -1777,7 +1783,7 @@ msgstr ""
 msgid "All values will be considered for extracted text from tickets."
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_manage/dashboard.coffee:136
+#: app/assets/javascripts/app/controllers/_manage/dashboard.coffee:155
 msgid "All views and widgets are turned off, so agents see an empty dashboard. If you do not need the dashboard at all, you can turn it off."
 msgstr ""
 
@@ -2932,7 +2938,7 @@ msgstr ""
 msgid "Begin forwarded message"
 msgstr ""
 
-#: app/models/wcl/setup.rb:555
+#: app/models/wcl/setup.rb:556
 msgid "Being worked on (WCL)."
 msgstr ""
 
@@ -3413,7 +3419,7 @@ msgstr ""
 #: app/assets/javascripts/app/views/ticket_zoom/knowledge_base_ai_draft_modal.jst.eco:78
 #: app/frontend/apps/desktop/components/KnowledgeBase/KnowledgeBaseAnswer/KnowledgeBaseAnswerAttributes.vue:85
 #: app/frontend/apps/desktop/entities/knowledge-base/composables/useAnswerFormSchema.ts:170
-#: app/models/wcl/setup.rb:352
+#: app/models/wcl/setup.rb:353
 msgid "Category"
 msgstr ""
 
@@ -5135,7 +5141,7 @@ msgstr ""
 msgid "Customer tickets of the user will get deleted on execution of the task. No rollback possible."
 msgstr ""
 
-#: app/models/wcl/setup.rb:40
+#: app/models/wcl/setup.rb:41
 msgid "Customers can create tickets here"
 msgstr ""
 
@@ -5166,7 +5172,7 @@ msgstr ""
 msgid "Dark mode"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_manage/dashboard.coffee:94
+#: app/assets/javascripts/app/controllers/_manage/dashboard.coffee:113
 #: app/assets/javascripts/app/controllers/_plugin/keyboard_shortcuts.coffee:149
 #: app/assets/javascripts/app/controllers/dashboard.coffee:52
 #: app/assets/javascripts/app/controllers/package.coffee:61
@@ -5208,7 +5214,7 @@ msgstr ""
 msgid "Dashboard tickets in process widget"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_manage/dashboard.coffee:106
+#: app/assets/javascripts/app/controllers/_manage/dashboard.coffee:125
 msgid "Dashboard views"
 msgstr ""
 
@@ -5216,7 +5222,7 @@ msgstr ""
 msgid "Dashboard waiting time widget"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_manage/dashboard.coffee:107
+#: app/assets/javascripts/app/controllers/_manage/dashboard.coffee:126
 msgid "Dashboard widgets"
 msgstr ""
 
@@ -5395,7 +5401,7 @@ msgstr ""
 
 #: app/assets/javascripts/app/models/ticket_priority.coffee:26
 #: app/assets/javascripts/app/models/ticket_state.coffee:28
-#: app/models/wcl/setup.rb:728
+#: app/models/wcl/setup.rb:729
 msgid "Default for new tickets"
 msgstr ""
 
@@ -6416,12 +6422,12 @@ msgstr ""
 
 #: app/assets/javascripts/app/controllers/department.coffee:3
 #: app/assets/javascripts/app/controllers/maintenance_report.coffee:82
-#: app/models/wcl/setup.rb:157
+#: app/models/wcl/setup.rb:158
 #: db/seeds/object_manager_attributes.rb:1234
 msgid "Department"
 msgstr ""
 
-#: app/models/wcl/setup.rb:157
+#: app/models/wcl/setup.rb:158
 msgid "Department of the requester when the ticket was created; filled in automatically."
 msgstr ""
 
@@ -7336,7 +7342,7 @@ msgstr ""
 msgid "Embedding provider returned no usable vector"
 msgstr ""
 
-#: app/models/wcl/setup.rb:41
+#: app/models/wcl/setup.rb:42
 msgid "Employees can pick this group when they create a ticket (and later in the HR app). Switch off for teams tickets are only handed to (e.g. Dev, Network)."
 msgstr ""
 
@@ -7957,7 +7963,7 @@ msgstr ""
 msgid "Event summary"
 msgstr ""
 
-#: app/models/wcl/setup.rb:700
+#: app/models/wcl/setup.rb:701
 msgid "Every Monday at 07:00, send each user with the Manager role a summary of last week's tickets for their groups, with the Excel report attached."
 msgstr ""
 
@@ -7969,8 +7975,12 @@ msgstr ""
 msgid "Every time a customer creates a new ticket, they automatically receive a confirmation email to assure them that their issue has been submitted successfully. This behavior is built into Zammad, but it’s also highly customizable, and you can set up other automated actions just like it.\n\nMaybe you want to set a higher priority on any ticket with the word “urgent” in the title. Maybe you want to avoid sending auto-reply emails to customers from certain organizations. Maybe you want mark a ticket as “pending” whenever someone adds an internal note to a ticket.\n\nWhatever it is, you can do it with triggers: actions that watch tickets for certain changes, and then fire off whenever those changes occur."
 msgstr ""
 
-#: app/models/wcl/setup.rb:119
+#: app/models/wcl/setup.rb:120
 msgid "Everyone working on the ticket. The first is its main owner (\"My Assigned Tickets\"); all of them are notified, and the others find it under \"My Subscribed Tickets\"."
+msgstr ""
+
+#: app/assets/javascripts/app/views/generic/timer.jst.eco:28
+msgid "Exact minutes"
 msgstr ""
 
 #: app/assets/javascripts/app/views/generic/object_import/index.jst.eco:28
@@ -8392,7 +8402,7 @@ msgstr ""
 msgid "First Solution"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_manage/dashboard.coffee:28
+#: app/assets/javascripts/app/controllers/_manage/dashboard.coffee:31
 #: app/assets/javascripts/app/views/dashboard.jst.eco:17
 msgid "First Steps"
 msgstr ""
@@ -8406,7 +8416,7 @@ msgstr ""
 msgid "First article (oldest)"
 msgstr ""
 
-#: app/models/wcl/setup.rb:364
+#: app/models/wcl/setup.rb:365
 msgid "First level: the name of a group. Under it: the categories offered for that group."
 msgstr ""
 
@@ -8744,7 +8754,7 @@ msgstr ""
 msgid "General communication error, maybe internet is not available!"
 msgstr ""
 
-#: app/models/wcl/setup.rb:311
+#: app/models/wcl/setup.rb:312
 msgid "General facility repairs"
 msgstr ""
 
@@ -9157,7 +9167,7 @@ msgstr ""
 msgid "HR app: maximum attachments per message"
 msgstr ""
 
-#: app/models/wcl/setup.rb:287
+#: app/models/wcl/setup.rb:288
 msgid "HR portal – open requests"
 msgstr ""
 
@@ -10497,6 +10507,11 @@ msgstr ""
 msgid "Kayako"
 msgstr ""
 
+#: app/assets/javascripts/app/views/settings/dashboard_views.jst.eco:22
+#: app/models/wcl/setup.rb:775
+msgid "Keep activities for"
+msgstr ""
+
 #: app/assets/javascripts/app/controllers/_channel/email.coffee:423
 #: app/assets/javascripts/app/controllers/_channel/google.coffee:62
 #: app/assets/javascripts/app/controllers/_channel/microsoft365.coffee:67
@@ -11195,7 +11210,7 @@ msgstr ""
 #: app/assets/javascripts/app/views/profile/devices.jst.eco:13
 #: app/assets/javascripts/app/views/session.jst.eco:10
 #: app/frontend/apps/desktop/pages/personal-setting/views/PersonalSettingDevices.vue:100
-#: app/models/wcl/setup.rb:415
+#: app/models/wcl/setup.rb:416
 msgid "Location"
 msgstr ""
 
@@ -12630,7 +12645,7 @@ msgstr ""
 msgid "New ticket: %s"
 msgstr ""
 
-#: app/models/wcl/setup.rb:719
+#: app/models/wcl/setup.rb:720
 msgid "New tickets start in this group (for everyone who may create tickets in it). Only one group can be the default."
 msgstr ""
 
@@ -13408,6 +13423,10 @@ msgstr ""
 msgid "Number"
 msgstr ""
 
+#: app/models/wcl/setup.rb:778
+msgid "Number of days the activity stream keeps its entries. Older entries are deleted once a day."
+msgstr ""
+
 #: app/assets/javascripts/app/controllers/_ai/provider_connections.coffee:395
 msgid "Number of input tokens the embedding model takes at once. Filled in for a model whose limit is known."
 msgstr ""
@@ -13525,7 +13544,7 @@ msgstr ""
 msgid "October"
 msgstr ""
 
-#: app/models/wcl/setup.rb:310
+#: app/models/wcl/setup.rb:311
 msgid "Office maintenance"
 msgstr ""
 
@@ -13535,6 +13554,10 @@ msgstr ""
 
 #: app/assets/javascripts/app/controllers/knowledge_base/delete_action.coffee:40
 msgid "Ok"
+msgstr ""
+
+#: app/assets/javascripts/app/views/settings/dashboard_views.jst.eco:32
+msgid "Older activities are deleted automatically once a day. Tickets and their history are not affected."
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/maintenance_report.coffee:120
@@ -13569,7 +13592,7 @@ msgstr ""
 msgid "On-screen Translation"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_manage/dashboard.coffee:30
+#: app/assets/javascripts/app/controllers/_manage/dashboard.coffee:33
 msgid "Onboard new users with a step-by-step Zammad setup."
 msgstr ""
 
@@ -13829,7 +13852,7 @@ msgstr ""
 msgid "Options are required."
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_manage/dashboard.coffee:95
+#: app/assets/javascripts/app/controllers/_manage/dashboard.coffee:114
 msgid "Options for enabling/disabling the dashboard and customizing its elements. If the dashboard is disabled, ticket overviews become your Zammad landing page."
 msgstr ""
 
@@ -14516,7 +14539,7 @@ msgstr ""
 msgid "Pick a name for the application, and we'll give you a unique token."
 msgstr ""
 
-#: app/models/wcl/setup.rb:156
+#: app/models/wcl/setup.rb:157
 msgid "Pick the department. The list is managed in Admin > Manage > Departments."
 msgstr ""
 
@@ -15777,7 +15800,7 @@ msgstr ""
 msgid "Request the password login here."
 msgstr ""
 
-#: app/models/wcl/setup.rb:217
+#: app/models/wcl/setup.rb:218
 msgid "Request turned down (WCL). Shown to the employee as \"Rejected\" in the HR app."
 msgstr ""
 
@@ -16054,7 +16077,7 @@ msgstr ""
 msgid "Ruby information (version and installed gems)"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_ui_element/timer.coffee:119
+#: app/assets/javascripts/app/controllers/_ui_element/timer.coffee:166
 msgid "Run every %s at %s in %s time"
 msgstr ""
 
@@ -18495,19 +18518,19 @@ msgstr ""
 msgid "Target ticket"
 msgstr ""
 
-#: app/models/wcl/setup.rb:537
+#: app/models/wcl/setup.rb:538
 msgid "Team: closed in the last 7 days"
 msgstr ""
 
-#: app/models/wcl/setup.rb:533
+#: app/models/wcl/setup.rb:534
 msgid "Team: no update for 3 days"
 msgstr ""
 
-#: app/models/wcl/setup.rb:526
+#: app/models/wcl/setup.rb:527
 msgid "Team: open tickets by agent"
 msgstr ""
 
-#: app/models/wcl/setup.rb:529
+#: app/models/wcl/setup.rb:530
 msgid "Team: unassigned tickets"
 msgstr ""
 
@@ -21685,7 +21708,7 @@ msgstr ""
 msgid "Tracked as checklist item in"
 msgstr ""
 
-#: app/models/wcl/setup.rb:509
+#: app/models/wcl/setup.rb:510
 msgid "Tracks the work of the agents in the groups set on each manager (Admin > Users > Group permissions: Read, Overview, Change): Reporting and the \"Team\" overviews. Not offered as an owner unless the user is also an Agent."
 msgstr ""
 
@@ -21810,7 +21833,7 @@ msgstr ""
 msgid "Triggers activated by actions are executed whenever a ticket is created or updated, while triggers activated by time events are executed when certain times are reached (e.g. pending time, escalation)."
 msgstr ""
 
-#: app/models/wcl/setup.rb:309
+#: app/models/wcl/setup.rb:310
 msgid "Trucking / vehicle maintenance"
 msgstr ""
 
@@ -23086,7 +23109,7 @@ msgstr ""
 msgid "Waiting in %s"
 msgstr ""
 
-#: app/models/wcl/setup.rb:556
+#: app/models/wcl/setup.rb:557
 msgid "Waiting, e.g. for parts or a supplier; does not escalate (WCL)."
 msgstr ""
 
@@ -23094,7 +23117,7 @@ msgstr ""
 msgid "Want to join the BETA UI feedback program?"
 msgstr ""
 
-#: app/models/wcl/setup.rb:308
+#: app/models/wcl/setup.rb:309
 msgid "Warehouse maintenance"
 msgstr ""
 
@@ -23200,7 +23223,7 @@ msgstr ""
 msgid "Week(s)"
 msgstr ""
 
-#: app/models/wcl/setup.rb:697
+#: app/models/wcl/setup.rb:698
 msgid "Weekly summary email to managers"
 msgstr ""
 
@@ -23300,7 +23323,7 @@ msgstr ""
 msgid "Where"
 msgstr ""
 
-#: app/models/wcl/setup.rb:394
+#: app/models/wcl/setup.rb:395
 msgid "Where is it? e.g. Warehouse A, Office 2nd floor, Truck 51C-12345"
 msgstr ""
 
@@ -24080,7 +24103,7 @@ msgstr ""
 msgid "all subscribers"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_ui_element/timer.coffee:139
+#: app/assets/javascripts/app/controllers/_ui_element/timer.coffee:186
 msgid "and"
 msgstr ""
 
@@ -24445,6 +24468,10 @@ msgstr ""
 
 #: app/assets/javascripts/app/views/profile/out_of_office.jst.eco:14
 msgid "e.g."
+msgstr ""
+
+#: app/assets/javascripts/app/views/generic/timer.jst.eco:29
+msgid "e.g. 24, 32"
 msgstr ""
 
 #: app/frontend/apps/desktop/pages/personal-setting/views/PersonalSettingOutOfOffice.vue:46

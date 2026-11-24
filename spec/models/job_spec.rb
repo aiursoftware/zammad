@@ -422,22 +422,23 @@ RSpec.describe Job, type: :model do
             end
           end
 
-          context 'that was started in the last 10 minutes' do
+          # WCL customization: exact minutes, so only a run in the last half minute blocks
+          context 'that was started in the last 30 seconds' do
             subject(:job) do
               create(:job, active:      true,
                            updated_at:  60.seconds.ago,
-                           last_run_at: 9.minutes.ago)
+                           last_run_at: 20.seconds.ago)
             end
 
             it 'returns false' do
               expect(job.executable?).to be(false)
             end
 
-            context '(or, given an argument, up to 10 minutes before that)' do
+            context '(or, given an argument, up to 30 seconds before that)' do
               subject(:job) do
                 create(:job, active:      true,
                              updated_at:  60.seconds.ago,
-                             last_run_at: 9.minutes.before(Time.current.yesterday))
+                             last_run_at: 20.seconds.before(Time.current.yesterday))
               end
 
               it 'returns false' do
@@ -577,8 +578,9 @@ RSpec.describe Job, type: :model do
             end
           end
 
+          # WCL customization: exact minutes, so a timeslot is that one minute
           context 'when record is saved during a valid timeslot' do
-            before { travel_to(valid_timeslots.fifth + 9.minutes + 59.seconds) }
+            before { travel_to(valid_timeslots.fifth + 59.seconds) }
 
             it 'is set to that timeslot' do
               expect { job.save }

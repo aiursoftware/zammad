@@ -23,5 +23,15 @@
       <div data-type="minute" class="select-value <% if @attribute.value.minutes[minute]: %>is-selected<% end %>" data-value="<%- minute %>"><%- minuteLong %></div>
       <input type="hidden" class="js-boolean" name="<%= @attribute.name %>::minutes::<%- minute %>" value="<% if @attribute.value.minutes[minute]: %>true<% else: %>false<% end %>">
     <% end %>
+    <%# WCL customization: any exact minute, e.g. 24, 32 %>
+    <label class="timer-exact">
+      <span><%- @T('Exact minutes') %></span>
+      <input type="text" class="form-control form-control--small js-exactMinutes" value="<%= @exactMinutes.join(', ') %>" placeholder="<%- @Ti('e.g. 24, 32') %>" inputmode="numeric" autocomplete="off" data-attribute-name="<%= @attribute.name %>">
+    </label>
+    <div class="js-exactMinutesValues">
+      <% for minute in @exactMinutes: %>
+        <input type="hidden" class="js-boolean" name="<%= @attribute.name %>::minutes::<%- minute %>" value="true">
+      <% end %>
+    </div>
   </div>
 </div>

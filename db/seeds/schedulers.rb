@@ -33,7 +33,7 @@ Scheduler.create_if_not_exists(
 Scheduler.create_if_not_exists(
   name:          __('Execute planned jobs.'),
   method:        'Job.run',
-  period:        5.minutes,
+  period:        1.minute, # WCL customization: admin schedulers run at the exact minute
   prio:          2,
   active:        true,
   updated_by_id: 1,

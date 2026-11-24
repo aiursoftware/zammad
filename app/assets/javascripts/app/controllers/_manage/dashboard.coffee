@@ -15,11 +15,14 @@ class DashboardElements extends App.Controller
 class DashboardViews extends DashboardElements
   events:
     'change .js-activityStream select': 'changeActivityStream'
+    'change .js-activityRetention select': 'changeRetention'
 
   render: =>
     @html App.view('settings/dashboard_views')(
-      disabled:       !App.Setting.get('dashboard')
-      activityStream: DashboardViews.activityStream()
+      disabled:         !App.Setting.get('dashboard')
+      activityStream:   DashboardViews.activityStream()
+      retention:        DashboardViews.retention()
+      retentionOptions: DashboardViews.retentionOptions()
     )
     @el.append App.view('settings/dashboard_elements')(
       disabled: !App.Setting.get('dashboard')
@@ -32,6 +35,22 @@ class DashboardViews extends DashboardElements
         }
       ]
     )
+
+  # WCL customization: how long the activity stream keeps its entries (ActivityStream.cleanup).
+  @retention: ->
+    days = parseInt(App.Setting.get('wcl_activity_stream_retention_days'), 10)
+    if _.isNaN(days) || days < 1 then 90 else days
+
+  @retentionOptions: ->
+    for days in [1, 7, 30, 90, 180, 365]
+      label = switch days
+        when 1 then App.i18n.translatePlain('1 day')
+        when 365 then App.i18n.translatePlain('1 year')
+        else App.i18n.translatePlain('%s days', days)
+      { days: days, label: label }
+
+  changeRetention: (e) ->
+    App.Setting.set('wcl_activity_stream_retention_days', parseInt($(e.currentTarget).val(), 10), notify: true)
 
   # The dropdown is backed by two settings, so that everything checking whether
   #   the activity stream is turned on keeps reading a plain boolean.

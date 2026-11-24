@@ -46,3 +46,10 @@
 .dropdown-menu > li.wcl-whoami .wcl-whoami-name {
   font-size: 14px;
 }
+
+.dropdown-menu > li.wcl-whoami,
+.dropdown-menu > li.wcl-whoami .wcl-roles {
+  height: auto;
+  min-height: 0;
+  line-height: 1.4;
+}

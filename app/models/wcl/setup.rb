@@ -33,7 +33,9 @@ module Wcl::Setup # rubocop:disable Metrics/ModuleLength
     work_states
     ticket_department
     manager_summary
+    activity_stream_retention
     default_group
+    ticket_target_date
     true
   end
 
@@ -806,5 +808,55 @@ module Wcl::Setup # rubocop:disable Metrics/ModuleLength
       created_by_id:      1,
       updated_by_id:      1,
     )
+  end
+
+  # How long the dashboard Activity Stream keeps its entries (Admin > Dashboard > "Keep activities
+  #   for"); the daily "Delete old activity stream entries." job reads it (see ActivityStream.cleanup).
+  def self.activity_stream_retention
+    Setting.create_if_not_exists(
+      title:       __('Keep activities for'),
+      name:        ActivityStream::RETENTION_SETTING,
+      area:        'Dashboard::Base',
+      description: __('Number of days the activity stream keeps its entries. Older entries are deleted once a day.'),
+      options:     {},
+      preferences: { authentication: true, permission: ['admin.dashboard'] },
+      state:       90,
+      frontend:    true,
+    )
+  end
+
+  # When the requester needs the work done by; optional, set on the new-ticket form by whoever
+  #   creates the ticket (employee or agent), and changeable later in the ticket sidebar.
+  def self.ticket_target_date
+    return if ObjectManager::Attribute.get(object: 'Ticket', name: 'target_date')
+
+    ObjectManager::Attribute.add(
+      force:         true,
+      object:        'Ticket',
+      name:          'target_date',
+      display:       __('Target date'),
+      data_type:     'date',
+      data_option:   { diff: nil, null: true, note: __('When this needs to be done by (optional).') },
+      editable:      true,
+      active:        true,
+      screens:       {
+        create_middle: {
+          'ticket.customer' => { 'shown' => true, 'required' => false, 'item_class' => 'column' },
+          'ticket.agent'    => { 'shown' => true, 'required' => false, 'item_class' => 'column' },
+        },
+        edit:          {
+          'ticket.customer' => { 'shown' => true, 'required' => false },
+          'ticket.agent'    => { 'shown' => true, 'required' => false },
+        },
+      },
+      to_create:     true,
+      to_migrate:    false,
+      to_delete:     false,
+      position:      35,
+      created_by_id: 1,
+      updated_by_id: 1,
+    )
+    ObjectManager::Attribute.migration_execute
+    Ticket.reset_column_information
   end
 end

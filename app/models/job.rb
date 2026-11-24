@@ -18,6 +18,10 @@ class Job < ApplicationModel
 
   OBJECTS_BATCH_SIZE = 2_000
 
+  # WCL customization: admin schedulers run at the exact minute picked (e.g. 01:24). A run that
+  #   a late check missed is still made within this window, and never twice for one planned time.
+  CATCH_UP_WINDOW = 10.minutes
+
   store     :condition
   store     :perform
   validates :name,    presence: true, uniqueness: { case_sensitive: false }
@@ -86,10 +90,33 @@ job.run(true)
     return false if running_actively?
 
     # check if jobs need to be executed
-    # ignore if job was running within last 10 min.
-    return false if last_run_at && last_run_at > start_at - 10.minutes
+    # ignore if job was running within the last half minute (WCL: exact minutes, see in_timeplan?)
+    return false if last_run_at && last_run_at > start_at - 30.seconds
 
     true
+  end
+
+  # WCL customization: exact minutes (see CATCH_UP_WINDOW).
+  def timeplan_calculation
+    TimeplanCalculation.new(timeplan, Setting.get('timezone_default'), exact: true)
+  end
+
+  def in_timeplan?(time = Time.zone.now)
+    planned = planned_run_at(time)
+    return false if !planned
+    return false if last_run_at && last_run_at >= planned
+
+    true
+  end
+
+  # the latest planned minute at or before the given time, within the catch-up window
+  def planned_run_at(time = Time.zone.now)
+    calculation = timeplan_calculation
+    minute      = time.change(sec: 0)
+
+    (0..(CATCH_UP_WINDOW / 60)).lazy
+      .map { |back| minute - back.minutes }
+      .find { |candidate| calculation.contains?(candidate) }
   end
 
   def runnable_on_demand?
@@ -112,7 +139,7 @@ job.run(true)
     return nil if !active
 
     if last_run_at && (time - last_run_at).positive?
-      time += 10.minutes
+      time += 1.minute
     end
 
     timeplan_calculation.next_at(time)

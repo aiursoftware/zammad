@@ -145,11 +145,22 @@ optional you can put the max oldest stream entries as argument
 
 =end
 
-  def self.cleanup(diff = 3.months)
+  # WCL customization: without an argument, keeps entries for the days chosen under
+  #   Admin > Dashboard > "Keep activities for" (setting wcl_activity_stream_retention_days).
+  def self.cleanup(diff = nil)
+    diff ||= retention
+
     where(created_at: ...diff.ago)
       .delete_all
 
     true
+  end
+
+  RETENTION_SETTING = 'wcl_activity_stream_retention_days'.freeze
+
+  def self.retention
+    days = Setting.get(RETENTION_SETTING).to_i
+    days.positive? ? days.days : 3.months
   end
 
 end
