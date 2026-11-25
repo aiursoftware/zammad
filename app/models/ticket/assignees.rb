@@ -22,6 +22,15 @@ module Ticket::Assignees
     Array(self[:assignees]).map(&:to_i).select { |id| id > 1 }.uniq
   end
 
+  # Everyone in "Owners", or the owner when the list is empty; the trigger/scheduler recipient
+  #   "Owners (all)" (`ticket_assignees`) sends to them.
+  def assignee_ids_or_owner
+    ids = assignee_ids
+    return ids if ids.any?
+
+    owner_id.to_i > 1 ? [owner_id] : []
+  end
+
   private
 
   def assignees_enabled?

@@ -1691,7 +1691,7 @@ msgstr ""
 msgid "Agents"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:525
+#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:526
 msgid "Agents with \"%s\" permission"
 msgstr ""
 
@@ -5043,7 +5043,7 @@ msgstr ""
 msgid "Current Token"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:832
+#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:833
 #: app/assets/javascripts/app/models/ai_text_tool.coffee:20
 #: app/assets/javascripts/app/models/signature.coffee:21
 #: app/assets/javascripts/app/models/text_module.coffee:21
@@ -5120,7 +5120,7 @@ msgid "Custom instructions"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/_application_controller/form.coffee:208
-#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:523
+#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:524
 #: app/assets/javascripts/app/controllers/_ui_element/_application_selector.coffee:14
 #: app/assets/javascripts/app/controllers/_ui_element/core_workflow_condition.coffee:28
 #: app/assets/javascripts/app/controllers/_ui_element/object_selector.coffee:14
@@ -6791,7 +6791,7 @@ msgstr ""
 msgid "Do not change email address (%s)"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:671
+#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:672
 msgid "Do not encrypt email"
 msgstr ""
 
@@ -6799,7 +6799,7 @@ msgstr ""
 msgid "Do not show activities"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:657
+#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:658
 msgid "Do not sign email"
 msgstr ""
 
@@ -7715,11 +7715,11 @@ msgstr ""
 msgid "Encrypt"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:672
+#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:673
 msgid "Encrypt email (if not possible, discard notification)"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:673
+#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:674
 msgid "Encrypt email (if not possible, send notification anyway)"
 msgstr ""
 
@@ -8812,7 +8812,7 @@ msgstr ""
 msgid "Frontend"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:525
+#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:526
 #: app/assets/javascripts/app/models/group.coffee:51
 #: app/frontend/apps/desktop/components/Form/fields/FieldGroupPermissions/FieldGroupPermissionsInput.vue:54
 msgid "Full"
@@ -14284,6 +14284,10 @@ msgstr ""
 msgid "Owner tickets of the user will not get deleted. The owner will be mapped to the system user (ID 1)."
 msgstr ""
 
+#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:523
+msgid "Owners (all)"
+msgstr ""
+
 #: app/assets/javascripts/app/controllers/_integration/pgp.coffee:3
 #: app/assets/javascripts/app/views/agent_ticket_create.jst.eco:37
 #: app/assets/javascripts/app/views/ticket_zoom/article_new.jst.eco:73
@@ -17690,11 +17694,11 @@ msgstr ""
 msgid "Sign built-in system notification emails if possible."
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:658
+#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:659
 msgid "Sign email (if not possible, discard notification)"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:659
+#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:660
 msgid "Sign email (if not possible, send notification anyway)"
 msgstr ""
 
@@ -23029,7 +23033,7 @@ msgstr ""
 msgid "Value"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:571
+#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:572
 msgid "Variables"
 msgstr ""
 
@@ -23169,7 +23173,7 @@ msgstr ""
 msgid "Viewing ticket"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:757
+#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:758
 #: app/assets/javascripts/app/controllers/knowledge_base/content_can_be_published_dialog.coffee:6
 #: app/assets/javascripts/app/controllers/widget/ticket_bulk_form.coffee:71
 #: app/assets/javascripts/app/lib/mixins/knowledge_base_actions.coffee:8
@@ -23599,7 +23603,7 @@ msgstr ""
 
 #: app/assets/javascripts/app/controllers/_application_controller/_modal_generic_confirm.coffee:4
 #: app/assets/javascripts/app/controllers/_manage/ticket_notification.coffee:47
-#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:631
+#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:632
 #: app/assets/javascripts/app/controllers/tag.coffee:147
 #: app/assets/javascripts/app/controllers/ticket_shared_draft_modal.coffee:121
 #: app/assets/javascripts/app/views/integration/ldap.jst.eco:100
@@ -24892,7 +24896,7 @@ msgstr ""
 msgid "inactive"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:622
+#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:623
 #: app/assets/javascripts/app/controllers/knowledge_base/content_can_be_published_form.coffee:91
 #: app/helpers/knowledge_base_visibility_note_helper.rb:25
 msgid "internal"
@@ -25138,7 +25142,7 @@ msgstr ""
 msgid "merged into"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:641
+#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:642
 msgid "message"
 msgstr ""
 
@@ -25418,7 +25422,7 @@ msgstr ""
 msgid "phone"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:622
+#: app/assets/javascripts/app/controllers/_ui_element/_application_action.coffee:623
 msgid "public"
 msgstr ""
 

@@ -46,4 +46,33 @@ RSpec.describe Ticket::Assignees, db_strategy: :reset, type: :model do
 
     expect(created.reload).to have_attributes(owner_id: agent.id, assignees: [agent.id.to_s])
   end
+
+  describe 'trigger recipient "Owners (all)"' do
+    let(:third)   { create(:agent, groups: [group]) }
+    let(:trigger) do
+      create(:trigger, perform: { 'notification.email' => { 'recipient' => ['ticket_assignees'], 'subject' => 'Customer replied', 'body' => 'Hi' } })
+    end
+
+    before do
+      group.update!(email_address: create(:email_address))
+      create(:ticket_article, ticket: ticket)
+    end
+
+    def notified
+      ticket.perform_changes(trigger, 'trigger', { article_id: ticket.articles.last.id }, 1)
+      ticket.articles.reload.last.to.to_s
+    end
+
+    it 'emails everyone in Owners' do
+      ticket.update!(assignees: [agent.id.to_s, other.id.to_s, third.id.to_s])
+
+      expect(notified).to include(agent.email, other.email, third.email)
+    end
+
+    it 'emails the owner when Owners is empty' do
+      ticket.update_columns(owner_id: agent.id, assignees: [])
+
+      expect(notified).to include(agent.email)
+    end
+  end
 end

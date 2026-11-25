@@ -83,6 +83,8 @@ class Ticket::PerformChanges::Action::NotificationSms < Ticket::PerformChanges::
       record.customer_id
     when 'ticket_owner'
       record.owner_id
+    when 'ticket_assignees' # WCL customization: everyone in "Owners"
+      record.assignee_ids_or_owner
     when 'ticket_agents'
       recipients_by_type_ticket_agents
     when %r{\Auserid_(\d+)\z}

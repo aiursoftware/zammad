@@ -232,6 +232,8 @@ class Ticket::PerformChanges::Action::NotificationEmail < Ticket::PerformChanges
       user_lookup_email(record.customer_id)
     when 'ticket_owner'
       user_lookup_email(record.owner_id)
+    when 'ticket_assignees' # WCL customization: everyone in "Owners"
+      User.where(id: record.assignee_ids_or_owner).pluck(:email)
     when 'ticket_agents'
       recipients_by_type_user_group_access
     when %r{\Auserid_(\d+)\z}
