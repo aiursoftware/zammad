@@ -6,6 +6,9 @@
 # Only while the group field is still empty, so a group picked by hand (or by a template) is
 # never overwritten. Zammad's "select" ignores a group the user may not create tickets in, so
 # employees only get the default when it is one of their selectable groups.
+#
+# The group field also stays visible when there is only one group to pick (Zammad hides it then
+# and fills it in silently), so people see where the ticket goes.
 class CoreWorkflow::Custom::WclDefaultGroup < CoreWorkflow::Custom::Backend
   FIELD = 'group_id'.freeze
 
@@ -15,6 +18,8 @@ class CoreWorkflow::Custom::WclDefaultGroup < CoreWorkflow::Custom::Backend
 
   def perform
     return if !screen?('create_middle')
+
+    result('show', FIELD)
     return if params&.dig(FIELD).present?
 
     group = Group.default_for_new_tickets

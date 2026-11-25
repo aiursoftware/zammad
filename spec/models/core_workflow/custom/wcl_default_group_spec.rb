@@ -45,6 +45,17 @@ RSpec.describe CoreWorkflow::Custom::WclDefaultGroup, db_strategy: :reset, type:
     end
   end
 
+  context 'when the user can create tickets in only one group' do
+    let(:agent) { create(:agent, groups: [default_group]) }
+
+    it 'still shows the group field, filled in' do
+      expect(result).to include(
+        visibility: include('group_id' => 'show'),
+        select:     include('group_id' => default_group.id.to_s),
+      )
+    end
+  end
+
   it 'keeps only one default group' do
     other_group.update!(wcl_default_group: true)
 
