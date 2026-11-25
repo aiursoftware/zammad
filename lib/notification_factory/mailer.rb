@@ -160,8 +160,13 @@ returns
       content_type = data[:content_type]
     end
 
+    # WCL customization: through the Microsoft 365 Graph account when switched on (Wcl::GraphNotifications)
+    if (channel = Wcl::GraphNotifications.channel)
+      sender = Wcl::GraphNotifications.sender(channel)
+    end
+
     # get active Email::Outbound Channel and send
-    channel = Channel.find_by(area: 'Email::Notification', active: true)
+    channel ||= Channel.find_by(area: 'Email::Notification', active: true)
 
     if channel.blank?
       Rails.logger.info "Can't find an active 'Email::Notification' channel. Canceling notification sending."

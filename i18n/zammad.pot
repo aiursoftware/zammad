@@ -949,7 +949,7 @@ msgstr ""
 msgid "Accept Data Privacy Policy & Acceptable Use Policy"
 msgstr ""
 
-#: app/models/wcl/setup.rb:826
+#: app/models/wcl/setup.rb:827
 msgid "Accept email only from existing users"
 msgstr ""
 
@@ -1676,6 +1676,10 @@ msgstr ""
 #: app/models/role.rb:182
 #: app/models/user.rb:833
 msgid "Agent limit exceeded, please check your account settings."
+msgstr ""
+
+#: app/models/wcl/setup.rb:887
+msgid "Agent notifications, invitations and password resets are sent through the Microsoft 365 Graph email account instead of the SMTP notification account. Falls back to the notification account when there is no active Graph account."
 msgstr ""
 
 #: db/seeds/permissions.rb:389
@@ -2975,7 +2979,7 @@ msgstr ""
 msgid "Begin forwarded message"
 msgstr ""
 
-#: app/models/wcl/setup.rb:558
+#: app/models/wcl/setup.rb:559
 msgid "Being worked on (WCL)."
 msgstr ""
 
@@ -3019,7 +3023,7 @@ msgstr ""
 msgid "Blocked countries"
 msgstr ""
 
-#: app/models/wcl/setup.rb:848
+#: app/models/wcl/setup.rb:849
 msgid "Blocked email addresses"
 msgstr ""
 
@@ -3464,7 +3468,7 @@ msgstr ""
 #: app/assets/javascripts/app/views/ticket_zoom/knowledge_base_ai_draft_modal.jst.eco:78
 #: app/frontend/apps/desktop/components/KnowledgeBase/KnowledgeBaseAnswer/KnowledgeBaseAnswerAttributes.vue:85
 #: app/frontend/apps/desktop/entities/knowledge-base/composables/useAnswerFormSchema.ts:170
-#: app/models/wcl/setup.rb:355
+#: app/models/wcl/setup.rb:356
 msgid "Category"
 msgstr ""
 
@@ -5192,7 +5196,7 @@ msgstr ""
 msgid "Customer tickets of the user will get deleted on execution of the task. No rollback possible."
 msgstr ""
 
-#: app/models/wcl/setup.rb:43
+#: app/models/wcl/setup.rb:44
 msgid "Customers can create tickets here"
 msgstr ""
 
@@ -5460,7 +5464,7 @@ msgstr ""
 
 #: app/assets/javascripts/app/models/ticket_priority.coffee:26
 #: app/assets/javascripts/app/models/ticket_state.coffee:28
-#: app/models/wcl/setup.rb:731
+#: app/models/wcl/setup.rb:732
 msgid "Default for new tickets"
 msgstr ""
 
@@ -5849,7 +5853,7 @@ msgstr ""
 msgid "Defines postmaster filter to check if the email is a self-created notification email, then ignore it to prevent email loops."
 msgstr ""
 
-#: app/models/wcl/setup.rb:872
+#: app/models/wcl/setup.rb:873
 msgid "Defines postmaster filter to drop email from senders without a user account."
 msgstr ""
 
@@ -5941,7 +5945,7 @@ msgstr ""
 msgid "Defines postmaster filter which sets the articles visibility to internal if it is a rely to an internal article or the last outgoing email is internal."
 msgstr ""
 
-#: app/models/wcl/setup.rb:869
+#: app/models/wcl/setup.rb:870
 #: db/seeds/settings.rb:4362
 msgid "Defines postmaster filter."
 msgstr ""
@@ -6268,7 +6272,7 @@ msgstr ""
 #: app/assets/javascripts/app/controllers/knowledge_base/base_form.coffee:118
 #: app/assets/javascripts/app/controllers/knowledge_base/delete_action.coffee:9
 #: app/assets/javascripts/app/controllers/package.coffee:76
-#: app/assets/javascripts/app/controllers/user.coffee:107
+#: app/assets/javascripts/app/controllers/user.coffee:110
 #: app/assets/javascripts/app/controllers/user_profile/action_row.coffee:93
 #: app/assets/javascripts/app/lib/mixins/knowledge_base_actions.coffee:26
 #: app/assets/javascripts/app/views/calendar/index.jst.eco:80
@@ -6499,12 +6503,12 @@ msgstr ""
 
 #: app/assets/javascripts/app/controllers/department.coffee:3
 #: app/assets/javascripts/app/controllers/maintenance_report.coffee:82
-#: app/models/wcl/setup.rb:160
+#: app/models/wcl/setup.rb:161
 #: db/seeds/object_manager_attributes.rb:1234
 msgid "Department"
 msgstr ""
 
-#: app/models/wcl/setup.rb:160
+#: app/models/wcl/setup.rb:161
 msgid "Department of the requester when the ticket was created; filled in automatically."
 msgstr ""
 
@@ -7361,11 +7365,11 @@ msgstr ""
 msgid "Email could not be verified. Please contact your administrator."
 msgstr ""
 
-#: app/models/wcl/setup.rb:829
+#: app/models/wcl/setup.rb:830
 msgid "Email from senders without a user account is dropped, and addresses in To/Cc are not added as users. Create the user first to let them email in."
 msgstr ""
 
-#: app/models/wcl/setup.rb:851
+#: app/models/wcl/setup.rb:852
 msgid "Email from these addresses is always dropped, one address per line. Deleting a user can add their address here; remove a line to unblock it."
 msgstr ""
 
@@ -7435,7 +7439,7 @@ msgstr ""
 msgid "Embedding provider returned no usable vector"
 msgstr ""
 
-#: app/models/wcl/setup.rb:44
+#: app/models/wcl/setup.rb:45
 msgid "Employees can pick this group when they create a ticket (and later in the HR app). Switch off for teams tickets are only handed to (e.g. Dev, Network)."
 msgstr ""
 
@@ -8056,7 +8060,7 @@ msgstr ""
 msgid "Event summary"
 msgstr ""
 
-#: app/models/wcl/setup.rb:703
+#: app/models/wcl/setup.rb:704
 msgid "Every Monday at 07:00, send each user with the Manager role a summary of last week's tickets for their groups, with the Excel report attached."
 msgstr ""
 
@@ -8068,7 +8072,7 @@ msgstr ""
 msgid "Every time a customer creates a new ticket, they automatically receive a confirmation email to assure them that their issue has been submitted successfully. This behavior is built into Zammad, but it’s also highly customizable, and you can set up other automated actions just like it.\n\nMaybe you want to set a higher priority on any ticket with the word “urgent” in the title. Maybe you want to avoid sending auto-reply emails to customers from certain organizations. Maybe you want mark a ticket as “pending” whenever someone adds an internal note to a ticket.\n\nWhatever it is, you can do it with triggers: actions that watch tickets for certain changes, and then fire off whenever those changes occur."
 msgstr ""
 
-#: app/models/wcl/setup.rb:122
+#: app/models/wcl/setup.rb:123
 msgid "Everyone working on the ticket. The first is its main owner (\"My Assigned Tickets\"); all of them are notified, and the others find it under \"My Subscribed Tickets\"."
 msgstr ""
 
@@ -8509,7 +8513,7 @@ msgstr ""
 msgid "First article (oldest)"
 msgstr ""
 
-#: app/models/wcl/setup.rb:367
+#: app/models/wcl/setup.rb:368
 msgid "First level: the name of a group. Under it: the categories offered for that group."
 msgstr ""
 
@@ -8847,7 +8851,7 @@ msgstr ""
 msgid "General communication error, maybe internet is not available!"
 msgstr ""
 
-#: app/models/wcl/setup.rb:314
+#: app/models/wcl/setup.rb:315
 msgid "General facility repairs"
 msgstr ""
 
@@ -9260,7 +9264,7 @@ msgstr ""
 msgid "HR app: maximum attachments per message"
 msgstr ""
 
-#: app/models/wcl/setup.rb:290
+#: app/models/wcl/setup.rb:291
 msgid "HR portal – open requests"
 msgstr ""
 
@@ -10473,12 +10477,18 @@ msgstr ""
 msgid "Invite Agents"
 msgstr ""
 
+#: app/assets/javascripts/app/controllers/user.coffee:61
+msgid "Invite Colleague"
+msgstr ""
+
 #: app/assets/javascripts/app/controllers/_dashboard/first_steps.coffee:41
+#: app/assets/javascripts/app/controllers/user.coffee:160
 #: app/assets/javascripts/app/views/getting_started/agent.jst.eco:5
 msgid "Invite Colleagues"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/_dashboard/first_steps.coffee:49
+#: app/assets/javascripts/app/controllers/user.coffee:62
 msgid "Invite Customer"
 msgstr ""
 
@@ -10601,7 +10611,7 @@ msgid "Kayako"
 msgstr ""
 
 #: app/assets/javascripts/app/views/settings/dashboard_views.jst.eco:22
-#: app/models/wcl/setup.rb:777
+#: app/models/wcl/setup.rb:778
 msgid "Keep activities for"
 msgstr ""
 
@@ -11303,7 +11313,7 @@ msgstr ""
 #: app/assets/javascripts/app/views/profile/devices.jst.eco:13
 #: app/assets/javascripts/app/views/session.jst.eco:10
 #: app/frontend/apps/desktop/pages/personal-setting/views/PersonalSettingDevices.vue:100
-#: app/models/wcl/setup.rb:418
+#: app/models/wcl/setup.rb:419
 msgid "Location"
 msgstr ""
 
@@ -11515,7 +11525,7 @@ msgstr ""
 msgid "Manage Telegram channel of your system."
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/user.coffee:92
+#: app/assets/javascripts/app/controllers/user.coffee:95
 #: app/assets/javascripts/app/controllers/user/manage_two_factor.coffee:4
 msgid "Manage Two-Factor Authentication"
 msgstr ""
@@ -12648,7 +12658,7 @@ msgstr ""
 msgid "New Trigger"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/user.coffee:60
+#: app/assets/javascripts/app/controllers/user.coffee:63
 #: app/assets/javascripts/app/views/cti/caller_log.jst.eco:89
 #: app/assets/javascripts/app/views/navigation/menu_cti_ringing.jst.eco:54
 msgid "New User"
@@ -12742,7 +12752,7 @@ msgstr ""
 msgid "New ticket: %s"
 msgstr ""
 
-#: app/models/wcl/setup.rb:722
+#: app/models/wcl/setup.rb:723
 msgid "New tickets start in this group (for everyone who may create tickets in it). Only one group can be the default."
 msgstr ""
 
@@ -13528,7 +13538,7 @@ msgstr ""
 msgid "Number"
 msgstr ""
 
-#: app/models/wcl/setup.rb:780
+#: app/models/wcl/setup.rb:781
 msgid "Number of days the activity stream keeps its entries. Older entries are deleted once a day."
 msgstr ""
 
@@ -13649,7 +13659,7 @@ msgstr ""
 msgid "October"
 msgstr ""
 
-#: app/models/wcl/setup.rb:313
+#: app/models/wcl/setup.rb:314
 msgid "Office maintenance"
 msgstr ""
 
@@ -14648,7 +14658,7 @@ msgstr ""
 msgid "Pick a name for the application, and we'll give you a unique token."
 msgstr ""
 
-#: app/models/wcl/setup.rb:159
+#: app/models/wcl/setup.rb:160
 msgid "Pick the department. The list is managed in Admin > Manage > Departments."
 msgstr ""
 
@@ -15909,7 +15919,7 @@ msgstr ""
 msgid "Request the password login here."
 msgstr ""
 
-#: app/models/wcl/setup.rb:220
+#: app/models/wcl/setup.rb:221
 msgid "Request turned down (WCL). Shown to the employee as \"Rejected\" in the HR app."
 msgstr ""
 
@@ -17151,6 +17161,10 @@ msgstr ""
 
 #: app/frontend/apps/desktop/entities/channel-email/composables/useEmailOutboundForm.ts:48
 msgid "Send mails via"
+msgstr ""
+
+#: app/models/wcl/setup.rb:884
+msgid "Send notifications through Microsoft 365 Graph"
 msgstr ""
 
 #: app/assets/javascripts/app/views/whatsapp/account_phone_number.jst.eco:40
@@ -18628,7 +18642,7 @@ msgstr ""
 msgid "Target Language"
 msgstr ""
 
-#: app/models/wcl/setup.rb:796
+#: app/models/wcl/setup.rb:797
 msgid "Target date"
 msgstr ""
 
@@ -18640,19 +18654,19 @@ msgstr ""
 msgid "Target ticket"
 msgstr ""
 
-#: app/models/wcl/setup.rb:540
+#: app/models/wcl/setup.rb:541
 msgid "Team: closed in the last 7 days"
 msgstr ""
 
-#: app/models/wcl/setup.rb:536
+#: app/models/wcl/setup.rb:537
 msgid "Team: no update for 3 days"
 msgstr ""
 
-#: app/models/wcl/setup.rb:529
+#: app/models/wcl/setup.rb:530
 msgid "Team: open tickets by agent"
 msgstr ""
 
-#: app/models/wcl/setup.rb:532
+#: app/models/wcl/setup.rb:533
 msgid "Team: unassigned tickets"
 msgstr ""
 
@@ -19584,7 +19598,7 @@ msgstr ""
 #: app/assets/javascripts/app/controllers/_settings/form.coffee:91
 #: app/assets/javascripts/app/controllers/object_manager.coffee:337
 #: app/assets/javascripts/app/controllers/ticket_zoom/sidebar_idoit.coffee:142
-#: app/assets/javascripts/app/controllers/user.coffee:241
+#: app/assets/javascripts/app/controllers/user.coffee:266
 msgid "The object could not be updated."
 msgstr ""
 
@@ -21834,7 +21848,7 @@ msgstr ""
 msgid "Tracked as checklist item in"
 msgstr ""
 
-#: app/models/wcl/setup.rb:512
+#: app/models/wcl/setup.rb:513
 msgid "Tracks the work of the agents in the groups set on each manager (Admin > Users > Group permissions: Read, Overview, Change): Reporting and the \"Team\" overviews. Not offered as an owner unless the user is also an Agent."
 msgstr ""
 
@@ -21959,7 +21973,7 @@ msgstr ""
 msgid "Triggers activated by actions are executed whenever a ticket is created or updated, while triggers activated by time events are executed when certain times are reached (e.g. pending time, escalation)."
 msgstr ""
 
-#: app/models/wcl/setup.rb:312
+#: app/models/wcl/setup.rb:313
 msgid "Trucking / vehicle maintenance"
 msgstr ""
 
@@ -22288,7 +22302,7 @@ msgstr ""
 msgid "Unlink ticket"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/user.coffee:115
+#: app/assets/javascripts/app/controllers/user.coffee:118
 msgid "Unlock"
 msgstr ""
 
@@ -22908,7 +22922,7 @@ msgstr ""
 msgid "User menu"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/user.coffee:129
+#: app/assets/javascripts/app/controllers/user.coffee:132
 msgid "User successfully unlocked!"
 msgstr ""
 
@@ -22916,7 +22930,7 @@ msgstr ""
 msgid "User taskbar tabs"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/user.coffee:226
+#: app/assets/javascripts/app/controllers/user.coffee:251
 msgid "User updated successfully."
 msgstr ""
 
@@ -23153,7 +23167,7 @@ msgstr ""
 msgid "View answer"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/user.coffee:69
+#: app/assets/javascripts/app/controllers/user.coffee:72
 msgid "View from user's perspective"
 msgstr ""
 
@@ -23235,7 +23249,7 @@ msgstr ""
 msgid "Waiting in %s"
 msgstr ""
 
-#: app/models/wcl/setup.rb:559
+#: app/models/wcl/setup.rb:560
 msgid "Waiting, e.g. for parts or a supplier; does not escalate (WCL)."
 msgstr ""
 
@@ -23243,7 +23257,7 @@ msgstr ""
 msgid "Want to join the BETA UI feedback program?"
 msgstr ""
 
-#: app/models/wcl/setup.rb:311
+#: app/models/wcl/setup.rb:312
 msgid "Warehouse maintenance"
 msgstr ""
 
@@ -23349,7 +23363,7 @@ msgstr ""
 msgid "Week(s)"
 msgstr ""
 
-#: app/models/wcl/setup.rb:700
+#: app/models/wcl/setup.rb:701
 msgid "Weekly summary email to managers"
 msgstr ""
 
@@ -23441,7 +23455,7 @@ msgstr ""
 msgid "When should the job run?"
 msgstr ""
 
-#: app/models/wcl/setup.rb:798
+#: app/models/wcl/setup.rb:799
 msgid "When this needs to be done by (optional)."
 msgstr ""
 
@@ -23453,7 +23467,7 @@ msgstr ""
 msgid "Where"
 msgstr ""
 
-#: app/models/wcl/setup.rb:397
+#: app/models/wcl/setup.rb:398
 msgid "Where is it? e.g. Warehouse A, Office 2nd floor, Truck 51C-12345"
 msgstr ""
 
@@ -23816,7 +23830,7 @@ msgstr ""
 msgid "You cannot resend the verification email to an inactive user. Activate them first."
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/user.coffee:156
+#: app/assets/javascripts/app/controllers/user.coffee:181
 msgid "You cannot view or change the group permissions of an inactive user. Activate them first to manage their permissions."
 msgstr ""
 

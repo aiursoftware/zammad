@@ -57,6 +57,9 @@ class User extends App.ControllerSubContent
         navupdate: '#users'
         buttons: [
           { name: __('Import'), 'data-type': 'import', class: 'btn' }
+          # WCL customization: the Dashboard's "First Steps" invitations, here as well
+          { name: __('Invite Colleague'), 'data-type': 'inviteAgent', class: 'btn' }
+          { name: __('Invite Customer'), 'data-type': 'inviteCustomer', class: 'btn' }
           { name: __('New User'), 'data-type': 'new', class: 'btn--success' }
         ]
         tableExtend: {
@@ -144,6 +147,28 @@ class User extends App.ControllerSubContent
     @genericController.paginate(@page || 1, params)
 
 class App.ControllerGenericIndexUser extends App.ControllerGenericIndex
+  # WCL customization: "Invite Colleague" / "Invite Customer" buttons (same dialog as the
+  #   Dashboard's First Steps; the invitation email goes out through the Notification channel).
+  events: _.extend({}, App.ControllerGenericIndex::events,
+    'click [data-type=inviteAgent]':    'inviteAgent'
+    'click [data-type=inviteCustomer]': 'inviteCustomer'
+  )
+
+  inviteAgent: (e) ->
+    e.preventDefault()
+    new App.InviteUser(
+      head:   __('Invite Colleagues')
+      screen: 'invite_agent'
+    )
+
+  inviteCustomer: (e) ->
+    e.preventDefault()
+    new App.InviteUser(
+      head:   __('Invite Customer')
+      screen: 'invite_customer'
+      signup: true
+    )
+
   edit: (id, e) =>
     e.preventDefault()
     item = App.User.find(id)

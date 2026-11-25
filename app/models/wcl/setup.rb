@@ -37,6 +37,7 @@ module Wcl::Setup # rubocop:disable Metrics/ModuleLength
     default_group
     ticket_target_date
     email_only_existing_users
+    notifications_via_graph
     true
   end
 
@@ -915,6 +916,34 @@ module Wcl::Setup # rubocop:disable Metrics/ModuleLength
       description: __('Defines postmaster filter to drop email from senders without a user account.'),
       options:     {},
       state:       'Channel::Filter::WclBlockUnknownSenders',
+      frontend:    false,
+    )
+  end
+
+  # Admin > Channels > Email > Settings > "Send notifications through Microsoft 365 Graph" (see
+  #   Wcl::GraphNotifications). Off by default so the stock notification specs keep working; the
+  #   WclNotificationsViaGraph migration switches it on.
+  def self.notifications_via_graph
+    Setting.create_if_not_exists(
+      title:       __('Send notifications through Microsoft 365 Graph'),
+      name:        Wcl::GraphNotifications::SETTING,
+      area:        'Email::Base',
+      description: __('Agent notifications, invitations and password resets are sent through the Microsoft 365 Graph email account instead of the SMTP notification account. Falls back to the notification account when there is no active Graph account.'),
+      options:     {
+        form: [
+          {
+            display: '',
+            null:    true,
+            name:    Wcl::GraphNotifications::SETTING,
+            tag:     'boolean',
+            options: { true => 'yes', false => 'no' },
+          },
+        ],
+      },
+      state:       false,
+      preferences: {
+        permission: ['admin.channel_email', 'admin.channel_google', 'admin.channel_microsoft365', 'admin.channel_microsoft_graph'],
+      },
       frontend:    false,
     )
   end
