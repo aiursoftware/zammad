@@ -25,6 +25,13 @@ RSpec.describe 'WCL backups', performs_jobs: true, type: :request do
       expect { post '/api/v1/wcl/backups', as: :json }.to have_enqueued_job(WclBackupJob)
     end
 
+    it 'deletes several backups' do
+      File.write(File.join(dir, '20261102030000_zammad_db.psql.gz'), 'x')
+      post '/api/v1/wcl/backups/delete', params: { ids: %w[20261101030000 20261102030000] }, as: :json
+
+      expect(json_response['backups']).to be_empty
+    end
+
     it 'deletes a backup' do
       delete '/api/v1/wcl/backups/20261101030000', as: :json
 

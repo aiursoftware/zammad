@@ -50,6 +50,34 @@ RSpec.describe Wcl::Backup, performs_jobs: true do
     end
   end
 
+  describe '.destroy_many!' do
+    before do
+      make('20261101030000')
+      make('20261102030000')
+      make('20261103030000')
+    end
+
+    it 'deletes the selected backups only' do
+      described_class.destroy_many!(%w[20261101030000 20261102030000])
+
+      expect(described_class.list.pluck(:id)).to eq(%w[20261103030000])
+    end
+
+    it 'refuses when one of them is not a backup' do
+      expect { described_class.destroy_many!(%w[20261101030000 ../../etc]) }.to raise_error(Wcl::Backup::Error)
+    end
+
+    it 'then deletes none of them' do
+      begin
+        described_class.destroy_many!(%w[20261101030000 ../../etc])
+      rescue Wcl::Backup::Error
+        nil
+      end
+
+      expect(described_class.list.size).to eq(3)
+    end
+  end
+
   describe '.create!' do
     it 'writes the database and the file storage' do
       id = described_class.create!

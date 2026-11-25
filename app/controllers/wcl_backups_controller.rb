@@ -25,6 +25,14 @@ class WclBackupsController < ApplicationController
     render json: { error: e.message }, status: :unprocessable_content
   end
 
+  # POST /api/v1/wcl/backups/delete  { ids: [...] }
+  def destroy_many
+    Wcl::Backup.destroy_many!(params[:ids])
+    render json: status_json
+  rescue Wcl::Backup::Error => e
+    render json: { error: e.message }, status: :unprocessable_content
+  end
+
   private
 
   def status_json

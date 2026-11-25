@@ -62,12 +62,26 @@ module Wcl::Backup
   end
 
   def self.destroy!(id)
-    raise Error, __('This backup does not exist.') if !ID_PATTERN.match?(id.to_s)
-
-    files = dir.glob("#{id}_zammad_*.gz")
+    files = files_of(id)
     raise Error, __('This backup does not exist.') if files.empty?
 
     files.each { |path| FileUtils.rm_f(path) }
+  end
+
+  # Several at once (Admin > System > Backups > "Delete selected"); checks every id before deleting any.
+  def self.destroy_many!(ids)
+    ids = Array(ids).map(&:to_s).uniq
+    raise Error, __('No backups selected.') if ids.empty?
+
+    files = ids.map { |id| files_of(id).presence || raise(Error, __('This backup does not exist.')) }
+    files.flatten.each { |path| FileUtils.rm_f(path) }
+    ids.size
+  end
+
+  def self.files_of(id)
+    return [] if !ID_PATTERN.match?(id.to_s)
+
+    dir.glob("#{id}_zammad_*.gz")
   end
 
   # The file storage folder (as in the docker image: /opt/zammad/storage).
@@ -110,5 +124,5 @@ module Wcl::Backup
     pg_config[:password].present? ? { 'PGPASSWORD' => pg_config[:password].to_s } : {}
   end
 
-  private_class_method :write, :run!, :pg_config, :pg_dump_args, :pg_env
+  private_class_method :files_of, :write, :run!, :pg_config, :pg_dump_args, :pg_env
 end

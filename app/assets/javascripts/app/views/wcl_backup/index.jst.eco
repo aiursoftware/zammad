@@ -3,6 +3,7 @@
     <h1><%- @T('Backups') %></h1>
   </div>
   <div class="page-header-meta">
+    <button class="btn btn--danger js-deleteSelected hidden"><span class="wcl-backups-deleteLabel"><%- @T('Delete selected') %> (<span class="js-selectedCount">0</span>)</span></button>
     <button class="btn btn--primary js-create" <% if @running: %>disabled<% end %>>
       <% if @running: %><%- @T('Making backup…') %><% else: %><%- @T('Create backup now') %><% end %>
     </button>
@@ -18,18 +19,33 @@
   <% if _.isEmpty(@backups): %>
     <p><%- @T('No backups yet.') %></p>
   <% else: %>
-    <table class="table table-hover">
+    <table class="table table-hover wcl-backups">
       <thead>
         <tr>
+          <th class="table-checkbox wcl-backups-check">
+            <label class="checkbox-replacement">
+              <input type="checkbox" class="js-selectAll" aria-label="<%= @Ti('Select all') %>">
+              <%- @Icon('checkbox', 'icon-unchecked') %>
+              <%- @Icon('checkbox-checked', 'icon-checked') %>
+              <%- @Icon('checkbox-indeterminate', 'icon-indeterminate') %>
+            </label>
+          </th>
           <th><%- @T('Created') %></th>
           <th><%- @T('Contents') %></th>
-          <th><%- @T('Size') %></th>
-          <th style="width: 110px"></th>
+          <th class="wcl-backups-size"><%- @T('Size') %></th>
+          <th class="wcl-backups-actions"></th>
         </tr>
       </thead>
       <tbody>
         <% for backup in @backups: %>
-          <tr>
+          <tr class="js-row" data-id="<%= backup.id %>">
+            <td class="table-checkbox wcl-backups-check">
+              <label class="checkbox-replacement">
+                <input type="checkbox" class="js-select" value="<%= backup.id %>" <% if @selected[backup.id]: %>checked<% end %>>
+                <%- @Icon('checkbox', 'icon-unchecked') %>
+                <%- @Icon('checkbox-checked', 'icon-checked') %>
+              </label>
+            </td>
             <td><%- @humanTime(backup.created_at) %> <span class="text-muted">(<%- @datetime(backup.created_at) %>)</span></td>
             <td>
               <% if backup.database && backup.files: %>
@@ -40,8 +56,8 @@
                 <span class="danger-color"><%- @T('Attachments only (incomplete)') %></span>
               <% end %>
             </td>
-            <td><%= App.Utils.humanFileSize(backup.size) %></td>
-            <td style="white-space: nowrap; text-align: right"><button class="btn btn--danger btn--small js-delete" data-id="<%= backup.id %>"><%- @T('Delete') %></button></td>
+            <td class="wcl-backups-size"><%= App.Utils.humanFileSize(backup.size) %></td>
+            <td class="wcl-backups-actions"><button class="btn btn--danger btn--small js-delete" data-id="<%= backup.id %>"><%- @T('Delete') %></button></td>
           </tr>
         <% end %>
       </tbody>

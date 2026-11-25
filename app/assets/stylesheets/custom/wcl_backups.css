@@ -1,0 +1,33 @@
+/* WCL customization: Admin > System > Backups */
+.wcl-backups .wcl-backups-check {
+  width: 40px;
+}
+
+.wcl-backups .wcl-backups-size {
+  width: 110px;
+}
+
+.wcl-backups .wcl-backups-actions {
+  width: 110px;
+  text-align: right;
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.wcl-backups .js-row {
+  cursor: pointer;
+}
+
+.wcl-backups .js-row.is-selected td {
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.page-header-meta .js-deleteSelected {
+  margin-right: 8px;
+  white-space: nowrap;
+}
+
+.wcl-backups-deleteLabel {
+  white-space: nowrap;
+}

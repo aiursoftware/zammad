@@ -176,6 +176,10 @@ msgstr ""
 msgid "%s attached file(s)"
 msgstr ""
 
+#: app/assets/javascripts/app/controllers/wcl_backup.coffee:108
+msgid "%s backups deleted."
+msgstr ""
+
 #: app/assets/javascripts/app/models/data_privacy_task.coffee:32
 #: app/frontend/shared/composables/activity-message/activityMessageBuilder/builders/data-privacy-task.ts:28
 msgid "%s completed data privacy task to delete user ID |%s|"
@@ -633,7 +637,7 @@ msgstr ""
 msgid "A backup is already being made."
 msgstr ""
 
-#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:15
+#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:16
 msgid "A backup is being made. This page updates when it is done."
 msgstr ""
 
@@ -2489,7 +2493,7 @@ msgstr ""
 msgid "Attachments are stored in the filesystem."
 msgstr ""
 
-#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:40
+#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:56
 msgid "Attachments only (incomplete)"
 msgstr ""
 
@@ -2892,15 +2896,15 @@ msgstr ""
 msgid "Backlog"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/wcl_backup.coffee:70
+#: app/assets/javascripts/app/controllers/wcl_backup.coffee:140
 msgid "Backup deleted."
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/wcl_backup.coffee:33
+#: app/assets/javascripts/app/controllers/wcl_backup.coffee:42
 msgid "Backup finished."
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/wcl_backup.coffee:51
+#: app/assets/javascripts/app/controllers/wcl_backup.coffee:121
 msgid "Backup started. This can take a few minutes."
 msgstr ""
 
@@ -4467,7 +4471,7 @@ msgid "Content written in any of these languages is shown in its original form i
 msgstr ""
 
 #: app/assets/javascripts/app/views/system_report.jst.eco:11
-#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:25
+#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:34
 msgid "Contents"
 msgstr ""
 
@@ -4819,7 +4823,7 @@ msgstr ""
 msgid "Create and set up Knowledge Base."
 msgstr ""
 
-#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:7
+#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:8
 msgid "Create backup now"
 msgstr ""
 
@@ -4907,7 +4911,7 @@ msgstr ""
 #: app/assets/javascripts/app/views/popover/ticket.jst.eco:34
 #: app/assets/javascripts/app/views/profile/token_access.jst.eco:18
 #: app/assets/javascripts/app/views/ssl_certificates_list.jst.eco:14
-#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:24
+#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:33
 #: app/assets/javascripts/app/views/widget/ticket_stats_frequency.jst.eco:20
 #: app/frontend/apps/desktop/components/Ticket/TicketBarChart/useTicketStatsChart.ts:94
 #: app/frontend/apps/desktop/pages/personal-setting/views/PersonalSettingTokenAccess.vue:94
@@ -5300,11 +5304,11 @@ msgstr ""
 msgid "Database Update Required"
 msgstr ""
 
-#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:36
+#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:52
 msgid "Database and attachments"
 msgstr ""
 
-#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:38
+#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:54
 msgid "Database only"
 msgstr ""
 
@@ -6287,7 +6291,7 @@ msgstr ""
 #: app/assets/javascripts/app/views/ssl_certificates_list.jst.eco:44
 #: app/assets/javascripts/app/views/tag/table.jst.eco:14
 #: app/assets/javascripts/app/views/telegram/index.jst.eco:38
-#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:44
+#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:6
 #: app/assets/javascripts/app/views/whatsapp/index.jst.eco:45
 #: app/assets/javascripts/app/views/widget/text_module.jst.eco:13
 #: app/frontend/apps/desktop/pages/ticket/components/TicketSharedDraftFlyout.vue:226
@@ -6295,6 +6299,10 @@ msgstr ""
 #: app/frontend/apps/mobile/pages/account/views/PersonalSettingAvatar.vue:154
 #: app/frontend/shared/components/Form/fields/FieldFile/FieldFileInput.vue:149
 msgid "Delete"
+msgstr ""
+
+#: app/assets/javascripts/app/controllers/wcl_backup.coffee:96
+msgid "Delete %s backups? This cannot be undone."
 msgstr ""
 
 #: app/frontend/shared/components/Form/fields/FieldEditor/features/table/TableMenuPopover.vue:89
@@ -6424,6 +6432,10 @@ msgstr ""
 msgid "Delete row"
 msgstr ""
 
+#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:6
+msgid "Delete selected"
+msgstr ""
+
 #: app/frontend/shared/components/Form/fields/FieldEditor/features/table/TableMenuPopover.vue:150
 msgid "Delete table"
 msgstr ""
@@ -6436,7 +6448,7 @@ msgstr ""
 msgid "Delete this avatar"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/wcl_backup.coffee:61
+#: app/assets/javascripts/app/controllers/wcl_backup.coffee:131
 msgid "Delete this backup? This cannot be undone."
 msgstr ""
 
@@ -7049,7 +7061,7 @@ msgstr ""
 msgid "Dynamic fields are not that common in Zammad, as it takes a different approach to ticket attributes. Zammad also uses tags in addition to custom fields to classify tickets. This difference can create a new philosophy of your ticket attributes/tags compared to your current use of dynamic fields in OTRS."
 msgstr ""
 
-#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:12
+#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:13
 msgid "Each backup holds the database and the attachments. A backup is also made every night; backups older than the server's hold time (14 days by default) are removed automatically."
 msgstr ""
 
@@ -11430,7 +11442,7 @@ msgstr ""
 msgid "Maintenance report"
 msgstr ""
 
-#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:7
+#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:8
 msgid "Making backup…"
 msgstr ""
 
@@ -12900,7 +12912,11 @@ msgstr ""
 msgid "No attached files"
 msgstr ""
 
-#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:19
+#: app/models/wcl/backup.rb:71
+msgid "No backups selected."
+msgstr ""
+
+#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:20
 msgid "No backups yet."
 msgstr ""
 
@@ -16953,6 +16969,10 @@ msgstr ""
 msgid "Select Template"
 msgstr ""
 
+#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:27
+msgid "Select all"
+msgstr ""
+
 #: app/frontend/apps/desktop/components/CommonTable/TableHeader.vue:423
 msgid "Select all %s results"
 msgstr ""
@@ -17838,7 +17858,7 @@ msgstr ""
 msgid "Site key"
 msgstr ""
 
-#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:26
+#: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:35
 msgid "Size"
 msgstr ""
 
@@ -17881,7 +17901,7 @@ msgstr ""
 msgid "Some system settings have changed, please restart all Zammad processes!"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/wcl_backup.coffee:79
+#: app/assets/javascripts/app/controllers/wcl_backup.coffee:149
 #: app/frontend/shared/errors/useErrorHandler.ts:35
 msgid "Something went wrong."
 msgstr ""
@@ -20498,7 +20518,7 @@ msgstr ""
 msgid "This article is not part of the ticket."
 msgstr ""
 
-#: app/models/wcl/backup.rb:63
+#: app/models/wcl/backup.rb:64
 msgid "This backup does not exist."
 msgstr ""
 

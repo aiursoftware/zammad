@@ -8,6 +8,7 @@ Zammad::Application.routes.draw do
     post 'wcl/organizations/assign_by_domain', to: 'wcl_organizations#assign_by_domain'
     get 'wcl/backups',          to: 'wcl_backups#index'
     post 'wcl/backups',         to: 'wcl_backups#create'
+    post 'wcl/backups/delete',  to: 'wcl_backups#destroy_many'
     delete 'wcl/backups/:id',   to: 'wcl_backups#destroy'
   end
 end
