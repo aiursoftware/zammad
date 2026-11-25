@@ -2,10 +2,9 @@
 
 require 'rails_helper'
 
-RSpec.describe 'Desktop > Ticket > Multitasking', app: :desktop_view, authenticated_as: :agent, type: :system do
+RSpec.describe 'Desktop > Ticket > Multitasking', app: :desktop_view, authenticated_as: :agent, type: :playwright do
   let(:agent)        { create(:agent, groups: [group]) }
   let(:group)        { create(:group) }
-  let(:article)      { create(:ticket_article, :inbound_email, ticket: ticket) }
   let(:ticket)       { create(:ticket, group:, title: 'Test initial') }
   let(:other_ticket) { create(:ticket, group:, title: 'Other ticket') }
   let(:customer)     { create(:customer, :with_org) }
@@ -24,75 +23,80 @@ RSpec.describe 'Desktop > Ticket > Multitasking', app: :desktop_view, authentica
     end
   end
 
+  def switch_to_tab(title)
+    main_sidebar.get_by_role('link', name: title).click
+  end
+
+  # A ticket opens scrolled to its newest article.
+  def wait_for_newest_article
+    expect(main_content.get_by_text(ticket.articles.last.body).last).to be_in_viewport
+  end
+
+  # The scroll to the newest article swaps the headers, which closes any open popover. Locators
+  #   do not tell the headers apart: the one swapped out only turns inert.
+  def wait_for_header_swap
+    full_header = '[data-test-id=ticket-detail-top-bar-full-details]'
+    page.wait_for_function('(header) => document.querySelector(`${header}[inert], ${header} [inert]`)', arg: full_header)
+  end
+
+  def expect_scroll_offset(element, offset)
+    expect(offset).to be_positive
+    wait_for_scroll_offset(element, offset)
+  end
+
   it 'history flyout stays around when switching between taskbars' do
-    visit "/tickets/#{ticket.id}"
+    open_desktop_ticket(ticket)
 
-    wait_for_form_to_settle("form-ticket-edit-#{ticket.id}")
+    wait_for_header_swap
 
-    # The scroll to the newest article swaps the headers, which closes any open popover.
-    expect(page).to have_css('[data-test-id="ticket-detail-top-bar-clipped-details"]:not([inert])')
+    content_sidebar.get_by_role('button', name: 'Action menu button').click
+    page.get_by_role('menuitem', name: 'History').click
+    wait_for_query('ticketHistory')
 
-    within('#ticketSidebar') do
-      click_on 'Action menu button'
-    end
+    history_entry = flyout('History').get_by_role('time').last
+    history_entry.scroll_into_view_if_needed
+    preserved_scroll_offset = scroll_offset(history_entry)
 
-    click_on 'History'
+    main_sidebar.get_by_role('link', name: 'New ticket').click
+    wait_for_form_to_settle('ticket-create')
+    fill_field('Title', 'Example Ticket Title')
+    search_for_option('Customer', customer.email, option: customer.fullname)
+    type_in_editor('Text', 'some text')
+    page.get_by_role('button', name: 'Create', exact: true).click
+    expect(notification('Ticket has been created successfully')).to be_visible
 
-    wait_for_gql('apps/desktop/pages/ticket/graphql/queries/ticketHistory.graphql')
+    switch_to_tab(ticket.title)
 
-    scroll_into_view(find('#flyout-ticket-history'))
-
-    flyout = find('#flyout-ticket-history')
-    preserved_scroll_offset = flyout.find('.h-full').evaluate_script('this.scrollTop')
-
-    click_on 'New ticket'
-    find_input('Title').type('Example Ticket Title')
-    find_autocomplete('Customer').search_for_option(customer.email, label: customer.fullname)
-    text = find_editor('Text')
-    text.type('some text')
-    click_on 'Create'
-    expect(page).to have_text('Ticket has been created successfully')
-
-    click_on ticket.title
-
-    expect(page).to have_css('#flyout-ticket-history')
-
-    flyout = find('#flyout-ticket-history')
-    current_scroll_offset = flyout.find('.h-full').evaluate_script('this.scrollTop')
-
-    expect(preserved_scroll_offset).to eq(current_scroll_offset).and(be_positive)
+    expect(flyout('History')).to be_visible
+    expect_scroll_offset(history_entry, preserved_scroll_offset)
   end
 
   it 'keeps new article form pinned and other ticket scrolling in place' do
-    visit "/tickets/#{ticket.id}"
-    visit "/tickets/#{other_ticket.id}"
+    open_desktop_ticket(ticket)
+    open_desktop_ticket(other_ticket)
 
-    find('button', text: 'Add internal note').click
-    within_form do
-      find_editor('Text').type('Call content here')
-    end
-    click_on('Pin this panel')
+    add_internal_note_button.click
+    type_in_editor('Text', 'Call content here')
+    page.get_by_role('button', name: 'Pin this panel').click
 
-    click_on(ticket.title)
+    switch_to_tab(ticket.title)
+    wait_for_newest_article
 
-    article = ticket.articles.third
-    elem = find('.Content', text: article.body)
-    scroll_into_view(elem)
-    preserved_scroll_offset = find('div[data-test-id="ticket-detail-content-container"]').evaluate_script('this.scrollTop')
+    article = main_content.get_by_text('some message 9', exact: true)
+    article.scroll_into_view_if_needed
+    preserved_scroll_offset = scroll_offset(article)
 
-    click_on other_ticket.title
+    switch_to_tab(other_ticket.title)
 
-    expect(page).to have_text('Call content here')
-    click_on('Unpin this panel')
-    click_on('Update')
+    expect(editor('Text')).to contain_text('Call content here')
+    page.get_by_role('button', name: 'Unpin this panel').click
+    page.get_by_role('button', name: 'Update', exact: true).click
 
-    expect(page).to have_text('Ticket updated successfully.')
-    expect(page).to have_css('.Content', text: 'Call content here')
+    expect(notification('Ticket updated successfully.')).to be_visible
+    expect(main_content.get_by_text('Call content here', exact: true)).to be_visible
 
-    click_on(ticket.title)
+    switch_to_tab(ticket.title)
 
-    current_scroll_offset = find('div[data-test-id="ticket-detail-content-container"]').evaluate_script('this.scrollTop')
-
-    expect(preserved_scroll_offset).to eq(current_scroll_offset).and(be_positive)
+    expect_scroll_offset(article, preserved_scroll_offset)
   end
 end

@@ -15,6 +15,7 @@ import {
   toRef,
   watch,
   markRaw,
+  toRaw,
   useSlots,
   onBeforeUnmount,
   effectScope,
@@ -22,9 +23,9 @@ import {
 
 import { NotificationTypes } from '#shared/components/CommonNotifications/types.ts'
 import { useNotifications } from '#shared/components/CommonNotifications/useNotifications.ts'
-import { useObjectAttributeFormFields } from '#shared/entities/object-attributes/composables/useObjectAttributeFormFields.ts'
-import { useObjectAttributeLoadFormFields } from '#shared/entities/object-attributes/composables/useObjectAttributeLoadFormFields.ts'
-import { flattenObjectAttributeValues } from '#shared/entities/object-attributes/utils.ts'
+import { useEntityAttributeFormFields } from '#shared/entities/core/attributes/composables/useEntityAttributeFormFields.ts'
+import { useEntityAttributeLoadFormFields } from '#shared/entities/core/attributes/composables/useEntityAttributeLoadFormFields.ts'
+import { flattenObjectAttributeValues } from '#shared/entities/core/attributes/utils.ts'
 import UserError from '#shared/errors/UserError.ts'
 import { extractEntityIds } from '#shared/form/utils/entity.ts'
 import type {
@@ -58,7 +59,12 @@ import { useFormUpdaterQuery } from './graphql/queries/formUpdater.api.ts'
 import { getFormClasses } from './initializeFormClasses.ts'
 import initializeFieldInitialValuesCleanupPlugin from './plugins/initializeFieldInitialValuesCleanupPlugin.ts'
 import { FormHandlerExecution, FormValidationVisibility } from './types.ts'
-import { getNodeByName as getFormkitFieldNode, getNodeId, setErrors } from './utils.ts'
+import {
+  autofocusFormField,
+  getNodeByName as getFormkitFieldNode,
+  getNodeId,
+  setErrors,
+} from './utils.ts'
 
 import type {
   ChangedField,
@@ -118,9 +124,9 @@ export interface Props {
   disabled?: boolean
   shouldAutofocus?: boolean
 
-  // Some special properties for working with object attribute fields inside of a form schema.
-  useObjectAttributes?: boolean
-  objectAttributeSkippedFields?: string[]
+  // Some special properties for working with entity attribute fields inside of a form schema.
+  useEntityAttributes?: boolean
+  entityAttributeSkippedFields?: string[]
 
   clearValuesAfterSubmit?: boolean
 
@@ -149,7 +155,7 @@ const props = withDefaults(defineProps<Props>(), {
     return reactive({})
   },
   validationVisibility: FormValidationVisibility.Submit,
-  useObjectAttributes: false,
+  useEntityAttributes: false,
 })
 
 const formId = props.formId ? props.formId : getUuid()
@@ -212,8 +218,7 @@ const autofocusFirstInput = (node: FormKitNode) => {
   nextTick(() => {
     const firstInput = getFirstFocusableElement(formElement.value)
 
-    firstInput?.focus()
-    firstInput?.scrollIntoView({ block: 'nearest' })
+    if (firstInput) autofocusFormField(firstInput)
 
     const formName = node.context?.id || node.name
     testFlags.set(`${formName}.focused`)
@@ -304,6 +309,10 @@ const values = computed<FormValues>(() => {
 
 const relationFields: FormUpdaterRelationField[] = []
 const relationFieldBelongsToObjectField: Record<string, string> = {}
+
+// The option lists which arrived with a signature. As long as the form names the signature of a list it holds, the
+// form updater leaves that list out of its result.
+const signedFieldOptions = new Map<string, { signature: string; options: unknown }>()
 
 const formUpdaterProcessing = computed(() => !!formNode.value?.context?.state.formUpdaterProcessing)
 
@@ -736,6 +745,13 @@ const updateSchemaDataField = (
   }
 }
 
+// A changed value used the marker up in its commit already. FormKit does not commit an unchanged
+//   value, so the marker would otherwise fall on the next commit, e.g. one with the user's typing.
+const inputFormUpdaterValue = (node: FormKitNode, value: FormFieldValue) => {
+  node.input(value, false)
+  node.props.formUpdaterValueChange = false
+}
+
 // We have some flags which are used for some detection related to some additional logic.
 // - formUpdaterValueChange: This flag is set when the value is changed by the form updater to avoid re-trigger of
 // the form updater (this is needed because "updaterChangedFields" can already be reseted again, but value changes can be delayed).
@@ -746,6 +762,8 @@ const updateChangedFields = (
   changedFields: Record<string, Partial<FormSchemaField>>,
   changesCanTriggerFormUpdater = false,
 ) => {
+  const deferredInputs: Promise<unknown>[] = []
+
   const handleUpdatedInitialFieldValue = (
     fieldName: string,
     value: FormFieldValue,
@@ -761,7 +779,7 @@ const updateChangedFields = (
     }
   }
 
-  Object.keys(changedFields).forEach(async (fieldName) => {
+  const fieldUpdates = Object.keys(changedFields).map(async (fieldName) => {
     if (!schemaData.fields[fieldName]) return
 
     const { initialValue, value, ...changedFieldProps } = changedFields[fieldName]
@@ -846,17 +864,29 @@ const updateChangedFields = (
           // from node.input() will automatically trigger dirty re-evaluation.
           // The plugin already captured _init synchronously during field creation,
           // before settled resolves, so the baseline is correct.
-          node.settled.then(() => node.input(value, false))
-        } else {
-          node?.input(value, false)
+          deferredInputs.push(node.settled.then(() => inputFormUpdaterValue(node, value)))
+        } else if (node) {
+          inputFormUpdaterValue(node, value)
         }
       })
     }
   })
 
+  // Resolves once every field has its new value, also the ones set in a later tick.
+  return Promise.all(fieldUpdates)
+    .then(() => nextTick())
+    .then(() => Promise.all(deferredInputs))
+}
+
+const finishFormUpdate = (fieldsUpdated: Promise<unknown>) => {
   nextTick(() => {
     updaterChangedFields.clear()
     formNode.value?.store.remove('formUpdaterProcessing')
+  })
+
+  fieldsUpdated.then(() => {
+    const formName = formNode.value?.context?.id || formNode.value?.name
+    testFlags.set(`${formName}.formUpdater.applied`)
   })
 }
 
@@ -904,6 +934,33 @@ const executeFormHandler = (
   })
 }
 
+const rememberSignedFieldOptions = (formUpdater: FormUpdaterQuery['formUpdater']) => {
+  const signatures: Record<string, string> = formUpdater.optionSignatures ?? {}
+
+  Object.entries(signatures).forEach(([fieldName, signature]) => {
+    const options = formUpdater.fields[fieldName]?.options
+
+    // Without options the form updater confirmed the list the form holds.
+    if (options === undefined) return
+
+    // A copy, as the list itself can change in place later, e.g. by changed fields from outside merged into it.
+    signedFieldOptions.set(fieldName, { signature, options: cloneDeep(options) })
+  })
+}
+
+const getKnownOptionSignatures = () => {
+  const signatures: Record<string, string> = {}
+
+  signedFieldOptions.forEach(({ signature, options }, fieldName) => {
+    // Only for a list the field still holds as it arrived, e.g. a form handler can replace or change it.
+    if (!isEqual(toRaw(schemaData.fields[fieldName]?.props.options), options)) return
+
+    signatures[fieldName] = signature
+  })
+
+  return signatures
+}
+
 const formUpdaterVariables = shallowRef<FormUpdaterQueryVariables>()
 let nextFormUpdaterVariables: Maybe<FormUpdaterQueryVariables>
 const executeFormUpdaterRefetch = () => {
@@ -917,6 +974,12 @@ const executeFormUpdaterRefetch = () => {
       visible: false,
     }),
   )
+
+  // Collected right before the request, a form handler of the same tick can still replace a list.
+  const knownOptionSignatures = getKnownOptionSignatures()
+  if (!isEmpty(knownOptionSignatures)) {
+    nextFormUpdaterVariables.meta.knownOptionSignatures = knownOptionSignatures
+  }
 
   formUpdaterVariables.value = nextFormUpdaterVariables
 
@@ -1054,11 +1117,13 @@ const changedInputValueHandling = (inputNode: FormKitNode) => {
       return
     }
 
-    if (
-      !formKitInitialNodesSettled.value ||
-      formResetRunning.value ||
-      (!currentCreatedFormFields.has(node.name) && !newValue) // It's the initial value commit for the field, when it's not "fully" created yet.
-    ) {
+    // The initial value commit of a field which is not "fully" created yet - a
+    //  multi-value field starts with an empty list instead of an empty value.
+    const initialEmptyCommit =
+      !currentCreatedFormFields.has(node.name) &&
+      (!newValue || (Array.isArray(newValue) && newValue.length === 0))
+
+    if (!formKitInitialNodesSettled.value || formResetRunning.value || initialEmptyCommit) {
       updaterChangedFields.delete(node.name)
       previousValues.set(node, cloneDeep(newValue))
       return
@@ -1113,7 +1178,7 @@ const changedInputValueHandling = (inputNode: FormKitNode) => {
 }
 
 const buildStaticSchema = () => {
-  const { getFormFieldSchema, getFormFieldsFromScreen } = useObjectAttributeFormFields(
+  const { getFormFieldSchema, getFormFieldsFromScreen } = useEntityAttributeFormFields(
     fixedAndSkippedFields,
     props.initialEntityObject?.policy,
   )
@@ -1140,7 +1205,8 @@ const buildStaticSchema = () => {
         plugins,
         validationMessages: field.validationMessages,
         validationRules: field.validationRules,
-        triggerFormUpdater: field.triggerFormUpdater ?? !!props.formUpdaterId,
+        triggerFormUpdater:
+          field.triggerFormUpdater ?? (!!props.formUpdaterId && !props.formUpdaterInitialOnly),
       },
     }
   }
@@ -1197,11 +1263,11 @@ const buildStaticSchema = () => {
       }
     }
 
-    if ('object' in node && getFormFieldSchema && getFormFieldsFromScreen) {
+    if ('entity' in node && getFormFieldSchema && getFormFieldsFromScreen) {
       if ('name' in node && node.name && !node.type) {
-        const { screen, object, ...fieldNode } = node
+        const { screen, entity, ...fieldNode } = node
 
-        const resolvedField = getFormFieldSchema(fieldNode.name, object, screen)
+        const resolvedField = getFormFieldSchema(fieldNode.name, entity, screen)
 
         if (!resolvedField) return null
 
@@ -1210,7 +1276,7 @@ const buildStaticSchema = () => {
           ...fieldNode,
         } as FormSchemaField
       } else if ('screen' in node && !('name' in node)) {
-        const resolvedFields = getFormFieldsFromScreen(node.screen, node.object)
+        const resolvedFields = getFormFieldsFromScreen(node.screen, node.entity)
         const formKitFields: ResolveFormKitSchemaNode[] = []
         resolvedFields.forEach((screenField) => {
           updateSchemaDataField(screenField)
@@ -1371,7 +1437,8 @@ const initializeFormSchema = () => {
 
     formUpdaterScope.run(() => {
       formUpdaterQueryHandler = new QueryHandler(
-        useFormUpdaterQuery(formUpdaterVariables as Ref<FormUpdaterQueryVariables>, () => ({
+        useFormUpdaterQuery({
+          variables: formUpdaterVariables as Ref<FormUpdaterQueryVariables>,
           context: {
             batch: {
               active: false,
@@ -1380,18 +1447,24 @@ const initializeFormSchema = () => {
               // Send the initial form load over HTTP — the WebSocket connection
               // is busy with many other messages during the initial render and
               // becomes a bottleneck. Subsequent refetches stay on ActionCable.
-              active: !formUpdaterVariables.value?.meta.initial,
+              // A getter, because the context is set up once and read per request.
+              get active() {
+                return !formUpdaterVariables.value?.meta.initial
+              },
             },
             skipSubscriptions: ['userCurrentTaskbarItemStateUpdates'],
           },
           fetchPolicy: 'no-cache',
-        })),
+        }),
       )
     })
 
     handleFormUpdaterAutosaveNotification()
 
     formUpdaterQueryHandler.onResult((queryResult) => {
+      // Before anything can change the result: the form handlers below get the result itself.
+      if (queryResult?.data?.formUpdater) rememberSignedFieldOptions(queryResult.data.formUpdater)
+
       // Execute the form handler function so that they can manipulate the form updater result.
       if (!formSchemaInitialized.value) {
         executeFormHandler(
@@ -1405,10 +1478,12 @@ const initializeFormSchema = () => {
       if (queryResult?.data?.formUpdater) {
         Object.assign(schemaData.flags, queryResult.data.formUpdater.flags)
 
-        updateChangedFields(
-          changeFields.value
-            ? merge(queryResult.data.formUpdater.fields, changeFields.value)
-            : queryResult.data.formUpdater.fields,
+        finishFormUpdate(
+          updateChangedFields(
+            changeFields.value
+              ? merge(queryResult.data.formUpdater.fields, changeFields.value)
+              : queryResult.data.formUpdater.fields,
+          ),
         )
       }
 
@@ -1416,7 +1491,7 @@ const initializeFormSchema = () => {
     })
   } else {
     executeFormHandler(FormHandlerExecution.Initial, localInitialValues)
-    if (changeFields.value) updateChangedFields(changeFields.value)
+    if (changeFields.value) finishFormUpdate(updateChangedFields(changeFields.value))
 
     setFormSchemaInitialized()
   }
@@ -1427,48 +1502,48 @@ const initializeFormSchema = () => {
 if (props.schema) {
   showInitialLoadingAnimation.value = true
 
-  if (props.useObjectAttributes) {
-    // TODO: rebuild schema, when object attributes
+  if (props.useEntityAttributes) {
+    // TODO: rebuild schema, when entity attributes
     // was changed from outside(not such important,
     // because we have currently the reload solution like in the desktop view).
-    if (props.objectAttributeSkippedFields) {
-      fixedAndSkippedFields.push(...props.objectAttributeSkippedFields)
+    if (props.entityAttributeSkippedFields) {
+      fixedAndSkippedFields.push(...props.entityAttributeSkippedFields)
     }
 
-    const objectAttributeObjects: EnumObjectManagerObjects[] = []
+    const entityAttributeEntities: EnumObjectManagerObjects[] = []
 
-    const addObjectAttributeToObjects = (object: EnumObjectManagerObjects) => {
-      if (objectAttributeObjects.includes(object)) return
+    const addEntityAttributeEntity = (entity: EnumObjectManagerObjects) => {
+      if (entityAttributeEntities.includes(entity)) return
 
-      objectAttributeObjects.push(object)
+      entityAttributeEntities.push(entity)
     }
 
-    const detectObjectAttributeObjects = (schema: FormSchemaNode[] = props.schema) => {
+    const detectEntityAttributeEntities = (schema: FormSchemaNode[] = props.schema) => {
       schema.forEach((item) => {
         if (typeof item === 'string') return
 
-        if ('object' in item) {
+        if ('entity' in item) {
           if ('name' in item && item.name && !item.type) {
             fixedAndSkippedFields.push(item.name)
           }
 
-          addObjectAttributeToObjects(item.object)
+          addEntityAttributeEntity(item.entity)
         }
 
         if ('children' in item && Array.isArray(item.children)) {
-          detectObjectAttributeObjects(item.children)
+          detectEntityAttributeEntities(item.children)
         }
       })
     }
 
-    detectObjectAttributeObjects()
+    detectEntityAttributeEntities()
 
-    // We need only to fetch object attributes, when there are used in the given schema.
-    if (objectAttributeObjects.length > 0) {
-      const { objectAttributesLoading } = useObjectAttributeLoadFormFields(objectAttributeObjects)
+    // We need only to fetch entity attributes, when there are used in the given schema.
+    if (entityAttributeEntities.length > 0) {
+      const { entityAttributesLoading } = useEntityAttributeLoadFormFields(entityAttributeEntities)
 
       const unwatchTriggerFormInitialize = watch(
-        objectAttributesLoading,
+        entityAttributesLoading,
         (loading) => {
           if (!loading) {
             nextTick(() => unwatchTriggerFormInitialize())
@@ -1528,6 +1603,7 @@ export default {
     :plugins="localFormKitPlugins"
     :sections-schema="formKitSectionsSchema"
     :disabled="disabled"
+    :aria-busy="formUpdaterProcessing || undefined"
     @node="setFormNode"
     @submit="onSubmit"
     @submit-raw="onSubmitRaw"

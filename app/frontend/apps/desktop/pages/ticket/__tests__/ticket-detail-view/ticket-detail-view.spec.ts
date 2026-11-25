@@ -14,6 +14,7 @@ import { createDummyArticle } from '#shared/entities/ticket-article/__tests__/mo
 import { createDummyTicket } from '#shared/entities/ticket-article/__tests__/mocks/ticket.ts'
 import { UserDocument } from '#shared/entities/user/graphql/queries/user.api.ts'
 import { EnumTicketArticleSenderName, type TicketArticleEdge } from '#shared/graphql/types.ts'
+import QueryHandler from '#shared/server/apollo/handler/QueryHandler.ts'
 import { SYSTEM_USER_ID, SYSTEM_USER_INTERNAL_ID } from '#shared/utils/constants.ts'
 
 import { mockLinkListQuery } from '#desktop/entities/link/graphql/queries/linkList.mocks.ts'
@@ -28,7 +29,8 @@ describe('Ticket detail view', () => {
   })
 
   describe('Article list', () => {
-    it('shows see more button', async () => {
+    // 5 first and 22 last articles of 50, with a See more button in between.
+    const mockPagedArticles = () => {
       mockTicketQuery({
         ticket: createDummyTicket(),
       })
@@ -76,6 +78,10 @@ describe('Ticket detail view', () => {
           edges: firstArticleEdges,
         },
       })
+    }
+
+    it('shows see more button', async () => {
+      mockPagedArticles()
 
       const view = await visitView('/tickets/1')
 
@@ -92,6 +98,23 @@ describe('Ticket detail view', () => {
           name: 'See more',
         }),
       ).toBeInTheDocument()
+    })
+
+    it('stops looking for a linked article when its page fails to load', async () => {
+      mockPagedArticles()
+
+      const failedPage = { data: null, error: new Error('Connection lost') }
+      const fetchMore = vi
+        .spyOn(QueryHandler.prototype, 'fetchMore')
+        .mockImplementation(() => new Promise((resolve) => setTimeout(() => resolve(failedPage))))
+      onTestFinished(() => fetchMore.mockRestore())
+
+      await visitView('/tickets/1#article-999')
+
+      await vi.waitFor(() => expect(fetchMore).toHaveBeenCalledOnce())
+      await new Promise((resolve) => setTimeout(resolve, 50))
+
+      expect(fetchMore).toHaveBeenCalledOnce()
     })
 
     it('shows meta information if article is clicked', async () => {
@@ -251,13 +274,19 @@ describe('Ticket detail view', () => {
       expect(warning).toHaveTextContent(
         'This ticket was created because the email could not be processed.',
       )
-      expect(within(warning).getByRole('button', { name: 'Download raw email' })).toBeVisible()
-      expect(within(warning).getByRole('button', { name: 'Download processing log' })).toBeVisible()
 
       const [flaggedRow] = within(feed).getAllByRole('article')
 
       expect(flaggedRow).toHaveAttribute('id', `article-${flaggedArticle.internalId}`)
       expect(flaggedRow).toContainElement(warning)
+
+      const rawEmailButton = within(flaggedRow).getByRole('button', { name: 'Download raw email' })
+
+      expect(rawEmailButton).toBeVisible()
+      expect(warning).not.toContainElement(rawEmailButton)
+      expect(
+        within(flaggedRow).getByRole('button', { name: 'Download processing log' }),
+      ).toBeVisible()
       expect(feed).not.toHaveTextContent('flagged article body')
 
       expect(view.getAllByTestId('article-content')).toHaveLength(1)

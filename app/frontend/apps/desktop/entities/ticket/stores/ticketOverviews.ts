@@ -53,7 +53,8 @@ const DEFAULT_CONFIG: TicketOverviewQueryPollingConfig = {
 }
 
 export const useTicketOverviewsStore = defineStore('ticketOverviews', () => {
-  const user = toRef(useSessionStore(), 'user')
+  const session = useSessionStore()
+  const user = toRef(session, 'user')
   const config = toRef(useApplicationStore(), 'config')
 
   const localConfig = useLocalStorage(
@@ -232,21 +233,19 @@ export const useTicketOverviewsStore = defineStore('ticketOverviews', () => {
           cachedTickets?.ticketsCachedByOverview?.collectionSignature
 
         const ticketsQuery = new QueryHandler(
-          useTicketsCachedByOverviewLazyQuery(
-            () => ({
+          useTicketsCachedByOverviewLazyQuery({
+            variables: () => ({
               pageSize: queryPollingConfig.value.page_size,
               ...getMainVariables(),
               knownCollectionSignature: cachedCollectionSignature,
             }),
-            {
-              fetchPolicy: 'network-only',
-              context: {
-                batch: {
-                  active: false,
-                },
+            fetchPolicy: 'network-only',
+            context: {
+              batch: {
+                active: false,
               },
             },
-          ),
+          }),
           {
             errorShowNotification: false, // We do not show notifications for the overview polling query in the background.
           },
@@ -350,11 +349,14 @@ export const useTicketOverviewsStore = defineStore('ticketOverviews', () => {
 
     if (user.value?.preferences) {
       // Update user preferences with the new mapping using overviewsById
-      user.value.preferences.overviews_last_used = Object.fromEntries(
-        Object.entries(newOverviewsLastUsed).map(([overviewId, lastUsedAt]) => [
-          overviewsById.value[overviewId].internalId,
-          lastUsedAt,
-        ]),
+      session.setUserPreference(
+        'overviews_last_used',
+        Object.fromEntries(
+          Object.entries(newOverviewsLastUsed).map(([overviewId, lastUsedAt]) => [
+            overviewsById.value[overviewId].internalId,
+            lastUsedAt,
+          ]),
+        ),
       )
     }
 

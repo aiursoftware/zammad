@@ -2,32 +2,91 @@
 
 import type { NotificationTypes } from '#shared/components/CommonNotifications/index.ts'
 import type { PageInfo } from '#shared/graphql/types.ts'
-import type { ReactiveFunction } from '#shared/types/utils.ts'
 
 import type { GraphQLHandlerError } from '../../error.ts'
-import type { OperationVariables } from '@apollo/client/core'
 import type {
-  UseMutationReturn,
-  UseQueryReturn,
-  UseQueryOptions,
-  UseSubscriptionReturn,
-  UseSubscriptionOptions,
-  UseMutationOptions,
-} from '@vue/apollo-composable'
+  DefaultContext,
+  ErrorLike,
+  OperationVariables,
+  TypedDocumentNode,
+} from '@apollo/client'
+import type { useLazyQuery, useMutation, useQuery, useSubscription } from '@vue/apollo-composable'
+import type { DocumentNode } from 'graphql'
 import type { Ref } from 'vue'
 
+export type QueryOperationReturn<TResult, TVariables extends OperationVariables> =
+  | useQuery.Result<TResult, TVariables>
+  | useLazyQuery.Result<TResult, TVariables>
+
+export type MutationOperationReturn<
+  TResult,
+  TVariables extends OperationVariables,
+> = useMutation.Result<TResult, TVariables>
+
+export type SubscriptionOperationReturn<
+  TResult,
+  TVariables extends OperationVariables,
+> = useSubscription.Result<TResult, TVariables>
+
 export type OperationReturn<TResult, TVariables extends OperationVariables> =
-  | UseQueryReturn<TResult, TVariables>
-  | UseMutationReturn<TResult, TVariables>
-  | UseSubscriptionReturn<TResult, TVariables>
+  | QueryOperationReturn<TResult, TVariables>
+  | MutationOperationReturn<TResult, TVariables>
+  | SubscriptionOperationReturn<TResult, TVariables>
 
-export type OperationQueryOptionsReturn<TResult, TVariables extends OperationVariables> =
-  | UseQueryOptions<TResult, TVariables>
-  | Ref<UseQueryOptions<TResult, TVariables>>
+export type OperationQueryOptionsReturn<TResult, TVariables extends OperationVariables> = Readonly<
+  Ref<useQuery.Options<TResult, TVariables> | undefined>
+>
 
-export type OperationSubscriptionOptionsReturn<TResult, TVariables extends OperationVariables> =
-  | UseSubscriptionOptions<TResult, TVariables>
-  | Ref<UseSubscriptionOptions<TResult, TVariables>>
+export type OperationSubscriptionOptionsReturn<
+  TResult,
+  TVariables extends OperationVariables,
+> = Readonly<Ref<useSubscription.Options<TResult, TVariables> | undefined>>
+
+// The handlers keep handing their `onResult` callbacks the payload vue-apollo 4
+// did (`data` instead of the native `result`).
+export interface QueryHandlerResult<TResult> {
+  data: TResult | undefined
+  loading: boolean
+  networkStatus: number
+}
+
+export interface SubscriptionHandlerResult<TResult> {
+  data?: Maybe<TResult>
+}
+
+export type MutationSendOptions<TResult, TVariables extends OperationVariables> = Omit<
+  useMutation.MutateOptions<TResult, TVariables>,
+  'variables'
+>
+
+export interface SubscribeToMoreUpdateQueryOptions<
+  TResult,
+  TSubscriptionVariables extends OperationVariables,
+  TSubscriptionData,
+> {
+  subscriptionData: { data: TSubscriptionData }
+  variables?: TSubscriptionVariables
+  // The previous result is only complete when the cache holds every field of the query, and
+  //   `null` while it holds nothing for it yet.
+  previousData?: TResult | null
+  complete?: boolean
+}
+
+export interface SubscribeToMoreOptions<
+  TResult,
+  TSubscriptionVariables extends OperationVariables,
+  TSubscriptionData,
+> {
+  document: DocumentNode | TypedDocumentNode<TSubscriptionData, TSubscriptionVariables>
+  variables?: TSubscriptionVariables
+  // Returning `null` or `undefined` leaves the query result untouched.
+  updateQuery?: (
+    previousResult: TResult | null,
+    options: SubscribeToMoreUpdateQueryOptions<TResult, TSubscriptionVariables, TSubscriptionData>,
+  ) => TResult | null | undefined
+  onError?: (error: ErrorLike) => void
+  context?: DefaultContext
+}
 
 export type OperationSubscriptionsResult = {
   __typename?: 'Subscriptions'
@@ -44,23 +103,19 @@ export type OperationMutationResult = {
   [key: string]: unknown
 }
 
-export type OperationMutationOptions<TResult, TVariables> =
-  | UseMutationOptions<TResult, TVariables>
-  | ReactiveFunction<UseMutationOptions<TResult, TVariables>>
-
 export type OperationMutationFunction<
   // oxlint-disable-next-line no-explicit-any
   TResult = any,
   // oxlint-disable-next-line no-explicit-any
   TVariables extends OperationVariables = any,
 > = (
-  options?: OperationMutationOptions<TResult, TVariables>,
-) => UseMutationReturn<TResult, TVariables>
+  options?: useMutation.Options<TResult, TVariables>,
+) => MutationOperationReturn<TResult, TVariables>
 
 export type OperationQueryFunction<
   TResult = OperationQueryResult,
   TVariables extends OperationVariables = OperationVariables,
-> = (options: OperationVariables) => UseQueryReturn<TResult, TVariables>
+> = (options: useQuery.Options<TResult, TVariables>) => QueryOperationReturn<TResult, TVariables>
 
 export type BaseConnection = {
   __typename?: string

@@ -233,6 +233,80 @@ describe('Form - Field - AutoComplete - Query', () => {
     expect(selectOptions[0]).toHaveTextContent(testOptions[2].label)
   })
 
+  it('shows cached options immediately when repeating a search and refreshes them', async () => {
+    const wrapper = renderComponent(FormKit, {
+      ...wrapperParameters,
+      props: {
+        ...testProps,
+        debounceInterval: 0,
+      },
+    })
+
+    await wrapper.events.click(wrapper.getByLabelText('Select…'))
+    const filterElement = wrapper.getByRole('searchbox')
+
+    await wrapper.events.type(filterElement, 'a')
+    await waitFor(() => expect(wrapper.getByRole('option')).toHaveTextContent('Item A'))
+
+    await wrapper.events.clear(filterElement)
+    await wrapper.events.type(filterElement, 'b')
+    await waitFor(() => expect(wrapper.getByRole('option')).toHaveTextContent('Item B'))
+
+    const refreshedResult = mockQueryResult({ query: 'a', limit: 25 })
+    refreshedResult.autocompleteSearchUser[0].label = 'Item A refreshed'
+    let release = () => {}
+    const response = new Promise<{ data: AutocompleteSearchUserQuery }>((resolve) => {
+      release = () => resolve({ data: refreshedResult })
+    })
+    mockApi.willBehave(() => response)
+
+    try {
+      await wrapper.events.clear(filterElement)
+      await wrapper.events.type(filterElement, 'a')
+      await waitFor(() => expect(wrapper.getByRole('option')).toHaveTextContent('Item A'))
+      expect(wrapper.queryByText('Item A refreshed')).not.toBeInTheDocument()
+    } finally {
+      release()
+    }
+
+    await waitFor(() => expect(wrapper.getByRole('option')).toHaveTextContent('Item A refreshed'))
+  })
+
+  it('sends no query without a filter and a default filter', async () => {
+    const wrapper = renderComponent(FormKit, {
+      ...wrapperParameters,
+      props: {
+        ...testProps,
+        debounceInterval: 0,
+      },
+    })
+
+    await wrapper.events.click(wrapper.getByLabelText('Select…'))
+    await waitForNextTick()
+
+    expect(wrapper.getByRole('searchbox')).toBeInTheDocument()
+    expect(mockApi.spies.behave).not.toHaveBeenCalled()
+  })
+
+  it('queries with the default filter when the dialog opens', async () => {
+    const wrapper = renderComponent(FormKit, {
+      ...wrapperParameters,
+      props: {
+        ...testProps,
+        debounceInterval: 0,
+        defaultFilter: 'item',
+      },
+    })
+
+    await wrapper.events.click(wrapper.getByLabelText('Select…'))
+
+    await waitUntil(() => mockApi.calls.behave)
+
+    expect(mockApi.spies.behave).toHaveBeenCalledWith({
+      input: expect.objectContaining({ query: 'item' }),
+    })
+  })
+
   it('replaces local options with selection', async () => {
     const wrapper = renderComponent(FormKit, {
       ...wrapperParameters,

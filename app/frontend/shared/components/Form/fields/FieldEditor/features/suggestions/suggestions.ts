@@ -7,12 +7,14 @@ import { watch, type WatchSource, type WatchStopHandle } from 'vue'
 import {
   claimInlineImages,
   getEditorFormId,
+  inlineImageUploadsPluginKey,
 } from '#shared/components/Form/fields/FieldEditor/features/image-handler/inlineImageUploads.ts'
+import { SUGGESTIONS_LOADING_ATTRIBUTE } from '#shared/components/Form/fields/FieldEditor/features/suggestions/constants.ts'
 import type { MentionType } from '#shared/components/Form/fields/FieldEditor/types.ts'
 import { setFloatingPopover } from '#shared/components/Form/fields/FieldEditor/utils.ts'
 import { getEditorComponents } from '#shared/components/Form/initializeFieldEditor.ts'
 
-import type { Content, Editor } from '@tiptap/core'
+import type { Content, Editor, EditorEvents } from '@tiptap/core'
 import type { SuggestionOptions, SuggestionProps } from '@tiptap/suggestion'
 
 interface MentionOptions<T> {
@@ -31,8 +33,12 @@ interface MentionOptions<T> {
 
   items(props: { query: string; editor: Editor }): T[] | Promise<T[]>
 
-  // oxlint-disable-next-line no-explicit-any
-  insert(props: Record<string, any>): Content | Promise<Content>
+  // Content that loads asks `isStillWanted` before it leaves anything else behind, like attachments.
+  insert(
+    // oxlint-disable-next-line no-explicit-any
+    props: Record<string, any>,
+    isStillWanted: () => boolean,
+  ): Content | Promise<Content>
 }
 
 enum Type {
@@ -54,10 +60,26 @@ const setEditorAttr = (editor: Editor, name: string, value: string | null) => {
 export default function buildMentionExtension<T>(
   options: MentionOptions<T>,
 ): Omit<SuggestionOptions, 'editor'> {
+  // A query overtaken by the next one settles early with the entries of the one before, so the
+  //   entries are only current once no query is left open.
+  let openQueries = 0
+
+  const items: MentionOptions<T>['items'] = async (props) => {
+    openQueries += 1
+    setEditorAttr(props.editor, SUGGESTIONS_LOADING_ATTRIBUTE, 'true')
+
+    try {
+      return await options.items(props)
+    } finally {
+      openQueries -= 1
+      if (!openQueries) setEditorAttr(props.editor, SUGGESTIONS_LOADING_ATTRIBUTE, null)
+    }
+  }
+
   return {
     char: options.activator,
     allowSpaces: options.allowSpaces ?? true,
-    items: options.items,
+    items,
     pluginKey: new PluginKey(options.type),
     command({ editor, range, props }) {
       // increase range.to by one when the next node is of type "text"
@@ -65,33 +87,83 @@ export default function buildMentionExtension<T>(
       const { nodeAfter } = editor.view.state.selection.$to
       const overrideSpace = nodeAfter?.text?.startsWith(' ')
 
-      // activators start with a space, so we need to decrease the range
-      range.from -= 1
-      if (overrideSpace) {
-        range.to += 1
+      // Activators start with a space, so the replaced range starts one earlier. A copy: the range
+      //   belongs to the open list, which stays open for another pick when the content is refused.
+      let replacedRange = {
+        from: range.from - 1,
+        to: overrideSpace ? range.to + 1 : range.to,
       }
 
-      const insert = (content: Content) => {
-        // Images of an inserted text module or answer belong to this draft, like pasted ones.
-        if (typeof content === 'string') claimInlineImages(getEditorFormId(editor), content)
+      // The search itself: the replaced range may outlive it with the space before it.
+      let searchRange = { from: range.from, to: range.to }
 
-        editor.chain().focus().insertContentAt(range, content).run()
+      const insert = (content: Content, takeFocus = true) => {
+        // Images of an inserted text module or answer belong to this draft, like pasted ones -
+        //   where the editor uploads its images at all.
+        if (typeof content === 'string' && inlineImageUploadsPluginKey.get(editor.state))
+          claimInlineImages(getEditorFormId(editor), content)
+
+        const chain = takeFocus ? editor.chain().focus() : editor.chain()
+
+        // Where the search opens a line, the range starts before the line, and text written at its
+        //   start while the content loaded lies in between. That text stays.
+        const from =
+          searchRange.from - replacedRange.from > 1 ? searchRange.from : replacedRange.from
+
+        chain.insertContentAt({ from, to: replacedRange.to }, content).run()
       }
 
-      const content = options.insert(props)
+      // Nothing left to replace once the search text is gone, e.g. deleted or sent, or the editor is.
+      const isStillWanted = () => !editor.isDestroyed && searchRange.from !== searchRange.to
 
-      if (content instanceof Promise) {
-        content.then((c) => insert(c))
-      } else {
+      const content = options.insert(props, isStillWanted)
+
+      if (!(content instanceof Promise)) {
         insert(content)
+        return
       }
+
+      // While the content loads, the ranges follow what is written meanwhile; text typed at either
+      //   edge stays outside of them.
+      const trackRange = ({ transaction, appendedTransactions }: EditorEvents['transaction']) => {
+        const follow = ({ from, to }: typeof replacedRange, { mapping }: typeof transaction) => {
+          const mappedFrom = mapping.map(from)
+
+          return { from: mappedFrom, to: Math.max(mappedFrom, mapping.map(to, -1)) }
+        }
+
+        ;[transaction, ...appendedTransactions].forEach((tr) => {
+          replacedRange = follow(replacedRange, tr)
+          searchRange = follow(searchRange, tr)
+        })
+      }
+
+      editor.on('transaction', trackRange)
+
+      // Loaded content leaves the focus where the writer has moved to meanwhile, e.g. another chat.
+      const hasFocusMovedOn = () => {
+        const { activeElement } = document
+
+        return (
+          !!activeElement &&
+          activeElement !== document.body &&
+          !editor.view.dom.contains(activeElement)
+        )
+      }
+
+      content
+        .then((loaded) => {
+          if (isStillWanted()) insert(loaded, !hasFocusMovedOn())
+        })
+        // A failed request is already notified where the content is loaded, and leaves the search.
+        .catch(() => {})
+        .finally(() => editor.off('transaction', trackRange))
     },
     render() {
       let component: VueRenderer | null
       let listboxId: string | null = null
       let editor: Editor | null = null
       let itemCount = 0
-      let lastItems: SuggestionProps['items'] = []
       let lastProps: SuggestionProps | null = null
       let stopDefaultListWatch: WatchStopHandle | undefined
 
@@ -120,7 +192,6 @@ export default function buildMentionExtension<T>(
         listboxId = null
         editor = null
         itemCount = 0
-        lastItems = []
         lastProps = null
       }
 
@@ -133,7 +204,6 @@ export default function buildMentionExtension<T>(
         // The plugin has rendered or closed the list in the meantime.
         if (props !== lastProps || !component) return
 
-        lastItems = items
         itemCount = items.length
         component.updateProps({ loading: false, items })
         syncActiveDescendant()
@@ -145,14 +215,19 @@ export default function buildMentionExtension<T>(
         // Query updates are always a loading state. The initial open is only a
         // loading state for types that show a default list — otherwise it would
         // just flash before the placeholder of a query-driven type.
-        const loading =
-          type === Type.BeforeUpdate || (type === Type.BeforeStart && !!options.showsDefaultList)
+        // The plugin also updates once before it asks for the entries of a typed term, with none and
+        // marked as loading: no finished search. An empty term keeps its hint, it never shows "No
+        // results found".
+        const isAskingForEntries = !!props.loading && !!props.query
 
-        // Keep the last settled items visible while a new query loads, so the
-        // list doesn't flash empty (or "no results") between keystrokes. Only
-        // adopt the incoming items once the query has settled.
-        if (!loading) lastItems = props.items
-        const items = loading ? lastItems : props.items
+        const loading =
+          type === Type.BeforeUpdate ||
+          (type === Type.BeforeStart && !!options.showsDefaultList) ||
+          isAskingForEntries
+
+        // No entries while a query loads: those of the query before are not current, and the list
+        //   shows its loading indicator instead.
+        const items = loading ? [] : props.items
 
         if (!component) {
           if (type === Type.Update) return // onUpdate hook can run after onExit call
@@ -200,10 +275,10 @@ export default function buildMentionExtension<T>(
       }
 
       return {
-        onBeforeStart: renderFn(Type.BeforeStart), // loading = true
-        onStart: renderFn(Type.Start), // loading = false
-        onBeforeUpdate: renderFn(Type.BeforeUpdate), // loading = true
-        onUpdate: renderFn(Type.Update), // loading = false
+        onBeforeStart: renderFn(Type.BeforeStart),
+        onStart: renderFn(Type.Start),
+        onBeforeUpdate: renderFn(Type.BeforeUpdate),
+        onUpdate: renderFn(Type.Update),
 
         onKeyDown(props) {
           if (props.event.key === 'Escape') {

@@ -3,25 +3,29 @@
 require 'jwt'
 
 class OmniAuth::Strategies::MicrosoftOffice365Database < OmniAuth::Strategies::MicrosoftOffice365
+  include OmniAuth::Strategies::DatabaseSettings
+
+  PROFILE_PHOTO_TIMEOUT = 5
+
   option :name, 'microsoft_office365'
 
-  def initialize(app, *args, &)
+  # Override the gem's DEFAULT_SCOPE ("openid User.Read Contacts.Read") to drop
+  # the Contacts.Read permission. Setting the scope option here makes the gem
+  # skip its `params[:scope] ||= DEFAULT_SCOPE` fallback.
+  option :scope, 'openid User.Read'
 
-    # database lookup
-    config  = Setting.get('auth_microsoft_office365_credentials') || {}
-    args[0] = config['app_id']
-    args[1] = config['app_secret']
-    tenant  = config['app_tenant'].presence || 'common'
+  def self.setup
+    config = Setting.get('auth_microsoft_office365_credentials') || {}
+    tenant = config['app_tenant'].presence || 'common'
 
-    super
-
-    @options[:client_options][:authorize_url] = "/#{tenant}/oauth2/v2.0/authorize"
-    @options[:client_options][:token_url]     = "/#{tenant}/oauth2/v2.0/token"
-
-    # Override the gem's DEFAULT_SCOPE ("openid User.Read Contacts.Read") to drop
-    # the Contacts.Read permission. Setting the scope option here makes the gem
-    # skip its `params[:scope] ||= DEFAULT_SCOPE` fallback.
-    @options[:scope] = 'openid User.Read'
+    {
+      client_id:      config['app_id'],
+      client_secret:  config['app_secret'],
+      client_options: {
+        authorize_url: "/#{tenant}/oauth2/v2.0/authorize",
+        token_url:     "/#{tenant}/oauth2/v2.0/token",
+      },
+    }
   end
 
   # The gem's raw_info only calls the Graph /me REST endpoint, which never
@@ -40,5 +44,23 @@ class OmniAuth::Strategies::MicrosoftOffice365Database < OmniAuth::Strategies::M
   rescue JWT::DecodeError => e
     Rails.logger.warn { "Failed to decode MS365 ID token: #{e.message}" }
     {}
+  end
+
+  private
+
+  # Replaces the gem's version, which fails the whole login on any photo error
+  # but a missing photo (e.g. while Exchange Online is down) - the avatar is optional.
+  def avatar_file
+    photo = access_token.get('https://graph.microsoft.com/v1.0/me/photo/$value') { |req| req.options.timeout = PROFILE_PHOTO_TIMEOUT }
+    ext   = photo.content_type.to_s.delete_prefix('image/')
+
+    Tempfile.new(['avatar', ".#{ext}"]).tap do |file|
+      file.binmode
+      file.write(photo.body)
+      file.rewind
+    end
+  rescue OAuth2::Error, Faraday::Error => e
+    Rails.logger.warn { "Failed to fetch MS365 profile photo: #{e.message}" } if e.response.try(:status) != 404
+    nil
   end
 end

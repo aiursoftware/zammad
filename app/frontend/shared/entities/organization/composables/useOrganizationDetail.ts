@@ -13,9 +13,9 @@ import { normalizeEdges } from '#shared/utils/helpers.ts'
 
 import { useOrganizationQuery } from '../graphql/queries/organization.api.ts'
 import { OrganizationUpdatesDocument } from '../graphql/subscriptions/organizationUpdates.api.ts'
-import { useOrganizationObjectAttributesStore } from '../stores/objectAttributes.ts'
+import { useOrganizationEntityAttributesStore } from '../stores/entityAttributes.ts'
 
-import type { WatchQueryFetchPolicy } from '@apollo/client/core'
+import type { WatchQueryFetchPolicy } from '@apollo/client'
 
 const SECONDARY_ORGANIZATIONS_FETCH_COUNT = 5
 
@@ -30,16 +30,14 @@ export const useOrganizationDetail = (
   const hasLoadedMore = ref(false)
 
   const organizationQuery = new QueryHandler(
-    useOrganizationQuery(
-      () => ({
+    useOrganizationQuery({
+      variables: () => ({
         organizationId: organizationId.value!,
         first: SECONDARY_ORGANIZATIONS_FETCH_COUNT,
       }),
-      () => ({
-        enabled: Boolean(organizationId.value),
-        fetchPolicy,
-      }),
-    ),
+      enabled: () => Boolean(organizationId.value),
+      fetchPolicy,
+    }),
     {
       errorCallback,
     },
@@ -69,7 +67,7 @@ export const useOrganizationDetail = (
   const organization = computed(() => organizationResult.value?.organization as Organization)
 
   const fetchMoreMembers = () => {
-    if (!organizationId) return
+    if (!organizationId.value) return
 
     hasLoadedMore.value = true
 
@@ -81,7 +79,7 @@ export const useOrganizationDetail = (
     })
   }
 
-  const viewScreenAttributes = toRef(useOrganizationObjectAttributesStore(), 'viewScreenAttributes')
+  const viewScreenAttributes = toRef(useOrganizationEntityAttributesStore(), 'viewScreenAttributes')
 
   const allOrganizationMembers = computed(
     () => normalizeEdges(organization.value?.allMembers) || [],
@@ -107,7 +105,7 @@ export const useOrganizationDetail = (
     loadingWithoutCachedResult,
     organizationQuery,
     organization,
-    objectAttributes: viewScreenAttributes,
+    entityAttributes: viewScreenAttributes,
     organizationMembers,
     fetchMoreMembers,
   }

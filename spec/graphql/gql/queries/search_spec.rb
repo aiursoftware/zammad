@@ -254,6 +254,45 @@ RSpec.describe Gql::Queries::Search, type: :graphql do
     it_behaves_like 'graphql responds with error if unauthenticated'
   end
 
+  # Served through Service::Search like users and organizations. What is found, with the search index
+  #   and without, and for whom, is covered in spec/models/chat/session/search_spec.rb.
+  context 'when searching chat sessions', authenticated_as: :agent do
+    let(:query) do
+      <<~QUERY
+        query search($search: String, $onlyIn: EnumSearchableModels!) {
+          search(search: $search, onlyIn: $onlyIn) {
+            totalCount
+            items {
+              ... on ChatSession {
+                __typename
+                id
+                name
+                state
+              }
+            }
+          }
+        }
+      QUERY
+    end
+
+    let(:agent)     { create(:agent) }
+    let(:session)   { create(:'chat/session', chat: create(:chat), state: 'closed', user: create(:agent), name: 'Ocarina lesson') }
+    let(:variables) { { search: 'ocarina', onlyIn: 'Chat__Session' } }
+
+    before do
+      Setting.set('chat', true)
+      Setting.set('es_url', nil)
+      session
+      gql.execute(query, variables:)
+    end
+
+    it 'returns the sessions found' do
+      expect(gql.result.data).to eq({ 'items' => [{ '__typename' => 'ChatSession', 'id' => gql.id(session), 'name' => 'Ocarina lesson', 'state' => 'closed' }], 'totalCount' => 1 })
+    end
+
+    it_behaves_like 'graphql responds with error if unauthenticated'
+  end
+
   # The one searchable model this query does not serve through Service::Search - see
   #   Gql::Concerns::SearchesKnowledgeBaseAnswers for why. What is covered here is the routing and
   #   the payload it produces; the search mode behind it belongs to Service::KnowledgeBase::Search
@@ -335,8 +374,8 @@ RSpec.describe Gql::Queries::Search, type: :graphql do
         end
       end
 
-      # The one thing this resolver does that the service does not, and what the quicksearch group's
-      #   "%s more" count rests on: `items` is the requested window while `totalCount` stays the
+      # The one thing this resolver does that the service does not, and what paging through the
+      #   detailed search rests on: `items` is the requested window while `totalCount` stays the
       #   whole permitted set.
       context 'with a limit below the number of hits' do
         let(:variables) { { search: search, onlyIn: 'KnowledgeBase__Answer__Translation', limit: 1 } }
@@ -358,9 +397,8 @@ RSpec.describe Gql::Queries::Search, type: :graphql do
         end
       end
 
-      # Quicksearch asks for every searchable entity in one document, so this branch must answer
-      #   rather than raise - raising would take the ticket, user and organization groups down with
-      #   it on every instance that has no knowledge base.
+      # Shares its knowledge base branch with the grouped search, which answers every requested
+      #   model in one field and so must not raise - see Gql::Concerns::SearchesKnowledgeBaseAnswers.
       context 'without an active knowledge base' do
         let(:kb_setup) { knowledge_base.update!(active: false) }
 

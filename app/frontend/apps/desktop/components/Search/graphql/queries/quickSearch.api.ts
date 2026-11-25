@@ -2,28 +2,11 @@ import * as Types from '#shared/graphql/types.ts';
 
 import gql from 'graphql-tag';
 import * as VueApolloComposable from '@vue/apollo-composable';
-import * as VueCompositionApi from 'vue';
-export type ReactiveFunction<TParam> = () => TParam;
 
 export const QuickSearchDocument = gql`
-    query quickSearch($search: String!, $limit: Int = 10) {
-  quickSearchOrganizations: search(
-    search: $search
-    onlyIn: Organization
-    limit: $limit
-  ) {
-    totalCount
-    items {
-      __typename
-      ... on Organization {
-        id
-        internalId
-        name
-        active
-      }
-    }
-  }
-  quickSearchTickets: search(search: $search, onlyIn: Ticket, limit: $limit) {
+    query quickSearch($search: String!, $onlyIn: [EnumSearchableModels!]!, $limit: Int = 10) {
+  searchGrouped(search: $search, onlyIn: $onlyIn, limit: $limit) {
+    model
     totalCount
     items {
       __typename
@@ -38,16 +21,18 @@ export const QuickSearchDocument = gql`
         }
         stateColorCode
       }
-    }
-  }
-  quickSearchKnowledgeBaseAnswers: search(
-    search: $search
-    onlyIn: KnowledgeBase__Answer__Translation
-    limit: $limit
-  ) {
-    totalCount
-    items {
-      __typename
+      ... on User {
+        id
+        internalId
+        fullname
+        active
+      }
+      ... on Organization {
+        id
+        internalId
+        name
+        active
+      }
       ... on KnowledgeBaseAnswerTranslation {
         id
         title
@@ -64,26 +49,19 @@ export const QuickSearchDocument = gql`
           }
         }
       }
-    }
-  }
-  quickSearchUsers: search(search: $search, onlyIn: User, limit: $limit) {
-    totalCount
-    items {
-      __typename
-      ... on User {
+      ... on ChatSession {
         id
         internalId
-        fullname
-        active
+        name
       }
     }
   }
 }
     `;
-export function useQuickSearchQuery(variables: Types.QuickSearchQueryVariables | VueCompositionApi.Ref<Types.QuickSearchQueryVariables> | ReactiveFunction<Types.QuickSearchQueryVariables>, options: VueApolloComposable.UseQueryOptions<Types.QuickSearchQuery, Types.QuickSearchQueryVariables> | VueCompositionApi.Ref<VueApolloComposable.UseQueryOptions<Types.QuickSearchQuery, Types.QuickSearchQueryVariables>> | ReactiveFunction<VueApolloComposable.UseQueryOptions<Types.QuickSearchQuery, Types.QuickSearchQueryVariables>> = {}) {
-  return VueApolloComposable.useQuery<Types.QuickSearchQuery, Types.QuickSearchQueryVariables>(QuickSearchDocument, variables, options);
+export function useQuickSearchQuery(options: VueApolloComposable.useQuery.Options<Types.QuickSearchQuery, Types.QuickSearchQueryVariables>) {
+  return VueApolloComposable.useQuery<Types.QuickSearchQuery, Types.QuickSearchQueryVariables>(QuickSearchDocument, options);
 }
-export function useQuickSearchLazyQuery(variables?: Types.QuickSearchQueryVariables | VueCompositionApi.Ref<Types.QuickSearchQueryVariables> | ReactiveFunction<Types.QuickSearchQueryVariables>, options: VueApolloComposable.UseQueryOptions<Types.QuickSearchQuery, Types.QuickSearchQueryVariables> | VueCompositionApi.Ref<VueApolloComposable.UseQueryOptions<Types.QuickSearchQuery, Types.QuickSearchQueryVariables>> | ReactiveFunction<VueApolloComposable.UseQueryOptions<Types.QuickSearchQuery, Types.QuickSearchQueryVariables>> = {}) {
-  return VueApolloComposable.useLazyQuery<Types.QuickSearchQuery, Types.QuickSearchQueryVariables>(QuickSearchDocument, variables, options);
+export function useQuickSearchLazyQuery(options?: VueApolloComposable.useLazyQuery.Options<Types.QuickSearchQuery, Types.QuickSearchQueryVariables>) {
+  return VueApolloComposable.useLazyQuery<Types.QuickSearchQuery, Types.QuickSearchQueryVariables>(QuickSearchDocument, options);
 }
-export type QuickSearchQueryCompositionFunctionResult = VueApolloComposable.UseQueryReturn<Types.QuickSearchQuery, Types.QuickSearchQueryVariables>;
+export type QuickSearchQueryCompositionFunctionResult = VueApolloComposable.useQuery.Result<Types.QuickSearchQuery, Types.QuickSearchQueryVariables>;

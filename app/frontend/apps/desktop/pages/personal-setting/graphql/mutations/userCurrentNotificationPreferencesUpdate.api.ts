@@ -4,8 +4,6 @@ import gql from 'graphql-tag';
 import { UserPersonalSettingsFragmentDoc } from '../../../../../../shared/graphql/fragments/userPersonalSettings.api';
 import { ErrorsFragmentDoc } from '../../../../../../shared/graphql/fragments/errors.api';
 import * as VueApolloComposable from '@vue/apollo-composable';
-import * as VueCompositionApi from 'vue';
-export type ReactiveFunction<TParam> = () => TParam;
 
 export const UserCurrentNotificationPreferencesUpdateDocument = gql`
     mutation userCurrentNotificationPreferencesUpdate($groupIds: [ID!], $matrix: UserNotificationMatrixInput!, $sound: UserNotificationSoundInput!) {
@@ -24,7 +22,7 @@ export const UserCurrentNotificationPreferencesUpdateDocument = gql`
 }
     ${UserPersonalSettingsFragmentDoc}
 ${ErrorsFragmentDoc}`;
-export function useUserCurrentNotificationPreferencesUpdateMutation(options: VueApolloComposable.UseMutationOptions<Types.UserCurrentNotificationPreferencesUpdateMutation, Types.UserCurrentNotificationPreferencesUpdateMutationVariables> | ReactiveFunction<VueApolloComposable.UseMutationOptions<Types.UserCurrentNotificationPreferencesUpdateMutation, Types.UserCurrentNotificationPreferencesUpdateMutationVariables>> = {}) {
+export function useUserCurrentNotificationPreferencesUpdateMutation(options: VueApolloComposable.useMutation.Options<Types.UserCurrentNotificationPreferencesUpdateMutation, Types.UserCurrentNotificationPreferencesUpdateMutationVariables> = {}) {
   return VueApolloComposable.useMutation<Types.UserCurrentNotificationPreferencesUpdateMutation, Types.UserCurrentNotificationPreferencesUpdateMutationVariables>(UserCurrentNotificationPreferencesUpdateDocument, options);
 }
-export type UserCurrentNotificationPreferencesUpdateMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<Types.UserCurrentNotificationPreferencesUpdateMutation, Types.UserCurrentNotificationPreferencesUpdateMutationVariables>;
+export type UserCurrentNotificationPreferencesUpdateMutationCompositionFunctionResult = VueApolloComposable.useMutation.Result<Types.UserCurrentNotificationPreferencesUpdateMutation, Types.UserCurrentNotificationPreferencesUpdateMutationVariables>;

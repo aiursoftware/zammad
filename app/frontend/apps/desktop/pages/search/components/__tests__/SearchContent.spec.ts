@@ -3,19 +3,27 @@
 import { within, waitFor } from '@testing-library/vue'
 import { computed } from 'vue'
 
+import { getGraphQLMockCalls } from '#tests/graphql/builders/mocks.ts'
 import ticketObjectAttributes from '#tests/graphql/factories/fixtures/ticket-object-attributes.ts'
 import { getByIconName } from '#tests/support/components/iconQueries.ts'
 import { renderComponent } from '#tests/support/components/index.ts'
 import { getTestRouter } from '#tests/support/components/renderComponent.ts'
+import { holdOperation } from '#tests/support/holdOperation.ts'
 import { mockApplicationConfig } from '#tests/support/mock-applicationConfig.ts'
 import { mockPermissions } from '#tests/support/mock-permissions.ts'
 import { mockRouterHooks } from '#tests/support/mock-vue-router.ts'
 import { waitForNextTick } from '#tests/support/utils.ts'
 
-import { mockObjectManagerFrontendAttributesQuery } from '#shared/entities/object-attributes/graphql/queries/objectManagerFrontendAttributes.mocks.ts'
-import { EnumSearchableModels, EnumTicketStateColorCode } from '#shared/graphql/types.ts'
+import { mockObjectManagerFrontendAttributesQuery } from '#shared/entities/core/attributes/graphql/queries/objectManagerFrontendAttributes.mocks.ts'
+import {
+  EnumChatSessionState,
+  EnumOrderDirection,
+  EnumSearchableModels,
+  EnumTicketStateColorCode,
+} from '#shared/graphql/types.ts'
 import { convertToGraphQLId } from '#shared/graphql/utils.ts'
 
+import { DetailSearchDocument } from '#desktop/components/Search/graphql/queries/detailSearch.api.ts'
 import {
   mockDetailSearchQuery,
   waitForDetailSearchQueryCalls,
@@ -228,6 +236,34 @@ describe('SearchContent', () => {
     expect((await callsForCountsQuery).length).toBe(2)
   })
 
+  it('returns to the idle state when the term is cleared before the first result arrives', async () => {
+    mockTicketSearchResult(1, [createSampleTicket(469, 'Foo ticket title', 12469)])
+    const releaseDetailSearch = holdOperation('detailSearch')
+
+    const wrapper = renderSearchContent({ searchTerm: 'ticket' })
+
+    // The skeleton stands in for the held first page.
+    await wrapper.findAllByRole('status')
+    expect(
+      wrapper.queryByText('Start typing or apply filters to get the search results.'),
+    ).not.toBeInTheDocument()
+
+    await wrapper.rerender({ searchTerm: '' })
+
+    // The idle prompt only renders once the table is no longer loading.
+    expect(
+      await wrapper.findByText('Start typing or apply filters to get the search results.'),
+    ).toBeInTheDocument()
+
+    releaseDetailSearch()
+    await waitForNextTick()
+
+    expect(
+      wrapper.getByText('Start typing or apply filters to get the search results.'),
+    ).toBeInTheDocument()
+    expect(wrapper.queryByText('Foo ticket title')).not.toBeInTheDocument()
+  })
+
   it('displays entity counts for agent', async () => {
     mockTicketSearchResult(0, [])
     mockSearchCountsQuery({
@@ -309,9 +345,9 @@ describe('SearchContent', () => {
 
     const wrapper = renderSearchContent({ searchTerm: 'Foo ticket title' })
 
-    await waitForDetailSearchQueryCalls()
-
-    await wrapper.events.click(wrapper.getByRole('button', { name: 'Sort by Title ascending' }))
+    await wrapper.events.click(
+      await wrapper.findByRole('button', { name: 'Sort by Title ascending' }),
+    )
     const mocks = await waitForDetailSearchQueryCalls()
 
     expect(mocks[1].variables.orderDirection).toBe('ASCENDING')
@@ -376,5 +412,86 @@ describe('SearchContent', () => {
     const calls = await waitForSearchCountsQueryCalls()
 
     expect(calls[0].variables.onlyIn).toContain(EnumSearchableModels.KnowledgeBaseAnswerTranslation)
+  })
+
+  describe('chat sessions', () => {
+    beforeEach(() => {
+      mockPermissions(['ticket.agent', 'chat.agent'])
+      mockApplicationConfig({ chat: true })
+
+      mockDetailSearchQuery((variables) => ({
+        search:
+          variables.onlyIn === EnumSearchableModels.ChatSession
+            ? {
+                totalCount: 1,
+                items: [
+                  {
+                    __typename: 'ChatSession',
+                    id: convertToGraphQLId('Chat::Session', 5),
+                    internalId: 5,
+                    name: 'VPN setup',
+                    sessionState: EnumChatSessionState.Closed,
+                    createdAt: '2026-11-03T11:00:00Z',
+                  },
+                ],
+              }
+            : { totalCount: 0, items: [] },
+      }))
+    })
+
+    it('offers their tab with the count of the sessions found', async () => {
+      mockSearchCountsQuery({
+        searchCounts: [{ model: EnumSearchableModels.ChatSession, totalCount: 3 }],
+      })
+
+      const wrapper = renderSearchContent({ searchTerm: 'vpn' })
+
+      const calls = await waitForSearchCountsQueryCalls()
+
+      expect(calls[0].variables.onlyIn).toContain(EnumSearchableModels.ChatSession)
+
+      await waitFor(() =>
+        expect(wrapper.getByRole('tab', { name: 'Chat session' })).toHaveTextContent('3'),
+      )
+    })
+
+    it('lists the sessions found and has the search sort them', async () => {
+      mockSearchCountsQuery({ searchCounts: [] })
+
+      const wrapper = renderSearchContent({ searchTerm: 'vpn' })
+
+      await wrapper.events.click(await wrapper.findByRole('tab', { name: 'Chat session' }))
+
+      const table = await wrapper.findByRole('table', {
+        name: 'Search result for: Chat session',
+      })
+
+      expect(within(table).getByRole('link', { name: '5' })).toBeInTheDocument()
+      expect(within(table).getByText('VPN setup')).toBeInTheDocument()
+
+      await wrapper.events.click(
+        within(table).getByRole('button', { name: 'Sort by Number ascending' }),
+      )
+
+      await waitFor(() =>
+        expect(getGraphQLMockCalls(DetailSearchDocument).at(-1)?.variables).toMatchObject({
+          onlyIn: EnumSearchableModels.ChatSession,
+          orderBy: 'id',
+          orderDirection: EnumOrderDirection.Ascending,
+        }),
+      )
+    })
+
+    it('offers no tab while the chat feature is off', async () => {
+      mockApplicationConfig({ chat: false })
+      mockSearchCountsQuery({ searchCounts: [] })
+
+      const wrapper = renderSearchContent({ searchTerm: 'vpn' })
+
+      const calls = await waitForSearchCountsQueryCalls()
+
+      expect(calls[0].variables.onlyIn).not.toContain(EnumSearchableModels.ChatSession)
+      expect(wrapper.queryByRole('tab', { name: 'Chat session' })).not.toBeInTheDocument()
+    })
   })
 })

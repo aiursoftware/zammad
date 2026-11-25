@@ -1,0 +1,83 @@
+// For format details, see https://containers.dev/implementors/json_reference/.
+// For config options, see the README at: https://github.com/devcontainers/templates/tree/main/src/ruby
+{
+  "name": "Zammad (with Playwright)",
+  "dockerComposeFile": "compose.yaml",
+  "service": "devcontainer",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "moby": false
+    },
+    "ghcr.io/devcontainers-extra/features/shellcheck:1": {},
+    "ghcr.io/devcontainers/features/node:2": {
+      "installYarnUsingApt": "false"
+    },
+    "ghcr.io/rails/devcontainer/features/postgres-client": {},
+    "ghcr.io/devcontainers-extra/features/apt-get-packages": {
+      "packages": "curl gnupg libimlib2-dev"
+    },
+    "ghcr.io/devcontainers/features/go:1": {},
+    "ghcr.io/rapidsai/devcontainers/features/gitlab-cli:latest": {},
+    "ghcr.io/anthropics/devcontainer-features/claude-code:latest": {},
+    "../features/zammad-deps": {},
+    "../features/add-bin-path": {
+      "addBinPath": "/workspaces/${localWorkspaceFolderBasename}/bin"
+    }
+  },
+  "mounts": [
+    {
+      // Avoid conflicts with host-installed node_modules with a different platform/architecture.
+      "source": "node-modules",
+      "target": "/workspaces/${localWorkspaceFolderBasename}/node_modules",
+      "type": "volume"
+    },
+    {
+      "source": "pnpm-store",
+      "target": "/workspaces/${localWorkspaceFolderBasename}/.pnpm-store",
+      "type": "volume"
+    }
+  ],
+  "containerEnv": {
+    "VITE_TEST_MODE": "1", // needed for test flag support
+    // The browser server shares the network namespace of the devcontainer (see compose.yaml),
+    // so the browser reaches the Capybara server on localhost, the default CAPYBARA_HOSTNAME.
+    "PLAYWRIGHT_SERVER_URL": "ws://localhost:4444/",
+    // Must match the image and the run-server version in compose.yaml.
+    "PLAYWRIGHT_VERSION": "1.65.1",
+    // Live view of the headless Chromium in DevTools, forwarded below.
+    "PLAYWRIGHT_REMOTE_DEBUGGING_PORT": "9222",
+    "TEST_BROWSER": "chromium"
+    // "TEST_BROWSER": "firefox"
+  },
+  "forwardPorts": [
+    3000,
+    3036,
+    4444,
+    6042,
+    9200,
+    9222
+  ],
+  "portsAttributes": {
+    "3000": {
+      "label": "Puma web server"
+    },
+    "3036": {
+      "label": "Vite dev server"
+    },
+    "4444": {
+      "label": "Playwright browser server"
+    },
+    "6042": {
+      "label": "WebSocket legacy server"
+    },
+    "9200": {
+      "label": "Elasticsearch HTTP API"
+    },
+    "9222": {
+      "label": "Playwright Chromium DevTools"
+    }
+  },
+  "postCreateCommand": "/workspaces/${localWorkspaceFolderBasename}/.devcontainer/with-playwright/scripts/post_create.sh",
+  "postStartCommand": "git config --global --add safe.directory /workspaces/${localWorkspaceFolderBasename}"
+}

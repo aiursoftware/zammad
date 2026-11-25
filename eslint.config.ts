@@ -25,7 +25,6 @@ const testFiles = [
   'app/frontend/tests/**',
   'app/frontend/**/__tests__/**',
   'app/frontend/**/*.spec.*',
-  'app/frontend/cypress/**',
   '.eslint-plugin-zammad/**',
 ]
 
@@ -46,6 +45,7 @@ export default defineConfigWithVueTs(
     'app/frontend/build/mocksGraphqlPlugin.js',
     'app/frontend/build/graphqlDocumentExtensions/transform.js',
     'app/frontend/build/graphqlDocumentExtensions/mergeDocument.js',
+    'app/frontend/build/vueApolloV5Plugin.js',
     '.eslint-plugin-zammad/lib/index.js',
     '.eslint-plugin-zammad/tests/**/*.js',
     'public/assets/tests/**/*.js',
@@ -87,8 +87,9 @@ export default defineConfigWithVueTs(
             '^[A-Z][A-Za-z]*$',
             '^(avatar-selected|border-shadow-b|bottom-navigation|color-indicator|content|cropper)$',
             '^(draggable|editor-action-popover|editor-overflow-popover|field-autocomplete-dialog)$',
-            '^(file-list|formkit-link|icon|indicator|inner-article-body|left|line-more)$',
-            '^(line-more-wrapper|line-new|object-attributes?|object-attribute-spanned-column)$',
+            '^(file-list|form-group-half-size-fields|formkit-link|icon|indicator)$',
+            '^(inner-article-body|left|line-more)$',
+            '^(line-more-wrapper|line-new|entity-attributes?|entity-attribute-spanned-column)$',
             '^(popover|print-area|progress-bar|select-dialog|select-overlay|show-action-bar)$',
             '^(select-scroll-shadows(--alt|--base)?|(bottom|show|top)-gradient)$',
             '^(ticket-detail-grid-full|vip|window|wrapper)$',
@@ -138,6 +139,18 @@ export default defineConfigWithVueTs(
       'vue/v-slot-style': ['error', 'shorthand'],
       'vue/custom-event-name-casing': ['error', 'kebab-case', { ignores: ['/^update:/'] }],
       'vue/attribute-hyphenation': 'error',
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            {
+              name: 'vue',
+              importNames: ['reactive'],
+              message: 'Declare reactive state with ref(), also for objects, maps and sets.',
+            },
+          ],
+        },
+      ],
     },
   },
 
@@ -203,11 +216,6 @@ export default defineConfigWithVueTs(
               position: 'before',
             },
             {
-              pattern: '#cy/**',
-              group: 'internal',
-              position: 'before',
-            },
-            {
               pattern: '#shared/**',
               group: 'internal',
               position: 'before',
@@ -265,6 +273,14 @@ export default defineConfigWithVueTs(
     rules: {
       'zammad/zammad-tailwind-ltr': 'off',
       'zammad/zammad-detect-translatable-string': 'off',
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'MemberExpression[property.name=/^toHaveClass(es)?$/]',
+          message:
+            'Assert what the user perceives (role, accessible name, text, state) instead of CSS classes.',
+        },
+      ],
     },
   },
 

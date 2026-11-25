@@ -318,7 +318,9 @@ RSpec.describe 'Ticket Create', time_zone: 'Europe/London', type: :system do
     end
 
     def add_email(input)
-      field = find_field('CC')
+      # The token field is set up with a delay and moves the plain input away, which loses the focus
+      #   while typing. The rest of the address then goes to the hotkeys, and the "o" opens the overviews.
+      field = find_field('CC', class: 'token-input')
       field.fill_in with: input
       field.execute_script "$(this).trigger('blur')" # trigger blur
 

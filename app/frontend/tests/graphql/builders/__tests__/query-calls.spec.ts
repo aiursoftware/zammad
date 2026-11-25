@@ -1,13 +1,21 @@
 // Copyright (C) 2012-2026 Zammad Foundation, https://zammad-foundation.org/
 
+import { flushPromises } from '@vue/test-utils'
+
 import {
   EnumObjectManagerObjects,
   EnumSearchableModels,
   type AutocompleteSearchObjectAttributeExternalDataSourceInput,
 } from '#shared/graphql/types.ts'
 import { convertToGraphQLId } from '#shared/graphql/utils.ts'
+import { GraphQLErrorTypes } from '#shared/types/error.ts'
 
-import { getGraphQLMockCalls, mockGraphQLResult, mockedApolloClient } from '../mocks.ts'
+import {
+  getGraphQLMockCalls,
+  mockGraphQLResult,
+  mockGraphQLResultWithError,
+  mockedApolloClient,
+} from '../mocks.ts'
 
 import {
   TestAutocompleteArrayFirstLevel,
@@ -120,6 +128,112 @@ describe('calling queries with mocked data works correctly', () => {
 
     expect(mock2).toHaveProperty('userCurrentAvatarActive.imageFull', exampleImage2)
     expect(data2).toHaveProperty('userCurrentAvatarActive.imageFull', exampleImage2)
+  })
+
+  it('query holds the answer back until the defaults promise settles', async () => {
+    const exampleImage = 'https://example.com/image.png'
+
+    let release: () => void = () => {}
+
+    const avatar = mockGraphQLResult<TestAvatarQuery>(
+      TestAvatarDocument,
+      () =>
+        new Promise((resolve) => {
+          release = () => resolve({ userCurrentAvatarActive: { imageFull: exampleImage } })
+        }),
+    )
+
+    let answered = false
+
+    const handler = getQueryHandler<TestAvatarQuery>(TestAvatarDocument)
+    const query = handler.query().then((result) => {
+      answered = true
+      return result
+    })
+
+    const [call] = await avatar.waitForCalls()
+    await flushPromises()
+
+    expect(answered).toBe(false)
+
+    release()
+
+    const { data } = await query
+
+    expect(data).toHaveProperty('userCurrentAvatarActive.imageFull', exampleImage)
+    expect(call.result).toHaveProperty('userCurrentAvatarActive.imageFull', exampleImage)
+  })
+
+  it('query fails a held back answer when its request is aborted', async () => {
+    let release: () => void = () => {}
+
+    const avatar = mockGraphQLResult<TestAvatarQuery>(
+      TestAvatarDocument,
+      () =>
+        new Promise((resolve) => {
+          release = () =>
+            resolve({ userCurrentAvatarActive: { imageFull: 'https://example.com/image.png' } })
+        }),
+    )
+
+    const handler = getQueryHandler<TestAvatarQuery>(TestAvatarDocument)
+    const query = handler.query()
+
+    const [call] = await avatar.waitForCalls()
+    handler.cancel()
+
+    const { data, error } = await query
+
+    expect(data).toBeNull()
+    expect(error).toHaveProperty('name', 'AbortError')
+
+    release()
+    await flushPromises()
+
+    expect(call.result).toEqual({})
+  })
+
+  it('query fails at once when its request was aborted before', async () => {
+    mockGraphQLResult<TestAvatarQuery>(TestAvatarDocument, async () => ({
+      userCurrentAvatarActive: { imageFull: 'https://example.com/image.png' },
+    }))
+
+    await expect(
+      mockedApolloClient.query({
+        query: TestAvatarDocument,
+        context: { fetchOptions: { signal: AbortSignal.abort() } },
+      }),
+    ).rejects.toHaveProperty('name', 'AbortError')
+  })
+
+  it('query fails an immediate answer when its request is aborted before it arrives', async () => {
+    const aborter = new AbortController()
+
+    // Queued while the request is handled, so it runs before the answer is delivered.
+    mockGraphQLResult<TestAvatarQuery>(TestAvatarDocument, () => {
+      queueMicrotask(() => aborter.abort())
+      return { userCurrentAvatarActive: { imageFull: 'https://example.com/image.png' } }
+    })
+
+    await expect(
+      mockedApolloClient.query({
+        query: TestAvatarDocument,
+        context: { fetchOptions: { signal: aborter.signal } },
+      }),
+    ).rejects.toHaveProperty('name', 'AbortError')
+  })
+
+  it('query fails a configured error at once when its request was aborted before', async () => {
+    mockGraphQLResultWithError(TestAvatarDocument, 'Avatar failed', {
+      type: GraphQLErrorTypes.UnknownError,
+    })
+
+    await expect(
+      mockedApolloClient.query({
+        query: TestAvatarDocument,
+        context: { fetchOptions: { signal: AbortSignal.abort() } },
+      }),
+    ).rejects.toHaveProperty('name', 'AbortError')
   })
 
   it('query correctly uses default data when updating the same object', async () => {

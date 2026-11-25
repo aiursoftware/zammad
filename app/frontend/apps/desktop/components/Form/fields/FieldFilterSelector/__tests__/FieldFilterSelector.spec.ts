@@ -7,8 +7,8 @@ import { waitFor } from '@testing-library/vue'
 import { renderComponent } from '#tests/support/components/index.ts'
 import { waitForNextTick } from '#tests/support/utils.ts'
 
-import type { ObjectSelectOption } from '#shared/entities/object-attributes/form/resolver/fields/select.ts'
-import type { FilterAttribute } from '#shared/entities/object-attributes/types/store.ts'
+import type { ObjectSelectOption } from '#shared/entities/core/attributes/form/resolver/fields/select.ts'
+import type { FilterAttribute } from '#shared/entities/core/attributes/types/store.ts'
 import { mockAutocompleteSearchTagQuery } from '#shared/entities/tags/graphql/queries/autocompleteTags.mocks.ts'
 import { i18n } from '#shared/i18n.ts'
 
@@ -406,7 +406,7 @@ describe('Fields - FieldFilterSelector', () => {
   })
 
   it('labels a multi-operator `in range` row as "Field - Operator"', async () => {
-    // A single native date-range field is routed through the fieldset/legend so
+    // A single date range field is routed through the fieldset/legend so
     // it, too, spells out the operator.
     const view = renderFilterSelector(
       [{ name: 'ticket.created_at', operator: 'in range', value: ['2026-01-01', '2026-02-01'] }],
@@ -414,6 +414,52 @@ describe('Fields - FieldFilterSelector', () => {
     )
 
     expect(view.getByRole('group', { name: 'Created at - in range' })).toBeInTheDocument()
+  })
+
+  it('renders a datetime `in range` row as a date range of timestamps and restores an external value', async () => {
+    const view = renderFilterSelector(
+      [
+        {
+          name: 'ticket.created_at',
+          operator: 'in range',
+          value: ['2026-01-01T08:00:00Z', '2026-02-01T08:00:00Z'],
+        },
+      ],
+      { filterAttributes: [dateAttribute] },
+    )
+
+    // The attribute's time part reaches the range field as its time panel, so the bounds stay
+    // timestamps for the backend selector.
+    expect(view.getAllByIconName('calendar-date-time')).toHaveLength(2)
+    expect(view.getByLabelText('Start date')).toHaveDisplayValue('2026-01-01 08:00')
+    expect(view.getByLabelText('End date')).toHaveDisplayValue('2026-02-01 08:00')
+
+    getNode('filterSelector')?.input([
+      {
+        name: 'ticket.created_at',
+        operator: 'in range',
+        value: ['2026-03-01T10:00:00Z', '2026-03-05T10:00:00Z'],
+      },
+    ])
+    await waitForNextTick()
+
+    expect(view.getByLabelText('Start date')).toHaveDisplayValue('2026-03-01 10:00')
+    expect(view.getByLabelText('End date')).toHaveDisplayValue('2026-03-05 10:00')
+  })
+
+  it('renders a date `in range` row without a time part', async () => {
+    const view = renderFilterSelector(
+      [{ name: 'ticket.due_at', operator: 'in range', value: ['2026-01-01', '2026-02-01'] }],
+      {
+        filterAttributes: [
+          { ...dateAttribute, name: 'ticket.due_at', label: 'Due at', attributeFieldType: 'date' },
+        ],
+      },
+    )
+
+    expect(view.getAllByIconName('calendar-event')).toHaveLength(2)
+    expect(view.getByLabelText('Start date')).toHaveDisplayValue('2026-01-01')
+    expect(view.getByLabelText('End date')).toHaveDisplayValue('2026-02-01')
   })
 
   it('omits the operator from the label for single-operator attributes', async () => {
@@ -469,5 +515,131 @@ describe('Fields - FieldFilterSelector', () => {
 
     expect(await view.findByRole('option', { name: 'Users' })).toBeInTheDocument()
     expect(view.getByRole('option', { name: 'Sales' })).toBeInTheDocument()
+  })
+
+  describe('after adding a filter', () => {
+    const groupAttributes: FilterAttribute[] = [
+      { name: 'ticket.group_id', label: 'Group', operators: ['is'] },
+      { name: 'ticket.title', label: 'Title', operators: ['matches'] },
+    ]
+
+    const filterAttributeOptions = {
+      'ticket.group_id': [
+        { value: 1, label: 'Users' },
+        { value: 2, label: 'Sales' },
+      ],
+    }
+
+    // Outlasts the ancestor animation wait an autofocused dropdown goes through before it opens.
+    const waitPastDropdownAutoOpen = () => new Promise((resolve) => setTimeout(resolve, 300))
+
+    it('opens the dropdown of a newly added select filter', async () => {
+      const view = renderFilterSelector([], {
+        filterAttributes: groupAttributes,
+        filterAttributeOptions,
+      })
+
+      await view.events.click(view.getByRole('button', { name: 'Add filter' }))
+      await view.events.click(
+        (await view.findByRole('option', { name: 'Group' })).firstChild as Element,
+      )
+
+      expect(await view.findByRole('option', { name: 'Users' })).toBeInTheDocument()
+    })
+
+    it('keeps the options of a rendered select filter untouched', async () => {
+      const view = renderFilterSelector(
+        [{ name: 'ticket.group_id', operator: 'is', value: null }],
+        {
+          filterAttributes: groupAttributes,
+          filterAttributeOptions,
+        },
+      )
+
+      expect(view.getByLabelText('Group')).toBeInTheDocument()
+
+      expect(getNode('filterSelector')?.context?.filterAttributeOptions).toEqual(
+        filterAttributeOptions,
+      )
+    })
+
+    it('keeps the dropdown of a restored select filter closed', async () => {
+      const view = renderFilterSelector(
+        [{ name: 'ticket.group_id', operator: 'is', value: null }],
+        {
+          filterAttributes: groupAttributes,
+          filterAttributeOptions,
+        },
+      )
+
+      expect(view.getByLabelText('Group')).toBeInTheDocument()
+
+      await waitPastDropdownAutoOpen()
+
+      expect(view.queryByRole('option', { name: 'Users' })).not.toBeInTheDocument()
+    })
+
+    it('keeps a select filter closed when it is restored after being removed', async () => {
+      const view = renderFilterSelector([], {
+        filterAttributes: groupAttributes,
+        filterAttributeOptions,
+      })
+
+      await view.events.click(view.getByRole('button', { name: 'Add filter' }))
+      await view.events.click(
+        (await view.findByRole('option', { name: 'Group' })).firstChild as Element,
+      )
+      await view.findByRole('option', { name: 'Users' })
+
+      await view.events.keyboard('{Escape}')
+      await waitFor(() =>
+        expect(view.queryByRole('option', { name: 'Users' })).not.toBeInTheDocument(),
+      )
+
+      await view.events.click(view.getByRole('button', { name: 'Remove filter' }))
+      await waitFor(() => expect(view.queryByLabelText('Group')).not.toBeInTheDocument())
+
+      getNode('filterSelector')?.input([{ name: 'ticket.group_id', operator: 'is', value: null }])
+      await waitFor(() => expect(view.getByLabelText('Group')).toBeInTheDocument())
+      await waitPastDropdownAutoOpen()
+
+      expect(view.queryByRole('option', { name: 'Users' })).not.toBeInTheDocument()
+    })
+
+    it('focuses the input of a newly added text filter', async () => {
+      const view = renderFilterSelector([], {
+        filterAttributes: groupAttributes,
+        filterAttributeOptions,
+      })
+
+      await view.events.click(view.getByRole('button', { name: 'Add filter' }))
+      await view.events.click(
+        (await view.findByRole('option', { name: 'Title' })).firstChild as Element,
+      )
+
+      await waitFor(() => expect(view.getByLabelText('Title')).toHaveFocus())
+    })
+
+    it('focuses the count input of a multi-input row instead of opening its unit dropdown', async () => {
+      const view = renderFilterSelector([], {
+        filterAttributes: [
+          {
+            name: 'ticket.created_at',
+            label: 'Created at',
+            operators: ['in range', 'within last (relative)'],
+            attributeFieldType: 'datetime',
+          },
+        ],
+      })
+
+      await view.events.click(view.getByRole('button', { name: 'Add filter' }))
+      await view.events.click(await view.findByRole('button', { name: 'Created at' }))
+      await view.events.click(
+        (await view.findByRole('option', { name: 'within last (relative)' })).firstChild as Element,
+      )
+
+      await waitFor(() => expect(view.getByLabelText('Value')).toHaveFocus())
+      expect(view.queryByRole('option', { name: 'day(s)' })).not.toBeInTheDocument()
+    })
   })
 })

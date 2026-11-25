@@ -3,7 +3,7 @@
 source 'https://rubygems.org'
 
 # core - base
-ruby '3.4.12'
+ruby '4.0.10'
 gem 'rails', '~> 8.1.0'
 gem 'rake'
 
@@ -33,12 +33,7 @@ gem 'thor'
 gem 'em-websocket'
 gem 'eventmachine'
 gem 'hiredis-client'
-# Action Cable's Redis pubsub adapter declares `gem 'redis', '>= 4', '< 6'`, so
-#   activating redis 6 breaks every subscription broadcast at runtime.
-#   Rails main already reimplemented the adapter on top of redis-client, but that
-#   is not part of any 8.0.x release yet, so keep redis below 6 until we upgrade.
-#   See https://github.com/rails/rails/blob/v8.0.5.1/actioncable/lib/action_cable/subscription_adapter/redis.rb#L5
-gem 'redis', '< 6'
+gem 'redis'
 
 # core - password security
 gem 'argon2'
@@ -121,6 +116,9 @@ gem 'omniauth-weibo-oauth2'
 # Rate limiting
 gem 'rack-attack'
 
+# feature - MCP server
+gem 'mcp', '~> 1.8', '>= 1.8.1'
+
 # channels
 gem 'koala'
 gem 'telegram-bot-ruby'
@@ -196,6 +194,7 @@ gem 'pry-remote'
 gem 'pry-rescue'
 gem 'pry-stack_explorer'
 gem 'pry-theme'
+gem 'readline' # undeclared dependency of pry-remote
 
 # monitoring / system report
 gem 'macaddr'
@@ -228,18 +227,16 @@ group :development, :test do
   # for testing Pundit authorisation policies in RSpec
   gem 'pundit-matchers'
 
-  # UI tests w/ Selenium
+  # UI tests w/ Playwright. playwright-ruby-client is pulled in by the driver;
+  #   it is declared here so Renovate sees it and can keep it in lockstep with
+  #   the playwright npm package.
   gem 'capybara'
-  gem 'selenium-webdriver'
-
-  # Playwright pilot (throwaway evaluation). playwright-ruby-client is pulled in
-  #   by the driver; it is declared here so Renovate sees it and can keep it in
-  #   lockstep with the playwright npm package.
   gem 'capybara-playwright-driver'
   gem 'playwright-ruby-client'
 
   # code QA
   gem 'brakeman', require: false
+  gem 'bundler-audit', require: false
   gem 'overcommit', require: false
   gem 'rubocop', require: false
   gem 'rubocop-capybara', require: false

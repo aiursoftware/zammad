@@ -5,9 +5,11 @@ assets:build:
     - !reference [.needs, nodejs]
     - !reference [.needs, lint]
   timeout: 15 minutes
-  # No `rules:` on purpose: the browser jobs of a filtered pipeline ($JOB_FILTER,
-  #   $BROWSER_TEST_FILTER) still need the assets built here, as the specs
-  #   themselves skip the compilation ($CI_SKIP_ASSETS_PRECOMPILE).
+  # Without the variable filters on purpose: the browser jobs of a filtered pipeline
+  #   ($JOB_FILTER, $BROWSER_TEST_FILTER) still need the assets built here, as the
+  #   specs themselves skip the compilation ($CI_SKIP_ASSETS_PRECOMPILE).
+  rules:
+    - !reference [.rule_fragments, then_unless_vitest_browser_test_filter_only]
   extends:
     - .template_ruby
     - .no_artifact_dependencies
@@ -40,8 +42,17 @@ assets:build:pwa:
   stage: test
   extends:
     - .template_ruby
-    - .job_rules_default
     - .no_artifact_dependencies
+  rules:
+    - !reference [.rule_fragments, variable_filters]
+    - !reference [.rule_fragments, backend_changes_in_mr]
+    - !reference [.rule_fragments, frontend_changes_in_mr]
+    - !reference [.rule_fragments, legacy_frontend_changes_in_mr]
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+      changes:
+        - .gitlab/ci/test/assets_build.yml
+      when: on_success
+    - !reference [.rule_fragments, then_manual_in_mr]
   needs:
     - !reference [.needs, ruby]
     - !reference [.needs, nodejs]

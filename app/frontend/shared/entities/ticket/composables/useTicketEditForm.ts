@@ -4,7 +4,10 @@ import { keyBy } from 'lodash-es'
 import { computed, nextTick, ref, shallowRef, watch } from 'vue'
 
 import { EXTENSION_NAME as TEXT_TOOL_PLUGIN_NAME } from '#shared/components/Form/fields/FieldEditor/extensions/AiAssistantTextTools.ts'
-import type { MentionKnowledgeBaseRelatedAnswers } from '#shared/components/Form/fields/FieldEditor/types.ts'
+import type {
+  FieldEditorNotice,
+  MentionKnowledgeBaseRelatedAnswers,
+} from '#shared/components/Form/fields/FieldEditor/types.ts'
 import { FormHandlerExecution } from '#shared/components/Form/types.ts'
 import type {
   ChangedField,
@@ -12,6 +15,7 @@ import type {
   FormHandlerFunction,
   FormRef,
 } from '#shared/components/Form/types.ts'
+import { autofocusFormField } from '#shared/components/Form/utils.ts'
 import { useAppName } from '#shared/composables/useAppName.ts'
 import { useTicketView } from '#shared/entities/ticket/composables/useTicketView.ts'
 import type { TicketById } from '#shared/entities/ticket/types.ts'
@@ -32,8 +36,10 @@ export const useTicketEditForm = (
   form: Ref<FormRef | undefined>,
   {
     knowledgeBaseRelatedAnswers,
+    articleBodyNotice,
   }: {
     knowledgeBaseRelatedAnswers?: () => MentionKnowledgeBaseRelatedAnswers
+    articleBodyNotice?: () => FieldEditorNotice | undefined
   } = {},
 ) => {
   const appName = useAppName()
@@ -103,6 +109,7 @@ export const useTicketEditForm = (
     articleType: undefined,
     internal: undefined,
     inReplyTo: undefined,
+    answeredArticleId: undefined,
     body: '',
   }
 
@@ -157,7 +164,7 @@ export const useTicketEditForm = (
       },
       {
         screen: 'edit',
-        object: EnumObjectManagerObjects.Ticket,
+        entity: EnumObjectManagerObjects.Ticket,
       },
     ],
   }
@@ -264,7 +271,8 @@ export const useTicketEditForm = (
                 // Move focus to the freshly revealed CC field so it can be filled right away.
                 nextTick(() => {
                   const ccFieldId = form.value?.getNodeByName('cc')?.context?.id
-                  if (ccFieldId) document.getElementById(ccFieldId)?.focus()
+                  const ccField = ccFieldId && document.getElementById(ccFieldId)
+                  if (ccField) autofocusFormField(ccField)
                 })
               },
             }),
@@ -307,7 +315,7 @@ export const useTicketEditForm = (
     {
       name: 'body',
       screen: 'edit',
-      object: EnumObjectManagerObjects.TicketArticle,
+      entity: EnumObjectManagerObjects.TicketArticle,
       validation: articleTypeFieldProps.body.validation,
       props: {
         ticketId: computed(() => ticket.value?.internalId),
@@ -319,6 +327,7 @@ export const useTicketEditForm = (
         contentType: editorType,
         meta: editorMeta,
         signatureEnabled: computed(() => !!currentArticleType.value?.signature),
+        ...(articleBodyNotice && { notice: computed(articleBodyNotice) }),
       },
       required: articleTypeFieldProps.body.required,
     },
@@ -464,6 +473,12 @@ export const useTicketEditForm = (
       {
         type: 'hidden',
         name: 'inReplyTo',
+      },
+      {
+        // The article the reply was opened from, whatever the channel. A field rather than local
+        //  state, so that it is restored and cleared together with the rest of the form.
+        type: 'hidden',
+        name: 'answeredArticleId',
       },
       {
         if: '$currentArticleType.fields.subtype',

@@ -41,6 +41,38 @@ RSpec.describe(FormUpdater::Updater::KnowledgeBase::Answer::Edit) do
     fields.dig(field, :initialValue)
   end
 
+  describe 'the categories the form holds already', :aggregate_failures do
+    def resolve(known_option_signatures: nil, data: {})
+      form = described_class.new(context:, relation_fields: [], meta: { form_id: SecureRandom.uuid, known_option_signatures:, additional_data: }, data:, id: answer_id)
+      form.authorized?
+
+      form.resolve
+    end
+
+    it 'gets them with a signature, and only the signature once it names it' do
+      first = resolve
+      again = resolve(known_option_signatures: first[:option_signatures], data: { 'categoryId' => category.id })
+
+      expect(first[:fields]['categoryId']).to include(options: [include(value: category.id)], required: true)
+      expect(first[:option_signatures]['categoryId']).to be_present
+      expect(again[:fields]['categoryId']).to eq(required: true)
+      expect(again[:option_signatures]).to eq(first[:option_signatures])
+    end
+
+    it 'gets them again once a category was renamed, and for a value the list lacks' do
+      first = resolve
+
+      travel 1.second
+      category.translations.first.update!(title: 'Renamed')
+      renamed = resolve(known_option_signatures: first[:option_signatures])
+      lacking = resolve(known_option_signatures: renamed[:option_signatures], data: { 'categoryId' => create(:knowledge_base_category).id })
+
+      expect(renamed[:fields]['categoryId'][:options]).to eq([{ value: category.id, label: 'Renamed' }])
+      expect(lacking[:option_signatures]).to eq(renamed[:option_signatures])
+      expect(lacking[:fields]['categoryId'][:options]).to eq([{ value: category.id, label: 'Renamed' }])
+    end
+  end
+
   describe '#authorized?' do
     it 'authorizes an editor to edit the answer' do
       expect(updater.authorized?).to be true
@@ -48,6 +80,14 @@ RSpec.describe(FormUpdater::Updater::KnowledgeBase::Answer::Edit) do
 
     context 'without an answer' do
       let(:answer_id) { nil }
+
+      it 'is not authorized' do
+        expect(updater.authorized?).to be false
+      end
+    end
+
+    context 'with a deactivated knowledge base' do
+      before { knowledge_base.update!(active: false) }
 
       it 'is not authorized' do
         expect(updater.authorized?).to be false
@@ -259,6 +299,14 @@ RSpec.describe(FormUpdater::Updater::KnowledgeBase::Answer::Edit) do
         fields
 
         expect(UploadCache.new(form_id).attachments).to be_empty
+      end
+    end
+
+    context 'when the form belongs to another user' do
+      before { create(:store, object: 'UploadCache', o_id: form_id, created_by_id: create(:agent).id) }
+
+      it 'does not copy the files into it' do
+        expect { fields }.to raise_error(Exceptions::Forbidden)
       end
     end
   end

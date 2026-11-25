@@ -111,10 +111,11 @@ export const useTicketArticleTranslation = (
   )
 
   const subscription = new SubscriptionHandler(
-    useTicketArticleTranslationUpdatesSubscription(
-      () => ({ ticketId: ticketId.value, targetLocale: targetLocale.value ?? '' }),
-      () => ({ enabled: started.value, fetchPolicy: 'no-cache' }),
-    ),
+    useTicketArticleTranslationUpdatesSubscription({
+      variables: { ticketId, targetLocale: () => targetLocale.value ?? '' },
+      enabled: started,
+      fetchPolicy: 'no-cache',
+    }),
     { errorShowNotification: false },
   )
 
@@ -508,6 +509,7 @@ export const useTicketArticleTranslation = (
     return {
       ...state,
       content: cached.content,
+      subject: cached.subject,
       backend: cached.backend,
       regenerating: regenerations.has(key),
     }
@@ -524,6 +526,12 @@ export const useTicketArticleTranslation = (
   // Requested and not failed: shown when done, awaited while pending. The toggle is on for both
   // and turns the original back on; for a failed one it is off and asks again.
   const isTranslationActive = (articleId: string) => isTranslation(translationFor(articleId))
+
+  const isTranslationDisplayed = (articleId: string) => {
+    const translation = translationFor(articleId)
+
+    return translation?.status === 'done' && !!translation.translated
+  }
 
   // Whether a translation for the article is stored, on its way, shown, or failed on request.
   const hasDirectTranslationAction = (articleId: string) => {
@@ -566,6 +574,7 @@ export const useTicketArticleTranslation = (
   return {
     translationFor,
     isTranslationActive,
+    isTranslationDisplayed,
     hasDirectTranslationAction,
     showTranslation: translate,
     showOriginal,

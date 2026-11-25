@@ -5,7 +5,6 @@ require 'lib/background_services/service/process_delayed_jobs_examples'
 
 RSpec.describe BackgroundServices::Service::ProcessDelayedJobs, :aggregate_failures, ensure_threads_exited: true do
   before do
-    stub_const "#{described_class}::SLEEP_IF_EMPTY", 1
     stub_const 'SampleDelayedJob', Class.new(ApplicationJob) { def perform; end }
     stub_const 'SampleDelayedAIJob', Class.new(AIJob) { def perform; end }
   end
@@ -53,6 +52,23 @@ RSpec.describe BackgroundServices::Service::ProcessDelayedJobs, :aggregate_failu
     end
   end
 
+  describe 'maximum run time of jobs' do
+    before do
+      allow(BackgroundServices).to receive(:shutdown_requested).and_return(true)
+    end
+
+    it 'keeps the configured maximum when the worker starts' do
+      expect { described_class.new(manager:).run }.not_to change(Delayed::Worker, :max_run_time).from(7.days)
+    end
+
+    it 'lets an import job run for its own maximum' do
+      AsyncImportJob.perform_later(create(:import_job))
+      described_class.new(manager:).run
+
+      expect(Delayed::Job.last.max_run_time).to eq(7.days)
+    end
+  end
+
   describe '#process_results' do
     before do
       allow(instance).to receive(:process_empty).and_call_original
@@ -64,7 +80,7 @@ RSpec.describe BackgroundServices::Service::ProcessDelayedJobs, :aggregate_failu
       instance.send(:process_results, [0, 0], 1)
 
       expect(instance).to have_received(:process_empty)
-      expect(instance).to have_received(:interruptible_sleep)
+      expect(instance).to have_received(:interruptible_sleep).with(1.second)
     end
 
     it 'loops immediately when there was anything to process', :aggregate_failures do

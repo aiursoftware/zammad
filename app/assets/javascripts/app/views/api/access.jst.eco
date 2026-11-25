@@ -1,0 +1,53 @@
+  <div class="page-header-title">
+    <div class="zammad-switch zammad-switch--small js-TokenAccess">
+       <input name="api_token_access" type="checkbox" id="api_token_access" <% if App.Setting.get('api_token_access'): %>checked<% end %>>
+       <label for="api_token_access"></label>
+    </div>
+    <h2><%- @T('Token Access') %> (HTTP Token Authentication)</h2>
+  </div>
+
+<p><%- @T('Enable REST API using tokens (not username/email address and password). All users need to create their own access tokens in the user profile.') %></p>
+
+<p><%- @T('Example:') %></p>
+
+<code>
+curl -H "Authorization: Token token=…" <%= @C('http_type') %>://<%= @C('fqdn') %>/api/v1/groups
+</code>
+
+<hr>
+
+  <div class="page-header-title">
+    <div class="zammad-switch zammad-switch--small js-PasswordAccess">
+       <input name="api_password_access" type="checkbox" id="api_password_access" <% if App.Setting.get('api_password_access'): %>checked<% end %>>
+       <label for="api_password_access"></label>
+    </div>
+    <h2><%- @T('Password Access') %> (HTTP Basic Authentication)</h2>
+  </div>
+
+<p><%- @T('Enable REST API access using the username/email address and password for the authentication user.') %></p>
+
+<p><%- @T('Example:') %></p>
+
+<code>
+curl -u <%= @S('email') %>:some_password <%= @C('http_type') %>://<%= @C('fqdn') %>/api/v1/groups
+</code>
+
+<hr>
+
+  <div class="page-header-title">
+    <div class="zammad-switch zammad-switch--small js-McpAccess">
+       <input name="api_mcp_access" type="checkbox" id="api_mcp_access" aria-labelledby="api_mcp_access_title" <% if App.Setting.get('api_mcp_access'): %>checked<% end %>>
+       <label for="api_mcp_access"></label>
+    </div>
+    <h2 id="api_mcp_access_title"><%- @T('MCP server') %> (Model Context Protocol)</h2>
+  </div>
+
+<p><%- @T('Enable the MCP server, so that AI clients can use Zammad with personal access tokens.') %> <%- @T('The MCP server works only while token access is enabled.') %></p>
+
+<p><%- @T('URL') %>: <code><%= @C('http_type') %>://<%= @C('fqdn') %>/mcp</code></p>
+
+<p><%- @T('Example:') %></p>
+
+<code>
+claude mcp add --transport http zammad <%= @C('http_type') %>://<%= @C('fqdn') %>/mcp --header "Authorization: Bearer …"
+</code>

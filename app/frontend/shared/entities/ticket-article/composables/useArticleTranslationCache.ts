@@ -11,7 +11,7 @@ import type {
 } from '#shared/graphql/types.ts'
 import { getApolloClient } from '#shared/server/apollo/client.ts'
 
-import type { InMemoryCache } from '@apollo/client/core'
+import type { InMemoryCache } from '@apollo/client'
 
 type TranslationFields = Pick<TicketArticleTranslationFragment, 'translation'> &
   Pick<TicketArticleTranslationAvailabilityFragment, 'translationAvailable'>
@@ -73,8 +73,9 @@ export const useArticleTranslationCache = () => {
 
   const write = (articleId: string, locale: string, translation: ArticleTranslationResult) => {
     writeField(articleId, locale, 'translation', {
-      __typename: 'ContentTranslation',
+      __typename: 'TicketArticleTranslation',
       content: translation.content,
+      subject: translation.subject ?? null,
       backend: translation.backend,
       translated: translation.translated,
     })

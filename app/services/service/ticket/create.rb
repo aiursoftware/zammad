@@ -9,8 +9,11 @@ class Service::Ticket::Create < Service::Base
 
   attr_reader :ticket_data
 
-  def initialize(ticket_data:)
-    @ticket_data = ticket_data
+  # @param prepared_article [Boolean] the article comes with its sender and recipients set, as a client named them;
+  #   without, they are filled in from the ticket's group and customer
+  def initialize(ticket_data:, prepared_article: false)
+    @ticket_data      = ticket_data
+    @prepared_article = prepared_article
   end
 
   def execute
@@ -39,10 +42,14 @@ class Service::Ticket::Create < Service::Base
 
   private
 
+  def prepared_article?
+    @prepared_article
+  end
+
   def create_article(ticket, article_data)
     return if article_data.blank?
 
-    preprocess_article_data! ticket, article_data
+    preprocess_article_data! ticket, article_data if !prepared_article?
 
     Service::Ticket::Article::Create
       .with_current_user(current_user)
@@ -229,6 +236,8 @@ class Service::Ticket::Create < Service::Base
     if shared_draft.group_id != ticket_data[:group].id || !shared_draft.group.shared_drafts?
       raise Exceptions::UnprocessableContent, __('Shared draft cannot be selected for this ticket.')
     end
+
+    Pundit.authorize(current_user, shared_draft, :destroy?)
 
     shared_draft.destroy!
   end

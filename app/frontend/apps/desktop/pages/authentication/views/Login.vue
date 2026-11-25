@@ -1,7 +1,6 @@
 <!-- Copyright (C) 2012-2026 Zammad Foundation, https://zammad-foundation.org/ -->
 
 <script setup lang="ts">
-import { ApolloError } from '@apollo/client/errors'
 import { computed, ref, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
@@ -98,9 +97,9 @@ const login = async (credentials: LoginCredentials) => {
 
     if (error instanceof UserError) {
       message = error.generalErrors[0]
-    } else if (error instanceof ApolloError) {
-      const { message: apolloMessage } = error
-      message = apolloMessage
+    } else if (error instanceof Error) {
+      const { message: errorMessage } = error
+      message = errorMessage
     } else {
       message = String(error)
     }
@@ -116,7 +115,7 @@ const passwordResetLink = computed(() => {
   return {
     name: 'PasswordReset',
     params: {
-      login: values.value.login as Maybe<string>,
+      login: (values.value.login as Maybe<string>) || null,
     },
   }
 })

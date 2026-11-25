@@ -108,16 +108,10 @@
 # Node
 **/node_modules
 /.vitest
+/app/frontend/.vitest
 yarn-error.log
 .yarn/cache
 /.pnpm-store
-
-# Cypress
-.dev/cypress/screenshots/*
-.dev/cypress/videos/*
-.dev/cypress/**/__diff_output__/**
-**/__image_snapshots__/**/*.diff.png
-**/__image_snapshots__/**/*.actual.png
 
 # Auto Generated
 schema.graphql
@@ -141,6 +135,7 @@ schema.graphql
 /.agents/skills
 /.claude/skills
 /.claude/settings.local.json
+/.codex/skills
 
 # CodeGraph
 /.codegraph/

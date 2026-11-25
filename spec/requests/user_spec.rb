@@ -1146,6 +1146,13 @@ RSpec.describe 'User', performs_jobs: true, type: :request do
       expect(User.find_by(email: successful_params[:email])).to be_nil
     end
 
+    it 'does not allow to create an administrator account while an import is running' do
+      Setting.set('import_mode', true)
+      make_request successful_params
+      expect(response).to have_http_status(:unprocessable_content)
+      expect(User.find_by(email: successful_params[:email])).to be_nil
+    end
+
     it 'requires email' do
       make_request successful_params.merge(email: nil)
       expect(response).to have_http_status(:unprocessable_content)
@@ -1538,14 +1545,15 @@ RSpec.describe 'User', performs_jobs: true, type: :request do
   end
 
   describe 'GET /api/v1/users/search, checks usage of the ids parameter', authenticated_as: :agent do
-    let(:agent) { create(:agent) }
+    # A random name could contain "Nick" and make the agent match the search query.
+    let(:agent) { create(:agent, firstname: 'Search', lastname: 'Requester') }
 
     let!(:search_agents) { create_list(:agent, 3, firstname: 'Nick') }
 
     shared_examples 'ids requests' do
 
       before do
-        post '/api/v1/users/search', params: { query: 'Nick', ids: search_ids, sort_by: ['created_at'], order_by: ['ASC'] }, as: :json
+        post '/api/v1/users/search', params: { query: 'Nick', ids: search_ids, sort_by: ['id'], order_by: ['ASC'] }, as: :json
       end
 
       shared_examples 'result check' do
@@ -1565,6 +1573,24 @@ RSpec.describe 'User', performs_jobs: true, type: :request do
         let(:search_ids) { search_agents.last(2).map(&:id) }
 
         include_examples 'result check'
+      end
+
+      shared_examples 'unrestricted result check' do
+        it 'returns all agents matching the query' do
+          expect(json_response.pluck('id')).to eq(search_agents.map(&:id))
+        end
+      end
+
+      context 'when ids is a blank string' do
+        let(:search_ids) { '' }
+
+        include_examples 'unrestricted result check'
+      end
+
+      context 'when ids is an empty list' do
+        let(:search_ids) { [] }
+
+        include_examples 'unrestricted result check'
       end
     end
 
@@ -1764,6 +1790,63 @@ RSpec.describe 'User', performs_jobs: true, type: :request do
 
       result = json_response.find { |u| u['id'] == customer.id }
       expect(result['label']).to eq('Tick')
+    end
+  end
+
+  describe 'search index is updated inline on request', authenticated_as: :admin, performs_jobs: false, searchindex: true do
+    let(:admin) { create(:admin) }
+
+    def search_ids(query)
+      User.search(query: query, current_user: admin, sort_by: 'id').map(&:id)
+    end
+
+    context 'when the client asks for it' do
+      before do
+        add_headers('X-Zammad-Search-Index-Inline' => 'true')
+      end
+
+      it 'finds a created user' do
+        post '/api/v1/users', params: { firstname: 'Searchable', lastname: 'User', role_ids: [Role.find_by(name: 'Agent').id] }, as: :json
+
+        expect(response).to have_http_status(:created)
+        expect(search_ids('Searchable')).to eq([json_response['id']])
+      end
+
+      it 'finds an updated user' do
+        user = create(:agent, firstname: 'Searchable')
+
+        put "/api/v1/users/#{user.id}", params: { firstname: 'Renamed' }, as: :json
+
+        expect(response).to have_http_status(:ok)
+        expect(search_ids('Renamed')).to eq([user.id])
+      end
+    end
+
+    context 'when the client does not ask for it' do
+      it 'leaves indexing to the background job' do
+        post '/api/v1/users', params: { firstname: 'Searchable', lastname: 'User', role_ids: [Role.find_by(name: 'Agent').id] }, as: :json
+
+        expect(response).to have_http_status(:created)
+        expect(search_ids('Searchable')).to be_empty
+      end
+    end
+
+    context 'when an agent asks for it', authenticated_as: :agent do
+      let(:agent) { create(:agent) }
+
+      before do
+        add_headers('X-Zammad-Search-Index-Inline' => 'true')
+      end
+
+      it 'leaves indexing to the background job', :aggregate_failures do
+        customer = create(:customer, firstname: 'Searchable')
+
+        put "/api/v1/users/#{customer.id}", params: { firstname: 'Renamed' }, as: :json
+
+        expect(response).to have_http_status(:ok)
+        expect(response.headers).not_to have_key('X-Zammad-Search-Index-Updated')
+        expect(search_ids('Renamed')).to be_empty
+      end
     end
   end
 end

@@ -80,8 +80,8 @@ RSpec.describe 'HasSearchIndexBackend', performs_jobs: true, searchindex: true, 
 
   %w[group priority state].each do |relation|
     describe "Updating referenced data between ticket and #{relation}" do
-      let(:user)   { create(:customer) }
-      let(:ticket) { create(:ticket, customer: user) }
+      let(:user)   { create(:agent, groups: [ticket.group]) }
+      let(:ticket) { create(:ticket) }
 
       before do
         ticket.send(relation).update!(name: 'NewTestPhrase')
@@ -210,6 +210,19 @@ RSpec.describe 'HasSearchIndexBackend', performs_jobs: true, searchindex: true, 
         expect(result).to include(ticket_customer_b_shared)
         expect(result).not_to include(ticket_customer_b_nonshared)
       end
+    end
+  end
+
+  describe '#search_index_update_inline' do
+    let(:ticket) { create(:ticket) }
+
+    before do
+      allow(SearchIndexBackend).to receive_messages(enabled?: true, update_inline: true)
+    end
+
+    it 'leaves documents with attachments to the background job', :aggregate_failures do
+      expect(ticket.search_index_update_inline).to be(false)
+      expect(SearchIndexBackend).not_to have_received(:update_inline)
     end
   end
 end

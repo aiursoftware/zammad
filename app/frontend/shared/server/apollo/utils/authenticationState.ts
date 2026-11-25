@@ -1,6 +1,6 @@
 // Copyright (C) 2012-2026 Zammad Foundation, https://zammad-foundation.org/
 
-import type { Operation } from '@apollo/client/core'
+import type { Operation } from '@apollo/client'
 
 const OPERATION_CONTEXT_KEY = 'authenticationGeneration'
 
@@ -27,6 +27,8 @@ export const setAuthenticationInvalidated = (value: boolean): void => {
 }
 
 export const authenticationInvalidated = (): boolean => invalidated
+
+export const authenticationGeneration = (): number => generation
 
 // Remembers on the operation which authentication it is being sent with.
 export const rememberAuthenticationGeneration = (operation: Operation): void => {

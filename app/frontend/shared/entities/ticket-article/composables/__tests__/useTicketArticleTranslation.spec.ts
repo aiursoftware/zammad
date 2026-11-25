@@ -1,11 +1,15 @@
 // Copyright (C) 2012-2026 Zammad Foundation, https://zammad-foundation.org/
 
-import { ApolloLink } from '@apollo/client/core'
-import { asyncMap } from '@apollo/client/utilities'
+import { ApolloLink } from '@apollo/client'
 import { waitFor } from '@testing-library/vue'
+import { concatMap } from 'rxjs'
 import { defineComponent, h, nextTick, ref } from 'vue'
 
-import { getGraphQLMockCalls, mockedApolloClient } from '#tests/graphql/builders/mocks.ts'
+import {
+  getGraphQLMockCalls,
+  getGraphQLSubscriptionHandler,
+  mockedApolloClient,
+} from '#tests/graphql/builders/mocks.ts'
 import { renderComponent } from '#tests/support/components/index.ts'
 import { mockApplicationConfig } from '#tests/support/mock-applicationConfig.ts'
 import { mockUserCurrent } from '#tests/support/mock-userCurrent.ts'
@@ -24,6 +28,7 @@ import {
   mockTicketArticleTranslateManyMutationError,
 } from '#shared/entities/ticket-article/graphql/mutations/ticketArticleTranslateMany.mocks.ts'
 import { mockTicketArticleTranslationTargetLocalesQuery } from '#shared/entities/ticket-article/graphql/queries/ticketArticleTranslationTargetLocales.mocks.ts'
+import { TicketArticleTranslationUpdatesDocument } from '#shared/entities/ticket-article/graphql/subscriptions/ticketArticleTranslationUpdates.api.ts'
 import { getTicketArticleTranslationUpdatesSubscriptionHandler } from '#shared/entities/ticket-article/graphql/subscriptions/ticketArticleTranslationUpdates.mocks.ts'
 import { useArticleTranslationStore } from '#shared/entities/ticket-article/stores/articleTranslation.ts'
 import type { TicketArticleTranslation } from '#shared/entities/ticket-article/stores/types.ts'
@@ -221,12 +226,14 @@ describe('useTicketArticleTranslation', () => {
       mockedApolloClient.setLink(
         new ApolloLink((operation, forward) => {
           if (operation.operationName !== 'ticketArticleTranslate') return forward(operation)
-          return asyncMap(forward(operation), async (result) => {
-            await new Promise<void>((resolve) => {
-              release = resolve
-            })
-            return result
-          })
+          return forward(operation).pipe(
+            concatMap(async (result) => {
+              await new Promise<void>((resolve) => {
+                release = resolve
+              })
+              return result
+            }),
+          )
         }).concat(originalLink),
       )
 
@@ -301,7 +308,12 @@ describe('useTicketArticleTranslation', () => {
         ticketArticleTranslationUpdates: {
           article: {
             id: articleId,
-            translation: { content: '<p>Hallo</p>', backend: 'ai', translated: true },
+            translation: {
+              content: '<p>Hallo</p>',
+              subject: 'Betreff',
+              backend: 'ai',
+              translated: true,
+            },
           },
           translation: { translated: true },
           error: null,
@@ -311,7 +323,36 @@ describe('useTicketArticleTranslation', () => {
       expect(translation.translationFor(articleId)).toMatchObject({
         status: 'done',
         content: '<p>Hallo</p>',
+        subject: 'Betreff',
         backend: 'ai',
+      })
+    })
+
+    it('carries the translated subject of a translation that is answered at once', async () => {
+      const { translation } = setup()
+      mockTicketArticleTranslateMutation({
+        ticketArticleTranslate: {
+          article: {
+            id: articleId,
+            translation: {
+              content: '<p>Hallo</p>',
+              subject: 'Betreff',
+              backend: 'ai',
+              translated: true,
+            },
+          },
+          translation: { translated: true },
+        },
+      })
+
+      const translating = translation.showTranslation(articleId)
+      await openSubscription()
+      await translating
+
+      expect(translation.translationFor(articleId)).toMatchObject({
+        status: 'done',
+        content: '<p>Hallo</p>',
+        subject: 'Betreff',
       })
     })
 
@@ -580,6 +621,7 @@ describe('useTicketArticleTranslation', () => {
       expect(translation.translationFor(articleId)).toEqual({
         status: 'done',
         content: '<p>Hallo</p>',
+        subject: null,
         backend: 'libretranslate',
         translated: true,
         analytics: null,
@@ -746,8 +788,9 @@ describe('useTicketArticleTranslation', () => {
                 id: articleId,
                 translationAvailable: true,
                 translation: {
-                  __typename: 'ContentTranslation',
+                  __typename: 'TicketArticleTranslation',
                   content: '<p>Hallo</p>',
+                  subject: null,
                   backend: 'ai',
                   translated: true,
                 },
@@ -848,6 +891,31 @@ describe('useTicketArticleTranslation', () => {
   })
 
   describe('per tab', () => {
+    it('does not listen while the service offers no target language', async () => {
+      const { store } = setup({}, [])
+
+      await store.loadTargetLocales()
+      await waitForNextTick(true)
+
+      expect(getTicketArticleTranslationUpdatesSubscriptionHandler()).toBeUndefined()
+    })
+
+    it('listens for the new target language once the target changes', async () => {
+      const { store } = setup()
+      await openSubscription()
+
+      store.setTargetLocale('fr-fr')
+
+      await waitFor(() =>
+        expect(
+          getGraphQLSubscriptionHandler(TicketArticleTranslationUpdatesDocument, {
+            ticketId,
+            targetLocale: 'fr-fr',
+          })?.closed(),
+        ).toBe(false),
+      )
+    })
+
     it('keeps listening while hidden, so a deferred result still arrives', async () => {
       const { translation, shown } = setup()
       deferred()
@@ -1979,6 +2047,71 @@ describe('useTicketArticleTranslation', () => {
       await waitForNextTick(true)
 
       expect(translation.hasDirectTranslationAction(articleId)).toBe(false)
+    })
+  })
+
+  describe('displayed translation', () => {
+    it('is displayed once it arrived, and no longer after the original is shown again', async () => {
+      const { translation } = setup()
+      deferred()
+
+      const translating = translation.showTranslation(articleId)
+      const subscription = await openSubscription()
+      await translating
+
+      // On its way: the toggle is on already, the article still shows the original.
+      expect(translation.isTranslationActive(articleId)).toBe(true)
+      expect(translation.isTranslationDisplayed(articleId)).toBe(false)
+
+      await subscription.trigger({
+        ticketArticleTranslationUpdates: {
+          article: {
+            id: articleId,
+            translation: { content: '<p>Hallo</p>', backend: 'ai', translated: true },
+          },
+          translation: { translated: true },
+          error: null,
+        },
+      })
+
+      expect(translation.isTranslationDisplayed(articleId)).toBe(true)
+      expect(translation.isTranslationDisplayed(otherArticleId)).toBe(false)
+
+      translation.showOriginal(articleId)
+
+      expect(translation.isTranslationDisplayed(articleId)).toBe(false)
+    })
+
+    it('is not displayed after a failure', async () => {
+      const { translation } = setup()
+      mockTicketArticleTranslateMutationError('AI provider is not configured.', {
+        type: GraphQLErrorTypes.UnknownError,
+      })
+
+      const translating = translation.showTranslation(articleId)
+      await openSubscription()
+      await translating
+
+      expect(translation.isTranslationDisplayed(articleId)).toBe(false)
+    })
+
+    it('is not displayed for an article already in the target language', async () => {
+      const { translation } = setup()
+      mockTicketArticleTranslateMutation({
+        ticketArticleTranslate: {
+          article: {
+            id: articleId,
+            translation: { content: '<p>Hallo</p>', backend: 'ai', translated: false },
+          },
+          translation: { translated: false },
+        },
+      })
+
+      const translating = translation.showTranslation(articleId)
+      await openSubscription()
+      await translating
+
+      expect(translation.isTranslationDisplayed(articleId)).toBe(false)
     })
   })
 })

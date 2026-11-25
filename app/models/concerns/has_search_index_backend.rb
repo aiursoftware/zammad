@@ -106,7 +106,7 @@ returns
   def search_index_update_associations
     return if !SearchIndexBackend.enabled?
 
-    new_search_index_value = search_index_attribute_lookup(include_references: false)
+    new_search_index_value = search_index_attribute_lookup_with_refresh(include_references: false)
     return if new_search_index_value.blank?
 
     search_index_indexable.each_with_object([]) do |index_class, result|
@@ -147,7 +147,7 @@ returns
 
   def search_index_update_backend
     # fill up with search data
-    attributes = search_index_attribute_lookup
+    attributes = search_index_attribute_lookup_with_refresh
     return true if !attributes
 
     # update backend
@@ -155,12 +155,74 @@ returns
     true
   end
 
+=begin
+
+update the search index right away, e.g. inside a request, the object is searchable when
+the call returns - models can leave expensive references to the background job via
+search_index_inline_include_references?, opt out via search_index_inline_supported? and
+report records changed by their callbacks via search_index_inline_cascaded?
+
+  ticket = Ticket.find(123)
+  result = ticket.search_index_update_inline
+
+returns
+
+  result = true  # the search index reflects the record
+  result = false # the record, or records changed with it, are left to the background job
+
+=end
+
+  def search_index_update_inline
+    return true if ignore_search_indexing?(:update)
+    return true if !SearchIndexBackend.enabled?
+    return false if !search_index_inline_supported?
+
+    attributes = search_index_attribute_lookup_with_refresh(include_references: search_index_inline_include_references?)
+    return true if !attributes
+
+    SearchIndexBackend.update_inline(self.class.to_s, search_index_inline_attributes(attributes))
+    !search_index_inline_cascaded?
+  end
+
+  def search_index_inline_include_references?
+    true
+  end
+
+  # documents with attachments depend on the ingest pipeline, which a partial update cannot run
+  def search_index_inline_supported?
+    true
+  end
+
+  # records changed by callbacks of this save are left to the background job
+  def search_index_inline_cascaded?
+    false
+  end
+
+  # drops ignored attributes and clears nil references, which a partial update would keep otherwise
+  def search_index_inline_attributes(attributes)
+    attributes.delete_if { |attribute_name, _| self.class.search_index_attribute_ignored?(attribute_name) }
+    return attributes if !search_index_inline_include_references?
+
+    self.attributes.each do |attribute_name, value|
+      next if !value.nil?
+      next if self.class.search_index_attribute_ignored?(attribute_name)
+      next if !search_index_attribute_method(attribute_name)
+
+      attribute_ref_name = self.class.search_index_attribute_ref_name(attribute_name)
+      next if self.class.search_index_attribute_ignored?(attribute_ref_name)
+
+      attributes[attribute_ref_name] = nil
+    end
+
+    attributes
+  end
+
   def ignore_search_indexing?(_action)
     false
   end
 
   # methods defined here are going to extend the class, not the instance of it
-  class_methods do # rubocop:disable Metrics/BlockLength
+  class_methods do
 
 =begin
 
@@ -190,38 +252,13 @@ reload search index with full data
 =end
 
     def search_index_reload(silent: false, worker: 0)
-      tolerance       = 10
-      tolerance_count = 0
-      query           = reorder(created_at: :desc)
-      total           = query.count
-      record_count    = 0
-      offset          = 0
-      batch_size      = 200
+      printed = 0
 
-      while query.offset(offset).limit(batch_size).any?
-        records = query.offset(offset).limit(batch_size)
+      SearchIndexBackend::Reload.new([self], worker:).perform do |records|
+        next if silent || records.count == printed
 
-        Parallel.map(records, { in_processes: worker }) do |record|
-          next if record.ignore_search_indexing?(:destroy)
-
-          begin
-            record.search_index_update_backend
-          rescue => e
-            logger.error "Unable to send #{record.class}.find(#{record.id}).search_index_update_backend backend: #{e.inspect}"
-            tolerance_count += 1
-            sleep 15
-            raise "Unable to send #{record.class}.find(#{record.id}).search_index_update_backend backend: #{e.inspect}" if tolerance_count == tolerance
-          end
-        end
-
-        offset += batch_size
-
-        next if silent
-
-        record_count += records.count
-        if (record_count % batch_size).zero? || record_count == total
-          print "\r    #{record_count}/#{total}" # rubocop:disable Rails/Output
-        end
+        printed = records.count
+        print "\r    #{printed}/#{records.total}" # rubocop:disable Rails/Output
       end
     end
   end

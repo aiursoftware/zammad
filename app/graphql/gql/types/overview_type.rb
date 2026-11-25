@@ -5,7 +5,6 @@ module Gql::Types
     include Gql::Types::Concerns::IsModelObject
     include Gql::Types::Concerns::HasInternalIdField
     include Gql::Types::Concerns::HasPunditAuthorization
-    include Gql::Concerns::HandlesOverviewCaching
 
     description 'Ticket overviews'
 
@@ -70,18 +69,15 @@ module Gql::Types
     end
 
     def ticket_count
-      ::Ticket::Overviews
-        .tickets_for_overview(object, context.current_user)
-        .unscope(:order)
-        .count(:all)
-        .count # double-count due to grouping in underlying scope
+      ::Ticket::Overviews.tickets_for_overview(object, context.current_user).count_rows
     end
 
     def cached_ticket_count(cache_ttl:)
-      cache_key = "OverviewType.cached_ticket_count(overview:#{object.id},cache_ttl:#{cache_ttl})-#{object_cache_key(object)}"
+      partition = ::Ticket::Overviews::CachePartition.new(object, context.current_user)
+      cache_key = "OverviewType.cached_ticket_count(overview:#{object.id},cache_ttl:#{cache_ttl})-#{partition.key}"
 
       Rails.cache.fetch(cache_key, expires_in: cache_ttl) do
-        ticket_count
+        partition.tickets.count_rows
       end
     end
 

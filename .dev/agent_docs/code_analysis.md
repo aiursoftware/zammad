@@ -4,8 +4,8 @@
 reports what the linters cannot see across files: unused files, exports, enum,
 class and store members, unused dependencies, import cycles, copy-paste
 duplication and oversized functions. It covers the Vue/TypeScript stack only,
-not Ruby or CoffeeScript. The config is `.fallowrc.json`; the hooks, permissions
-and the MCP server are described in
+not Ruby or CoffeeScript. The config is `.fallowrc.json`; the hooks and
+permissions are described in
 `doc/developer_manual/development_environment/fallow-setup.md`.
 
 ## What runs on its own
@@ -58,8 +58,7 @@ When a hook blocks:
   `pnpm exec fallow dead-code --trace <file>:<export>` explains why fallow
   considers it unused. Modules registered through `import.meta.glob` are easy
   to misjudge, see below. Search for remaining uses with `git grep`, not plain
-  `rg`: `rg` skips hidden directories, and the Cypress support code lives in
-  `.dev/cypress`.
+  `rg`: `rg` skips hidden directories such as `.dev` and `.gitlab`.
 - **After removing the last consumer of something**:
   `pnpm exec fallow fix --dry-run <directory>` lists the exports, enum members
   and dependencies left behind there. Apply with `--yes <directory>` only after
@@ -75,12 +74,6 @@ When a hook blocks:
 
 ## Reading the results
 
-- `.dev/cypress` is analysed as a workspace package with its own
-  `package.json`; the rest of `.dev` is ignored. The package cycle between it
-  and the Cypress specs in `app/frontend/cypress` is inherent to that layout, so
-  `package-cycle` is off. Its packages are installed separately
-  (`pnpm cypress:install`), so `cypress` imports are never reported as
-  unresolved.
 - `import.meta.glob` with a parent-relative pattern (`'../components/…'`) is not
   followed by fallow; the targets of such globs are listed under
   `dynamicallyLoaded` in `.fallowrc.json`. A new glob of that shape needs an

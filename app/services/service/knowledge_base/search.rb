@@ -50,7 +50,7 @@ class Service::KnowledgeBase::Search < Service::Base
   Result  = Struct.new(:item, :translation, :title_preview, :body_preview, :category_path, keyword_init: true)
   Segment = Struct.new(:text, :highlight, keyword_init: true)
 
-  attr_reader :query, :knowledge_base, :entity, :scope, :locale, :limit, :enriched
+  attr_reader :query, :knowledge_base, :entity, :scope, :locale, :limit, :enriched, :include_drafts_and_archived, :raise_on_failure
 
   # `entity` is the kind of content to search, one of ENTITY_MODELS' keys. `scope` is the category
   #   to search within (its whole subtree), `locale` the resolved KnowledgeBase::Locale being
@@ -61,20 +61,29 @@ class Service::KnowledgeBase::Search < Service::Base
   #   and fires on every debounced keystroke — paying for 200 highlighted fragments and a category
   #   tree per keystroke is the cost that has to go. `limit` stays at MAX_RESULTS there on purpose,
   #   so its total count keeps meaning the same lower bound as the search page's.
-  def initialize(query:, knowledge_base:, entity:, scope: nil, locale: nil, limit: MAX_RESULTS, enriched: true)
-    @query          = query
-    @knowledge_base = knowledge_base
-    @entity         = entity
-    @scope          = scope
-    @locale         = locale
-    @limit          = limit
-    @enriched       = enriched
+  #
+  # `include_drafts_and_archived` false searches only the answers published internally or
+  #   publicly, as a reader would, for a caller that has no use for the others even where the user
+  #   may see them.
+  #
+  # `raise_on_failure` raises SearchIndexBackend::SearchFailedError where Elasticsearch did not run the search, for a
+  #   caller that has to tell that from a search without results.
+  def initialize(query:, knowledge_base:, entity:, scope: nil, locale: nil, limit: MAX_RESULTS, enriched: true, include_drafts_and_archived: true, raise_on_failure: false)
+    @query                       = query
+    @knowledge_base              = knowledge_base
+    @entity                      = entity
+    @scope                       = scope
+    @locale                      = locale
+    @limit                       = limit
+    @enriched                    = enriched
+    @include_drafts_and_archived = include_drafts_and_archived
+    @raise_on_failure            = raise_on_failure
   end
 
   def execute
     return empty if query.blank?
 
-    hits = backend.search(query, user: current_user)
+    hits = backend.search(query)
 
     preheat(hits)
 
@@ -99,32 +108,28 @@ class Service::KnowledgeBase::Search < Service::Base
 
   def backend
     SearchKnowledgeBaseBackend.new(
-      knowledge_base:    knowledge_base,
-      locale:            locale,
-      scope:             scope,
-      flavor:            flavor,
-      index:             translation_model.name,
+      knowledge_base:              knowledge_base,
+      locale:                      locale,
+      scope:                       scope,
+      flavor:                      flavor,
+      index:                       translation_model.name,
       # Both are needed: SearchKnowledgeBaseBackend#options_apply_pagination only forwards a limit
       #   to Elasticsearch when an offset is given too, and without one Elasticsearch answers with
       #   its own default of ten hits.
-      from:              0,
-      limit:             limit,
+      from:                        0,
+      limit:                       limit,
       # The nil is compacted away by SearchKnowledgeBaseBackend#initialize, and #options_apply_
       #   highlight skips the whole block once highlighting is off.
-      highlight_enabled: enriched,
-      highlight_options: enriched ? HIGHLIGHT_OPTIONS : nil,
+      highlight_enabled:           enriched,
+      highlight_options:           enriched ? HIGHLIGHT_OPTIONS : nil,
+      include_drafts_and_archived: include_drafts_and_archived,
+      user:                        current_user,
+      raise_on_failure:            raise_on_failure,
     )
   end
 
-  # Derived rather than hardcoded to :agent. SearchKnowledgeBaseBackend#use_internal_assets? is
-  #   `flavor == :agent && granular_permissions?` with no role condition, so a user without any
-  #   knowledge base permission would be filtered through the granular category grants — of which
-  #   they have none — and see nothing, while KnowledgeBase::Answer.visible_to_user still lets them
-  #   browse published content. Mapping :public through keeps search and browsing in agreement.
-  #
-  # A side effect is that such a user searches with the public field list and therefore without the
-  #   title/tag weighting, which SearchKnowledgeBaseBackend applies to the agent flavor only so the
-  #   public help site's ranking stays untouched.
+  # Not hardcoded to :agent: a user without knowledge base permission keeps the help site's field
+  #   list and ranking, which the backend only changes for the agent flavor.
   def flavor
     ::KnowledgeBase.access_for_user(current_user) == :public ? :public : :agent
   end

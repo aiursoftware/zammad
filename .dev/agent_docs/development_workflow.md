@@ -23,14 +23,14 @@ The lifecycle below starts at "read the GitHub issue" and assumes a task
 issue already exists that says something useful. Getting there is its own
 stage, and it acts on a **story** rather than on a task:
 
-1. **Refine** — `/refine-story`. Checks whether the story can be planned at
+1. **Refine** — `/zammad-refine-story`. Checks whether the story can be planned at
    all, whether it is really several stories, and whether its acceptance
    criteria, its use cases and its linked design agree. Proposes the missing
    criteria and sections, and writes them to the story on confirmation.
-2. **Break down** — `/plan-story`. Cuts a ready story into `Task` and `Spike`
+2. **Break down** — `/zammad-plan-story`. Cuts a ready story into `Task` and `Spike`
    sub-issues: a task carries the plan of how to solve it, a spike the question
    it has to answer. Refuses to plan a story that is not ready.
-3. **Present** — `/present-story`. Explains the prepared work in a sprint
+3. **Present** — `/zammad-present-story`. Explains the prepared work in a sprint
    planning. Reads only.
 
 The rules all three follow — the definition of ready, how story size is
@@ -48,7 +48,7 @@ conversation about whether it should be a story.
 
 Note that **"Plan" means two different things**: step 3 of the lifecycle below
 is the technical plan for one task, written by whoever implements it.
-`/plan-story` is the story-level breakdown that produces those tasks.
+`/zammad-plan-story` is the story-level breakdown that produces those tasks.
 
 ## Lifecycle
 
@@ -108,11 +108,11 @@ other parts of the system.
 
 ### 4. Branch
 
-**Standalone mode:** Use the `/prepare-issue-branch` skill to create the
+**Standalone mode:** Use the `/zammad-prepare-issue-branch` skill to create the
 branch and prepare the commit message. It handles naming conventions, public
 vs. private issue detection, and commit message formatting automatically.
 
-**Attach mode:** Do _not_ invoke `/prepare-issue-branch`. The story branch
+**Attach mode:** Do _not_ invoke `/zammad-prepare-issue-branch`. The story branch
 is already checked out (confirmed in step 1). Instead:
 
 - Run `git fetch origin && git pull --rebase` to align with what colleagues
@@ -152,7 +152,7 @@ the GraphQL schema or settings, the regenerate hook runs the appropriate
 generators automatically.
 
 **Standalone mode:** Use the prepared commit message from step 4
-(`/prepare-issue-branch` wrote it to `.git/COMMIT_EDITMSG`).
+(`/zammad-prepare-issue-branch` wrote it to `.git/COMMIT_EDITMSG`).
 
 **Attach mode:** Write a commit message that describes what this commit
 changed — no issue reference, no `Closes`/`Fixes` keywords. The parent
@@ -160,13 +160,18 @@ story's MR carries the issue context; individual commits within it only
 need to describe their own change. Keep it short and conventional, e.g.
 `Add validation for empty subject on ticket form.`
 
+After a squash or a rebase, check that
+`git diff --stat origin/develop...HEAD` lists only files of the change. A
+stale copy of a file reverts what `develop` fixed in the meantime, and no
+conflict shows it.
+
 ### 9. Merge Request
 
-**Standalone mode:** Use the `/create-mr` skill to push the branch and
+**Standalone mode:** Use the `/zammad-create-mr` skill to push the branch and
 create a Merge Request on GitLab. It selects the correct MR template, fills
 in the sections, and targets the appropriate branch automatically.
 
-**Attach mode:** Do _not_ invoke `/create-mr` — the MR for the parent story
+**Attach mode:** Do _not_ invoke `/zammad-create-mr` — the MR for the parent story
 already exists.
 
 **Don't push automatically.** After committing, stop and wait. Tell the
@@ -181,11 +186,14 @@ review is required before merging.
 
 ### 10. Cherry-pick
 
-If the fix also applies to `stable`, use the `/cherry-pick-to-stable` skill
+If the fix also applies to `stable`, use the `/zammad-cherry-pick-to-stable` skill
 after the MR is merged to `develop`.
 
 ## Rules
 
 - Never push directly to `develop` or `stable`.
 - Never reference private issue numbers in public commits.
+- The commit message and the MR title of a fix for a security vulnerability
+  describe the change in general terms and do not name the vulnerability,
+  for the same reason as in code comments.
 - Never run the full test suite — always target specific files.

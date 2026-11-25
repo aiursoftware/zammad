@@ -91,13 +91,28 @@ export interface FieldEditorContext {
   removeSignature(): void
   focus(): void
   getEditorValue(type: EditorContentType): string
+  // Hands over the images that were pasted or dropped but are still being read, in the content as it
+  //   would have been with them, which they no longer reach. Nothing when none is on its way; not
+  //   offered before the editor is loaded.
+  takeContentWithImagesOnTheirWay?(): Promise<string> | undefined
   // Only offered by editors with the knowledge base mention (`??`).
   insertKnowledgeBaseAnswer?(translationId: ID): void
   signature?: Pick<PossibleSignature, 'internalId' | 'renderedBody'> | null
   signatureEnabled?: boolean
 }
 
-export type EditorExtensionSet = 'basic'
+// `reduced`: paragraphs, line breaks, links and images that stay embedded in the HTML, with text
+//   modules as the only suggestions.
+export type EditorExtensionSet = 'basic' | 'reduced'
+
+export interface FieldEditorNotice {
+  // Tells one notice from the next: a notice the user dismissed is shown again under another key.
+  key: string
+  // A source string, translated where it is shown.
+  text: string
+  // Values for the `%s` placeholders of `text`, inserted as they are.
+  textPlaceholder?: string[]
+}
 
 export interface FieldEditorProps {
   placeholder?: string
@@ -124,6 +139,11 @@ export interface FieldEditorProps {
    */
   contentType?: EditorContentType
   /**
+   * Shown below the toolbar for as long as it is set, unless the user dismisses it. Only the
+   * desktop editor renders it.
+   */
+  notice?: FieldEditorNotice
+  /**
    * "meta" represents an object, where the key is a plugin, and the value is an object with plugin-specific options
    */
   meta?: {
@@ -146,6 +166,8 @@ export interface FieldEditorProps {
     }
     mentionKnowledgeBase?: {
       disabled?: boolean
+      // who gets the list in this editor, instead of agents with ticket access
+      permission?: string[]
       // where to put attachments from knowledge base, if any are available
       attachmentsNodeName?: string
       // answers related to the record being edited, offered before a search term is typed;

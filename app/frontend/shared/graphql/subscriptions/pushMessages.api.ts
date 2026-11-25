@@ -2,8 +2,6 @@ import * as Types from '#shared/graphql/types.ts';
 
 import gql from 'graphql-tag';
 import * as VueApolloComposable from '@vue/apollo-composable';
-import * as VueCompositionApi from 'vue';
-export type ReactiveFunction<TParam> = () => TParam;
 
 export const PushMessagesDocument = gql`
     subscription pushMessages {
@@ -13,7 +11,7 @@ export const PushMessagesDocument = gql`
   }
 }
     `;
-export function usePushMessagesSubscription(options: VueApolloComposable.UseSubscriptionOptions<Types.PushMessagesSubscription, Types.PushMessagesSubscriptionVariables> | VueCompositionApi.Ref<VueApolloComposable.UseSubscriptionOptions<Types.PushMessagesSubscription, Types.PushMessagesSubscriptionVariables>> | ReactiveFunction<VueApolloComposable.UseSubscriptionOptions<Types.PushMessagesSubscription, Types.PushMessagesSubscriptionVariables>> = {}) {
-  return VueApolloComposable.useSubscription<Types.PushMessagesSubscription, Types.PushMessagesSubscriptionVariables>(PushMessagesDocument, {}, options);
+export function usePushMessagesSubscription(options: VueApolloComposable.useSubscription.Options<Types.PushMessagesSubscription, Types.PushMessagesSubscriptionVariables> = {}) {
+  return VueApolloComposable.useSubscription<Types.PushMessagesSubscription, Types.PushMessagesSubscriptionVariables>(PushMessagesDocument, options);
 }
-export type PushMessagesSubscriptionCompositionFunctionResult = VueApolloComposable.UseSubscriptionReturn<Types.PushMessagesSubscription, Types.PushMessagesSubscriptionVariables>;
+export type PushMessagesSubscriptionCompositionFunctionResult = VueApolloComposable.useSubscription.Result<Types.PushMessagesSubscription, Types.PushMessagesSubscriptionVariables>;

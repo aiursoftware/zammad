@@ -6,11 +6,12 @@ import { transformEditorHtml } from '#shared/components/Form/fields/FieldEditor/
 import type { FormRef, FormSubmitData } from '#shared/components/Form/types.ts'
 import { setErrors } from '#shared/components/Form/utils.ts'
 import { useCheckBodyAttachmentReference } from '#shared/composables/form/useCheckBodyAttachmentReference.ts'
-import { useObjectAttributeFormData } from '#shared/entities/object-attributes/composables/useObjectAttributeFormData.ts'
-import { useObjectAttributes } from '#shared/entities/object-attributes/composables/useObjectAttributes.ts'
+import { useEntityAttributeFormData } from '#shared/entities/core/attributes/composables/useEntityAttributeFormData.ts'
+import { useEntityAttributes } from '#shared/entities/core/attributes/composables/useEntityAttributes.ts'
 import { ticketCreateArticleType } from '#shared/entities/ticket/composables/useTicketCreateArticleType.ts'
 import { useTicketCreateMutation } from '#shared/entities/ticket/graphql/mutations/create.api.ts'
 import UserError from '#shared/errors/UserError.ts'
+import { getGraphQLErrorType } from '#shared/errors/utils.ts'
 import { EnumObjectManagerObjects, type TicketCreateInput } from '#shared/graphql/types.ts'
 import { isGraphQLId, convertToGraphQLId } from '#shared/graphql/utils.ts'
 import MutationHandler from '#shared/server/apollo/handler/MutationHandler.ts'
@@ -20,7 +21,7 @@ import { convertFilesToAttachmentInput } from '#shared/utils/files.ts'
 import { useTicketCreateView } from './useTicketCreateView.ts'
 
 import type { TicketFormData } from '../types.ts'
-import type { ApolloError } from '@apollo/client/core'
+import type { ErrorLike } from '@apollo/client'
 import type { Ref } from 'vue'
 
 const {
@@ -45,13 +46,11 @@ export const useTicketCreate = (
     })
   }
 
-  const handleTicketCreateError = (error: UserError | ApolloError) => {
-    if ('graphQLErrors' in error) {
-      const graphQLErrors = error.graphQLErrors?.[0]
-
+  const handleTicketCreateError = (error: UserError | ErrorLike) => {
+    if (!(error instanceof UserError)) {
       // Treat this as successful, because it happens when you create a ticket inside a group, where you only
       // have create permission, but not view permission.
-      if (graphQLErrors?.extensions?.type === GraphQLErrorTypes.Forbidden) {
+      if (getGraphQLErrorType(error) === GraphQLErrorTypes.Forbidden) {
         skipAttachmentReferenceCheck.value = false
         notifySuccess()
 
@@ -63,18 +62,20 @@ export const useTicketCreate = (
         message: __('Ticket could not be created.'),
         type: NotificationTypes.Error,
       })
-    } else {
-      if (error instanceof UserError && form.value?.formNode) {
-        setErrors(form.value?.formNode, error)
-        return
-      }
 
-      notify({
-        id: 'ticket-create-error',
-        message: error.generalErrors[0],
-        type: NotificationTypes.Error,
-      })
+      return
     }
+
+    if (form.value?.formNode) {
+      setErrors(form.value?.formNode, error)
+      return
+    }
+
+    notify({
+      id: 'ticket-create-error',
+      message: error.generalErrors[0],
+      type: NotificationTypes.Error,
+    })
   }
 
   const ticketCreateMutation = new MutationHandler(useTicketCreateMutation({}), {
@@ -98,14 +99,14 @@ export const useTicketCreate = (
       return false
     }
 
-    const { attributesLookup: ticketObjectAttributesLookup } = useObjectAttributes(
+    const { attributesLookup: ticketEntityAttributesLookup } = useEntityAttributes(
       EnumObjectManagerObjects.Ticket,
     )
 
     const { internalObjectAttributeValues, additionalObjectAttributeValues } =
-      useObjectAttributeFormData(
+      useEntityAttributeFormData(
         EnumObjectManagerObjects.Ticket,
-        ticketObjectAttributesLookup.value,
+        ticketEntityAttributesLookup.value,
         formData,
       )
 

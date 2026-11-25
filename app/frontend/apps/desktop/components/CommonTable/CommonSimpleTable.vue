@@ -52,7 +52,8 @@ const { getCellContentComponent } = useCellContent()
 const checkedRows = defineModel<Array<TableItem>>('checkedRows', {
   required: false,
   // is not reactive by default and making it reactive causes other issues.
-  default: (props) => (props.items as Array<TableItem>).filter((item) => item.checked),
+  default: (props: Record<string, unknown>) =>
+    (props.items as Array<TableItem>).filter((item) => item.checked),
 })
 
 const { hasCheckboxId, allCheckboxRowsSelected, selectAllRowCheckboxes, handleCheckboxUpdate } =
@@ -96,10 +97,8 @@ const { hasCheckboxId, allCheckboxRowsSelected, selectAllRowCheckboxes, handleCh
 
           <slot :name="`header-suffix-${header.key}`" :item="header" />
         </th>
-        <th v-if="actions" class="h-10 w-0 p-2.5 text-center">
-          <CommonLabel class="font-normal text-muted!" size="small"
-            >{{ $t('Actions') }}
-          </CommonLabel>
+        <th v-if="actions" class="h-10 w-12.5">
+          <span class="sr-only">{{ $t('Actions') }}</span>
         </th>
       </tr>
     </thead>

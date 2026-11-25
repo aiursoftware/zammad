@@ -12,7 +12,7 @@ import { waitUntil } from '#tests/support/vitest-wrapper.ts'
 
 import { mockFormUpdaterQuery } from '#shared/components/Form/graphql/queries/formUpdater.mocks.ts'
 import useMetaTitle from '#shared/composables/useMetaTitle.ts'
-import { mockObjectManagerFrontendAttributesQuery } from '#shared/entities/object-attributes/graphql/queries/objectManagerFrontendAttributes.mocks.ts'
+import { mockObjectManagerFrontendAttributesQuery } from '#shared/entities/core/attributes/graphql/queries/objectManagerFrontendAttributes.mocks.ts'
 import { createDummyTicket } from '#shared/entities/ticket-article/__tests__/mocks/ticket.ts'
 import { EnumSearchableModels, type Ticket } from '#shared/graphql/types.ts'
 import { convertToGraphQLId } from '#shared/graphql/utils.ts'
@@ -285,9 +285,12 @@ describe('search view', () => {
 
       const ticketState = await view.findByLabelText('State')
 
+      // The Group field is autofocused, so its dropdown opens by itself.
+      await view.findByRole('menu')
+
       await view.events.click(ticketState)
 
-      expect(await view.findByRole('menu')).toBeInTheDocument()
+      expect(await view.findByRole('option', { name: 'closed' })).toBeInTheDocument()
 
       await view.events.click(view.getByRole('option', { name: 'closed' }))
 

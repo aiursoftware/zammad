@@ -253,6 +253,7 @@ export interface ConfigList {
   user_name_format: 'first_last' | 'last_first' | 'last_first_comma'
   user_show_password_login?: boolean | null
   vectordb_enabled: boolean
+  wcl_activity_stream_retention_days: number
   web_push_vapid_public_key: string
   websocket_backend: string
   websocket_port: string

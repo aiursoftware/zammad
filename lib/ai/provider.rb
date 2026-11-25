@@ -133,7 +133,13 @@ class AI::Provider
       error = data.is_a?(Hash) ? data['error'] : nil
       return false if !error.is_a?(Hash)
 
-      error.values_at('type', 'param', 'code') == %w[invalid_request_error temperature unsupported_value]
+      type, param, code = error.values_at('type', 'param', 'code')
+      return true if [type, param, code] == %w[invalid_request_error temperature unsupported_value]
+
+      # Some compatible endpoints (e.g. Kimi) send neither param nor code and name the parameter in
+      # the message only.
+      message = error['message'].to_s
+      type == 'invalid_request_error' && param.blank? && code.blank? && message.valid_encoding? && message.match?(%r{\btemperature\b}i)
     rescue JSON::ParserError
       false
     end
@@ -391,6 +397,11 @@ class AI::Provider
     raise 'not implemented'
   end
 
+  # Mail attachments keep MIME parameters (e.g. "image/png; name=image.png"), which providers reject.
+  def image_media_type(prompt_image)
+    (prompt_image.preferences['Content-Type'] || prompt_image.preferences['Mime-Type']).to_s.split(';').first.to_s.strip
+  end
+
   def embeddings(input:)
     raise 'not implemented'
   end
@@ -398,5 +409,6 @@ class AI::Provider
   class RequestError < StandardError; end
   class ResponseError < StandardError; end
   class OutputFormatError < ResponseError; end
+  class OutputTruncatedError < OutputFormatError; end
   class CheckTemperatureSupportError < ResponseError; end
 end

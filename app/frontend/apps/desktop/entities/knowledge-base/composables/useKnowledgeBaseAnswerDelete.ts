@@ -12,7 +12,7 @@ import { useKnowledgeBaseAnswerDeleteMutation } from '../graphql/mutations/knowl
 import { useKnowledgeBaseStore } from '../stores/knowledgeBase.ts'
 import { knowledgeBaseBrowseRoute } from '../utils/routeLocation.ts'
 
-import type { Reference, StoreObject } from '@apollo/client/core'
+import type { Reference, StoreObject } from '@apollo/client'
 
 // The `knowledgeBaseAnswers` connection as it sits in the cache: edges holding references to the
 //   normalized answers, not the denormalized query result. A cached field can always be a
@@ -48,7 +48,7 @@ export const useKnowledgeBaseAnswerDelete = () => {
     if (!confirmed) return
 
     const deleteMutation = new MutationHandler(
-      useKnowledgeBaseAnswerDeleteMutation(() => ({
+      useKnowledgeBaseAnswerDeleteMutation({
         variables: { answerId: answer.id },
         update(cache, { data }) {
           if (!data?.knowledgeBaseAnswerDelete?.success) return
@@ -96,7 +96,7 @@ export const useKnowledgeBaseAnswerDelete = () => {
           cache.evict({ id: cache.identify({ __typename: 'KnowledgeBaseAnswer', id: answer.id }) })
           cache.gc()
         },
-      })),
+      }),
     )
 
     // Whichever view is currently open *on this exact answer* - the reader, or its own edit tab.

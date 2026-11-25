@@ -1,13 +1,13 @@
 // Copyright (C) 2012-2026 Zammad Foundation, https://zammad-foundation.org/
 
-import { within } from '@testing-library/vue'
+import { waitFor, within } from '@testing-library/vue'
 
 import FormUpdaterOrganization from '#tests/graphql/factories/types/FormUpdaterOrganization.ts'
 import { visitView } from '#tests/support/components/visitView.ts'
 import { mockPermissions } from '#tests/support/mock-permissions.ts'
 
 import { mockFormUpdaterQuery } from '#shared/components/Form/graphql/queries/formUpdater.mocks.ts'
-import { mockObjectManagerFrontendAttributesQuery } from '#shared/entities/object-attributes/graphql/queries/objectManagerFrontendAttributes.mocks.ts'
+import { mockObjectManagerFrontendAttributesQuery } from '#shared/entities/core/attributes/graphql/queries/objectManagerFrontendAttributes.mocks.ts'
 import { waitForOrganizationUpdateMutationCalls } from '#shared/entities/organization/graphql/mutations/update.mocks.ts'
 import { mockOrganizationQuery } from '#shared/entities/organization/graphql/queries/organization.mocks.ts'
 import type { Organization } from '#shared/graphql/types.ts'
@@ -107,6 +107,8 @@ describe('Organization Detail View - Edit Organization', () => {
     const flyout = await view.findByRole('complementary', { name: 'Edit organization' })
 
     const name = await within(flyout).findByLabelText('Name')
+
+    await waitFor(() => expect(name).toBeVisible())
 
     await view.events.clear(name)
     await view.events.type(name, 'Updated organization name')

@@ -265,11 +265,7 @@ RSpec.describe 'Ticket zoom > Article actions', type: :system do
         element = find('.ticketZoom')
 
         wait(5, interval: 0.2).until_constant do
-          if page.driver.is_a?(Capybara::Playwright::Driver)
-            element.native.bounding_box&.fetch('y')
-          else
-            element.native.location.y
-          end
+          element.native.bounding_box&.fetch('y')
         end
       end
 
@@ -418,6 +414,34 @@ RSpec.describe 'Ticket zoom > Article actions', type: :system do
       click '.js-ArticleAction[data-type=internal]'
       click '.js-ArticleAction[data-type=public]'
       expect(page).to have_css('.js-ArticleAction[data-type=emailReply]')
+    end
+  end
+
+  describe 'Reply all for an agent email sent to a system address #4325' do
+    let(:group)  { Group.find_by(name: 'Users') }
+    let(:ticket) { create(:ticket, group: group) }
+    let(:cc)     { 'external@example.com' }
+
+    before do
+      # Only an article received by mail keeps the address of the agent as sender.
+      ApplicationHandleInfo.use('email.postmaster') do
+        create(:ticket_article, :outbound_email, ticket: ticket, from: 'Agent <agent@example.com>', to: group.email_address.email, cc: cc)
+      end
+
+      visit "#ticket/zoom/#{ticket.id}"
+    end
+
+    it 'shows the action when a recipient besides the agent exists' do
+      expect(page).to have_css('.js-ArticleAction[data-type=emailReplyAll]')
+    end
+
+    context 'without another recipient' do
+      let(:cc) { nil }
+
+      it 'does not show the action' do
+        expect(page).to have_css('.js-ArticleAction[data-type=emailReply]')
+          .and have_no_css('.js-ArticleAction[data-type=emailReplyAll]', wait: 0)
+      end
     end
   end
 end

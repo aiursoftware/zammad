@@ -17,6 +17,12 @@ class BackgroundServices
         raise 'not implemented'
       end
 
+      # Each empty pass costs a reservation query per thread, so only services
+      #   whose jobs a user waits for poll more often.
+      def self.sleep_if_empty
+        SLEEP_IF_EMPTY
+      end
+
       def self.pre_launch
         start_time = Time.zone.now
 
@@ -26,7 +32,7 @@ class BackgroundServices
       end
 
       def launch
-        Delayed::Worker.reset
+        initialize_thread_settings
 
         loop do
           break if BackgroundServices.shutdown_requested
@@ -56,6 +62,13 @@ class BackgroundServices
 
       private
 
+      # Not Delayed::Worker.reset: it would also reset process-wide settings like max_run_time,
+      #   see config/initializers/delayed_jobs_timeout_per_job.rb.
+      def initialize_thread_settings
+        ::Delayed::Worker.sleep_delay = ::Delayed::Worker::DEFAULT_SLEEP_DELAY
+        ::Delayed::Worker.read_ahead  = ::Delayed::Worker::DEFAULT_READ_AHEAD
+      end
+
       def process_results(result, realtime)
         result.sum.zero? ? process_empty : process_busy(result, realtime)
       end
@@ -64,7 +77,7 @@ class BackgroundServices
         Rails.logger.debug do
           format('*** no jobs processed in %<queues>s, sleeping…', queues: self.class.queues) # rubocop:disable Style/FormatStringToken
         end
-        interruptible_sleep SLEEP_IF_EMPTY
+        interruptible_sleep self.class.sleep_if_empty
         Rails.logger.debug do
           format('*** worker thread loop processing %<queues>s queues', queues: self.class.queues) # rubocop:disable Style/FormatStringToken
         end

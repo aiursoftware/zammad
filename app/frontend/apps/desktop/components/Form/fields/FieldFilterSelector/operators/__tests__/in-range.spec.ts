@@ -1,6 +1,6 @@
 // Copyright (C) 2012-2026 Zammad Foundation, https://zammad-foundation.org/
 
-import type { FilterAttribute } from '#shared/entities/object-attributes/types/store.ts'
+import type { FilterAttribute } from '#shared/entities/core/attributes/types/store.ts'
 
 import inRange from '../in-range.ts'
 
@@ -33,11 +33,14 @@ describe('FieldFilterSelector - in range operator', () => {
     ])
   })
 
-  it.each(['date', 'datetime'])(
-    'renders a single native range picker for %s (no compound list)',
-    (fieldType) => {
+  it.each([
+    ['date', false],
+    ['datetime', true],
+  ])(
+    'renders a single date range field for %s, with a time for datetime',
+    (fieldType, withTime) => {
       expect(inRange.filterFields(attribute({ attributeFieldType: fieldType }))).toEqual([
-        { type: fieldType, props: { range: true, clearable: true, partialRange: false } },
+        { type: 'daterange', props: { withTime, clearable: true, partialRange: false } },
       ])
     },
   )

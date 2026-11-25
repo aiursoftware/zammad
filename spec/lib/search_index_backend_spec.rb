@@ -18,6 +18,34 @@ RSpec.describe SearchIndexBackend do
     it 'coerces :query_extension hash keys to symbols' do
       expect(query.dig(:query, :bool, :filter, :term, :a)).to eq('b')
     end
+
+    context 'with ids option' do
+      subject(:query) { described_class.build_query('Ticket', '', ids: ids) }
+
+      context 'when ids is not given' do
+        let(:ids) { nil }
+
+        it 'does not add an ids clause' do
+          expect(query.dig(:query, :bool, :must).grep(Hash).flat_map(&:keys)).not_to include(:ids)
+        end
+      end
+
+      context 'when ids is empty' do
+        let(:ids) { [] }
+
+        it 'adds an ids clause matching nothing' do
+          expect(query.dig(:query, :bool, :must)).to include({ ids: { values: [] } })
+        end
+      end
+
+      context 'when ids are given' do
+        let(:ids) { [1, 2] }
+
+        it 'adds an ids clause with the given ids' do
+          expect(query.dig(:query, :bool, :must)).to include({ ids: { values: [1, 2] } })
+        end
+      end
+    end
   end
 
   describe '.search', searchindex: false do
@@ -132,6 +160,23 @@ RSpec.describe SearchIndexBackend do
           total_count:     1,
           object_metadata: include(include(id: record.id.to_s))
         )
+      end
+
+      context 'with ids option' do
+        it 'does not restrict results when ids is not given' do
+          result = described_class.search_by_index(record.number, record_type, ids: nil)
+          expect(result).to eq([{ id: record.id.to_s, type: record_type }])
+        end
+
+        it 'restricts results to the given ids' do
+          result = described_class.search_by_index(record.number, record_type, ids: [record.id])
+          expect(result).to eq([{ id: record.id.to_s, type: record_type }])
+        end
+
+        it 'returns nothing when ids is empty' do
+          result = described_class.search_by_index(record.number, record_type, ids: [])
+          expect(result).to be_empty
+        end
       end
     end
 
@@ -457,11 +502,54 @@ RSpec.describe SearchIndexBackend do
     end
   end
 
+  describe '.update_inline', searchindex: true do
+    let(:record) { create(:group, name: 'Searchable Group') }
+
+    before do
+      allow(described_class).to receive(:make_request).and_call_original
+    end
+
+    it 'makes the record searchable right away' do
+      described_class.update_inline('Group', record.search_index_attribute_lookup)
+
+      result = described_class.search_by_index('Searchable', 'Group')
+      expect(result).to eq([{ id: record.id.to_s, type: 'Group' }])
+    end
+
+    it 'uses the inline timeout profile' do
+      described_class.update_inline('Group', record.search_index_attribute_lookup)
+
+      expect(described_class).to have_received(:make_request).with(anything, hash_including(request_type: :inline))
+    end
+
+    it 'retries on version conflicts with the background job' do
+      described_class.update_inline('Group', record.search_index_attribute_lookup)
+
+      expect(described_class).to have_received(:make_request).with(a_string_including('retry_on_conflict=3'), anything)
+    end
+
+    context 'with an organization and its members' do
+      let(:record) { create(:organization) }
+      let(:member) { create(:agent, organization: record) }
+
+      before do
+        member
+        described_class.add('Organization', record.search_index_attribute_lookup)
+      end
+
+      it 'keeps attributes which are not part of the update' do
+        described_class.update_inline('Organization', record.search_index_attribute_lookup(include_references: false))
+
+        expect(described_class.get('Organization', record.id)['_source']['members']).to include(hash_including('id' => member.id))
+      end
+    end
+  end
+
   describe '.remove', searchindex: true do
 
     context 'record gets deleted' do
 
-      let(:record_type) { 'Ticket'.freeze }
+      let(:record_type)    { 'Ticket'.freeze }
       let(:deleted_record) { create(:ticket) }
 
       before do
@@ -492,6 +580,56 @@ RSpec.describe SearchIndexBackend do
 
           result = described_class.search(other_record.number, record_type, sort_by: ['updated_at'], order_by: ['desc'])
           expect(result).to eq([{ id: other_record.id.to_s, type: record_type }])
+        end
+      end
+    end
+  end
+
+  describe '.search_by_index with raise_on_failure', searchindex: true do
+    it 'finds nothing without raising, by default, where the index is missing' do
+      expect(described_class.search_by_index('test', 'MissingIndex')).to eq([])
+    end
+
+    it 'raises where the index is missing' do
+      expect { described_class.search_by_index('test', 'MissingIndex', raise_on_failure: true) }
+        .to raise_error(described_class::SearchFailedError)
+    end
+
+    it 'raises where Elasticsearch refuses the query' do
+      expect { described_class.search_by_index('laptop / email', 'Ticket', raise_on_failure: true) }
+        .to raise_error(described_class::SearchFailedError)
+    end
+
+    it 'raises where Elasticsearch cannot be reached' do
+      Setting.set('es_url', 'http://127.0.0.1:1')
+
+      expect { described_class.search_by_index('test', 'Ticket', raise_on_failure: true) }
+        .to raise_error(described_class::SearchFailedError)
+    end
+
+    it 'finds nothing without raising where the search ran' do
+      expect(described_class.search_by_index('nothing-matches-this', 'Ticket', raise_on_failure: true)).to eq([])
+    end
+
+    context 'when Elasticsearch answers with an incomplete search' do
+      {
+        'a timeout'      => { 'timed_out' => true, '_shards' => { 'failed' => 0 } },
+        'a failed shard' => { 'timed_out' => false, '_shards' => { 'failed' => 1 } },
+      }.each do |name, status|
+        context "with #{name}" do
+          before do
+            response = UserAgent::Result.new(success: true, code: 200, data: status.merge('hits' => { 'hits' => [] }))
+            allow(described_class).to receive(:make_request).and_return(response)
+          end
+
+          it 'raises' do
+            expect { described_class.search_by_index('test', 'Ticket', raise_on_failure: true) }
+              .to raise_error(described_class::SearchFailedError, include('did not complete'))
+          end
+
+          it 'finds what it got without raising, by default' do
+            expect(described_class.search_by_index('test', 'Ticket')).to eq([])
+          end
         end
       end
     end
@@ -1391,6 +1529,24 @@ RSpec.describe SearchIndexBackend do
     end
   end
 
+  describe 'Ticket can not be indexed if article preferences contain values of changing types #6556', searchindex: true do
+    let(:ticket_date)   { create(:ticket) }
+    let(:ticket_string) { create(:ticket) }
+
+    before do
+      create(:ticket_article, ticket: ticket_date, preferences: { special: { version: '2026-11-10' } })
+      create(:ticket_article, ticket: ticket_string, preferences: { special: { version: '2026-11-10-candidate-only' } })
+      ticket_date.search_index_update_backend
+      ticket_string.search_index_update_backend
+      described_class.refresh
+    end
+
+    it 'does index both tickets', :aggregate_failures do
+      expect(described_class.search('article.preferences.special.version: "2026-11-10"', 'Ticket').pluck(:id)).to eq([ticket_date.id.to_s])
+      expect(described_class.search('article.preferences.special.version: "2026-11-10-candidate-only"', 'Ticket').pluck(:id)).to eq([ticket_string.id.to_s])
+    end
+  end
+
   describe 'works with special characters', performs_jobs: true, searchindex: true do
     # Verify fix for Github issue #2058 - Autocomplete hangs on dot in the new user form
     it 'does searching for organization with a dot in its name' do
@@ -1423,12 +1579,13 @@ RSpec.describe SearchIndexBackend do
   end
 
   describe '.attachment_ignored?', searchindex: false do
+    let(:preferences) { {} }
     let(:store) do
-      create(:store,
-             object:   'SomeObject',
-             o_id:     1,
-             data:     'some content',
-             filename:)
+      build(:store,
+            object:      'SomeObject',
+            o_id:        1,
+            filename:,
+            preferences:)
     end
 
     context 'when attachment is indexable', searchindex: false do
@@ -1444,6 +1601,182 @@ RSpec.describe SearchIndexBackend do
 
       it 'return true' do
         expect(described_class).to be_attachment_ignored(store)
+      end
+    end
+
+    context 'when attachment has an indexable extension but an ignored MIME type' do
+      let(:filename)    { 'image.gif' }
+      let(:preferences) { { 'Mime-Type' => 'image/png' } }
+
+      it 'return false' do
+        expect(described_class).not_to be_attachment_ignored(store)
+      end
+    end
+
+    context 'when attachment has no extension' do
+      let(:filename) { 'noname' }
+
+      context 'with an ignored MIME type' do
+        let(:preferences) { { 'Mime-Type' => 'image/png' } }
+
+        it 'return true' do
+          expect(described_class).to be_attachment_ignored(store)
+        end
+      end
+
+      context 'with an ignored content type including parameters' do
+        let(:preferences) { { 'Content-Type' => 'image/jpeg; name=noname' } }
+
+        it 'return true' do
+          expect(described_class).to be_attachment_ignored(store)
+        end
+      end
+
+      context 'with an ignored MIME type whose preferred extension is not ignored' do
+        let(:preferences) { { 'Mime-Type' => 'video/quicktime' } }
+
+        it 'return true' do
+          expect(described_class).to be_attachment_ignored(store)
+        end
+      end
+
+      [
+        'image/jpg; name=noname',
+        'image/jpe; name=noname',
+        'image/pjpeg; name=noname',
+        'image/x-jpeg; name=noname',
+        'image/x-jpg; name=noname',
+        'image/x-png; name=noname',
+        'image/x-citrix-png; name=noname',
+        'image/x-citrix-jpeg; name=noname',
+        'image/x-citrix-pjpeg; name=noname',
+        'video/mpg; name=noname',
+        'video/x-mpeg; name=noname',
+        'video/x-quicktime; name=noname',
+      ].each do |alias_content_type|
+        context "with a non-standard alias of an ignored MIME type (#{alias_content_type})" do
+          let(:preferences) { { 'Content-Type' => alias_content_type } }
+
+          it 'return true' do
+            expect(described_class).to be_attachment_ignored(store)
+          end
+        end
+      end
+
+      [
+        'image/jpg name=noname',
+        '"image/jpg"',
+        'image/jpg, name=noname',
+      ].each do |malformed_content_type|
+        context "with a malformed content type of an ignored MIME type (#{malformed_content_type})" do
+          let(:preferences) { { 'Content-Type' => malformed_content_type } }
+
+          it 'return true' do
+            expect(described_class).to be_attachment_ignored(store)
+          end
+        end
+      end
+
+      context 'with an audio MIME type' do
+        let(:preferences) { { 'Content-Type' => 'audio/wav' } }
+
+        it 'return false' do
+          expect(described_class).not_to be_attachment_ignored(store)
+        end
+
+        context 'when an admin ignores one of its extensions' do
+          before do
+            Setting.set('es_attachment_ignore', Setting.get('es_attachment_ignore') + ['.wav'])
+          end
+
+          it 'return true' do
+            expect(described_class).to be_attachment_ignored(store)
+          end
+        end
+      end
+
+      context 'with a non-media MIME type listing an ignored extension' do
+        let(:preferences) { { 'Content-Type' => 'application/octet-stream' } }
+
+        it 'return false' do
+          expect(described_class).not_to be_attachment_ignored(store)
+        end
+      end
+
+      context 'with a text MIME type listing an extension an admin ignores' do
+        let(:preferences) { { 'Content-Type' => 'text/plain' } }
+
+        before do
+          Setting.set('es_attachment_ignore', Setting.get('es_attachment_ignore') + ['.log'])
+        end
+
+        it 'return false' do
+          expect(described_class).not_to be_attachment_ignored(store)
+        end
+      end
+
+      context 'with an empty ignore list' do
+        let(:preferences) { { 'Content-Type' => 'image/png' } }
+
+        before do
+          Setting.set('es_attachment_ignore', [])
+        end
+
+        it 'return false' do
+          expect(described_class).not_to be_attachment_ignored(store)
+        end
+      end
+
+      context 'with a malformed MIME type' do
+        let(:preferences) { { 'Mime-Type' => ';' } }
+
+        it 'return false' do
+          expect(described_class).not_to be_attachment_ignored(store)
+        end
+      end
+
+      context 'with an indexable MIME type' do
+        let(:preferences) { { 'Mime-Type' => 'text/plain' } }
+
+        it 'return false' do
+          expect(described_class).not_to be_attachment_ignored(store)
+        end
+      end
+
+      context 'with an unknown MIME type' do
+        let(:preferences) { { 'Mime-Type' => 'foo/bar' } }
+
+        it 'return false' do
+          expect(described_class).not_to be_attachment_ignored(store)
+        end
+      end
+
+      context 'with an attachment that has no MIME type' do
+        let(:attachment) { Struct.new(:filename).new('noname') }
+
+        it 'return false' do
+          expect(described_class).not_to be_attachment_ignored(attachment)
+        end
+      end
+
+      context 'without a MIME type' do
+        it 'return false' do
+          expect(described_class).not_to be_attachment_ignored(store)
+        end
+      end
+    end
+
+    context 'when attachment has an extension mime-types does not know' do
+      let(:preferences) { { 'Content-Type' => 'video/mpeg' } }
+
+      %w[part1.06090408.01060107 noname.].each do |unknown_extension_filename|
+        context "with filename #{unknown_extension_filename}" do
+          let(:filename) { unknown_extension_filename }
+
+          it 'return true' do
+            expect(described_class).to be_attachment_ignored(store)
+          end
+        end
       end
     end
   end
@@ -1514,6 +1847,12 @@ RSpec.describe SearchIndexBackend do
   end
 
   describe '.get_mapping_properties_object' do
+    it 'maps article preferences as flattened (#6556)' do
+      mapping = described_class.get_mapping_properties_object(Ticket)
+
+      expect(mapping.dig(:properties, :article, :properties, 'preferences')).to eq(type: 'flattened')
+    end
+
     context 'with multi-value object attributes (#6130)', db_strategy: :reset do
       let(:screens) { { create_middle: { '-all-' => { shown: true, required: false } } } }
 

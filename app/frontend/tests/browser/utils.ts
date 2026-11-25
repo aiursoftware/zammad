@@ -1,0 +1,101 @@
+// Copyright (C) 2012-2026 Zammad Foundation, https://zammad-foundation.org/
+
+import { FormKit } from '@formkit/vue'
+import { provideApolloClient } from '@vue/apollo-composable'
+import { createMockClient } from 'mock-apollo-client'
+import { onTestFinished } from 'vitest'
+import { commands } from 'vitest/browser'
+import { render } from 'vitest-browser-vue'
+import { createMemoryHistory, createRouter } from 'vue-router'
+
+import type { FormSchemaField } from '#shared/components/Form/types.ts'
+import { initializeAppName } from '#shared/composables/useAppName.ts'
+import initializeGlobalComponents from '#shared/initializer/globalComponents.ts'
+import initializeGlobalProperties from '#shared/initializer/globalProperties.ts'
+import createCache from '#shared/server/apollo/cache.ts'
+import { useApplicationStore } from '#shared/stores/application.ts'
+import initializeStore, { resetAndDisposeStores } from '#shared/stores/index.ts'
+import { useSessionStore } from '#shared/stores/session.ts'
+import type { UserData } from '#shared/types/store.ts'
+
+import { getBrowserApp } from './app.ts'
+
+import type { RouteResponse } from './commands.mts'
+import type { MountOptions } from './types.ts'
+import type { App, Component } from 'vue'
+
+// The store outlives the test, so a mount without permissions must not see those of an earlier one.
+const mockPermissions = (permissions?: string[], userId = '123') => {
+  const session = useSessionStore()
+
+  session.user = permissions
+    ? ({
+        __typename: 'User',
+        id: userId,
+        internalId: 1,
+        objectAttributeValues: [],
+        permissions: { __typename: 'UserPermission', names: permissions },
+      } as unknown as UserData)
+    : null
+}
+
+export const mountComponent = (
+  component: Component,
+  props: Record<string, unknown> = {},
+  { config, permissions, userId }: MountOptions = {},
+) => {
+  const { name, plugins: appPlugins } = getBrowserApp()
+
+  const router = createRouter({
+    history: createMemoryHistory('/'),
+    // Like the app's error route, the catch-all lets links resolve external urls without a warning.
+    routes: [
+      { path: '/', component: { template: '<div />' } },
+      { name: 'Error', path: '/:pathMatch(.*)*', component: { template: '<div />' } },
+    ],
+  })
+
+  const plugins = [
+    () => initializeAppName(name),
+    initializeStore,
+    () => Object.assign(useApplicationStore().config, config),
+    () => mockPermissions(permissions, userId),
+    ...appPlugins,
+    initializeGlobalComponents,
+    initializeGlobalProperties,
+    (app: App) => router.install(app),
+  ]
+
+  // The store outlives the test as well: what a logout disposes ends here, so the next mount does
+  //   not start from the stores of this one.
+  onTestFinished(() => resetAndDisposeStores(true))
+
+  return render(component, { props, global: { plugins } })
+}
+
+export const mountFormField = (
+  field: string,
+  props?: Partial<FormSchemaField> & Record<string, unknown>,
+) =>
+  mountComponent(FormKit, {
+    name: field,
+    type: field,
+    ...props,
+  })
+
+export const mockApolloClient = () => {
+  const client = createMockClient({
+    cache: createCache(getBrowserApp().cacheInitializerModules),
+    queryDeduplication: true,
+  })
+  provideApolloClient(client)
+
+  return client
+}
+
+// The page and its routes outlive the test, other test files run on it afterwards.
+export const routeRequest = async (url: string, response: RouteResponse) => {
+  await commands.routeRequest(url, response)
+
+  onTestFinished(() => commands.unrouteRequest(url))
+}

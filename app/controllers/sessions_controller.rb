@@ -50,30 +50,34 @@ class SessionsController < ApplicationController
 
     verify_sso_trusted_ip!
 
-    user = begin
-      login = request.env['REMOTE_USER'] ||
-              request.env['HTTP_REMOTE_USER'] ||
-              request.headers['X-Forwarded-User']
+    logins = [
+      request.env['REMOTE_USER'],
+      request.env['HTTP_REMOTE_USER'],
+      request.headers['X-Forwarded-User'],
+    ].compact_blank
 
-      User.lookup(login: login&.downcase)
-    end
+    raise Exceptions::NotAuthorized, __("Neither an SSO environment variable 'REMOTE_USER' nor a 'X-Forwarded-User' header could be found.") if logins.blank?
+    raise Exceptions::NotAuthorized, __('The SSO environment variables and headers contain different user logins.') if logins.map(&:downcase).uniq.many?
 
-    raise Exceptions::NotAuthorized, __("Neither an SSO environment variable 'REMOTE_USER' nor a 'X-Forwarded-User' header could be found.") if login.blank?
+    login = logins.first
+    user  = User.lookup(login: login.downcase)
+
     raise Exceptions::NotAuthorized, "User '#{login}' could not be found." if user.blank?
 
     session.delete(:switched_from_user_id)
     authentication_check_prerequesits(user, 'SSO')
 
     initiate_session_for(user, 'SSO')
+    user.update_last_login
 
     redirect_after_omniauth('/#')
   end
 
   # "Delete" a login, aka "log the user out"
   def destroy
-    if %w[test development].include?(Rails.env) && ENV['FAKE_SELENIUM_LOGIN_USER_ID'].present?
-      ENV['FAKE_SELENIUM_LOGIN_USER_ID'] = nil # rubocop:disable Rails/EnvironmentVariableAccess
-      ENV['FAKE_SELENIUM_LOGIN_PENDING'] = nil # rubocop:disable Rails/EnvironmentVariableAccess
+    if %w[test development].include?(Rails.env) && ENV['FAKE_LOGIN_USER_ID'].present?
+      ENV['FAKE_LOGIN_USER_ID'] = nil # rubocop:disable Rails/EnvironmentVariableAccess
+      ENV['FAKE_LOGIN_PENDING'] = nil # rubocop:disable Rails/EnvironmentVariableAccess
     end
 
     return saml_destroy if saml_session?
@@ -139,7 +143,7 @@ class SessionsController < ApplicationController
     session[:persistent] = true
 
     # Persist the browser cookie so it survives browser restarts, matching the persistent server-side
-    # session. See #6260.
+    # session. See #6260. Refreshed on every further request in ApplicationController::HasUser#session_update (#6495).
     request.env['rack.session.options'][:expire_after] = omniauth_cookie_lifetime(authorization.user)
 
     # remember omniauth login
@@ -322,16 +326,6 @@ class SessionsController < ApplicationController
 
     session.delete(:switched_from_user_id)
     authentication_check_prerequesits(auth.user, 'session')
-  end
-
-  # Cookie lifetime for OAuth/OIDC logins: tie it to the same session timeout the server enforces,
-  # so cookie and session expire together. A disabled (0) timeout falls back to the idle window of
-  # SessionHelper.cleanup_expired. Note that the cookie expiry is fixed at login time and not
-  # refreshed per request, so with a disabled timeout an actively used session outlives its cookie
-  # and the user has to re-authenticate once the fallback lifetime is up. See #6260.
-  def omniauth_cookie_lifetime(user)
-    timeout = SessionTimeoutJob::Session.timeout_for(user)
-    timeout >= 1 ? timeout.seconds : SessionHelper::MAX_SESSION_LIFETIME
   end
 
   def initiate_session_for(user, type = 'password')

@@ -5,19 +5,20 @@ import { watch } from 'vue'
 import type {
   OperationSubscriptionOptionsReturn,
   OperationSubscriptionsResult,
+  SubscriptionHandlerResult,
+  SubscriptionOperationReturn,
   WatchResultCallback,
 } from '#shared/types/server/apollo/handler.ts'
 
 import { BaseHandler } from './BaseHandler.ts'
 
-import type { FetchResult, OperationVariables } from '@apollo/client/core'
-import type { UseSubscriptionReturn } from '@vue/apollo-composable'
+import type { OperationVariables } from '@apollo/client'
 import type { Ref, WatchStopHandle } from 'vue'
 
 export default class SubscriptionHandler<
   TResult = OperationSubscriptionsResult,
   TVariables extends OperationVariables = OperationVariables,
-> extends BaseHandler<TResult, TVariables, UseSubscriptionReturn<TResult, TVariables>> {
+> extends BaseHandler<TResult, TVariables, SubscriptionOperationReturn<TResult, TVariables>> {
   public subscribed = false
 
   public options(): OperationSubscriptionOptionsReturn<TResult, TVariables> {
@@ -32,16 +33,25 @@ export default class SubscriptionHandler<
     this.operationResult.stop()
   }
 
-  public result(): Ref<Maybe<TResult> | undefined> {
+  // Resolves once the new subscription is open - callers must not rely on
+  // synchronous completion.
+  public async restart(): Promise<void> {
+    await this.operationResult.restart()
+  }
+
+  public result(): Readonly<Ref<Maybe<TResult> | undefined>> {
     return this.operationResult.result
   }
 
-  public onResult(
-    callback: (
-      result: FetchResult<TResult, Record<string, unknown>, Record<string, unknown>>,
-    ) => void,
-  ) {
-    return this.operationResult.onResult(callback)
+  public onResult(callback: (result: SubscriptionHandlerResult<TResult>) => void) {
+    // The event hands the data directly; keep the v4 `{ data }` payload shape
+    // for the callers. Cast: vueuse's `Callback<TResult>` is a conditional type
+    // that stays unresolved on the open generic and accepts no callback at all.
+    const onResult = this.operationResult.onResult as (fn: (data: TResult) => void) => {
+      off: () => void
+    }
+
+    return onResult((data) => callback({ data }))
   }
 
   public async onSubscribed(): Promise<Maybe<TResult> | undefined> {

@@ -11,7 +11,7 @@ import { visitView } from '#tests/support/components/visitView.ts'
 import { mockApplicationConfig } from '#tests/support/mock-applicationConfig.ts'
 import { mockPermissions } from '#tests/support/mock-permissions.ts'
 
-import { mockObjectManagerFrontendAttributesQuery } from '#shared/entities/object-attributes/graphql/queries/objectManagerFrontendAttributes.mocks.ts'
+import { mockObjectManagerFrontendAttributesQuery } from '#shared/entities/core/attributes/graphql/queries/objectManagerFrontendAttributes.mocks.ts'
 import { waitForTicketCreateMutationCalls } from '#shared/entities/ticket/graphql/mutations/create.mocks.ts'
 import {
   EnumObjectManagerObjects,
@@ -158,9 +158,9 @@ describe('ticket create view', () => {
       await view.events.click(view.getByRole('option', { name: 'pending reminder' }))
 
       // Date selection Field on pending reminder
-      await view.events.click(view.getByLabelText('Pending till'))
+      await view.events.click(view.getByRole('button', { name: 'Choose date' }))
 
-      const dateCells: Element[] = await view.findAllByRole('gridcell', { name: /29/ })
+      const dateCells: Element[] = await view.findAllByRole('button', { name: /29th/ })
 
       await view.events.click(<Element>dateCells.at(-1))
 

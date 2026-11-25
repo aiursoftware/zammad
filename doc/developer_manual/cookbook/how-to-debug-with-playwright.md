@@ -1,9 +1,8 @@
 # How to Debug System Tests with Playwright
 
-Zammad's browser tests run through Capybara, normally against Selenium. In addition to that there is a **Playwright
-driver**, registered next to the Selenium ones. It is currently a pilot: CI runs it as a non-gating shadow lane, and
-locally it is mainly a debugging tool, because it records a **trace** of every example - a step-by-step timeline with
-screenshots, console output and network requests.
+Zammad's browser tests run through Capybara on the **Playwright driver**. Besides driving the browser, it records a
+**trace** of every example - a step-by-step timeline with screenshots, console output and network requests - which
+makes it a debugging tool as well.
 
 If you are looking for how to write or run browser tests in general, see
 [How to test with RSpec / Capybara](how-to-test-with-rspec-and-capybara.md). This page only covers the Playwright
@@ -19,8 +18,8 @@ pnpm playwright:install
 
 Without it, the first driver call fails with `Executable doesn't exist ... chrome-headless-shell`.
 
-The Firefox driver (`SELENIUM_BROWSER=playwright_firefox`) uses Playwright's own Firefox build, which this script does
-not download. Install it once as well if you want to use that driver:
+The Firefox driver (`TEST_BROWSER=firefox`) uses Playwright's own Firefox build, which this script does not download.
+Install it once as well if you want to use that driver:
 
 ```sh
 pnpm exec playwright install firefox
@@ -28,9 +27,13 @@ pnpm exec playwright install firefox
 
 ### In the Devcontainer
 
-There is no Playwright service container - the browser is launched inside the devcontainer itself, so the download
-above is needed there as well. The devcontainer image does not ship Chromium's shared libraries, and `playwright
-install` refuses to continue without them:
+The `with-playwright` stack runs a Playwright browser server next to the devcontainer and points the tests at it via
+`PLAYWRIGHT_SERVER_URL`, so nothing has to be installed there. Its browsers are always headless, and the stack also comes
+with built-in debugging tools, so it's not needed to run the commands above.
+
+However, in the other stacks the browser is launched inside the devcontainer itself, so the download above is needed there
+as well. The devcontainer image does not ship Chromium's shared libraries, and `playwright install` refuses to continue
+without them:
 
 ```text
 Host system is missing dependencies to run browsers.
@@ -42,35 +45,29 @@ Please install them with the following command:
 Install them once, then download the browser:
 
 ```sh
-sudo "$(pnpm bin)/playwright" install-deps chromium
+sudo env PATH="$PATH" pnpm playwright install-deps chrome-for-testing
 pnpm playwright:install
 ```
 
 Both are lost on a container rebuild and have to be repeated.
 
-Note that `SELENIUM_REMOTE_URL` has no effect on the Playwright driver - it only knows `PLAYWRIGHT_SERVER_URL`, which
-is set in CI only. The Selenium service containers of the `with-selenium` stack are therefore not involved.
+## Choosing the Browser
 
-## Running a Spec with Playwright
-
-The driver is selected with the same variable as the Selenium browsers:
+Specs run in Chromium by default. `TEST_BROWSER=firefox` runs them in Playwright's Firefox build instead (see the
+one-time setup above):
 
 ```sh
-SELENIUM_BROWSER=playwright bundle exec rspec spec/system/ticket/zoom_spec.rb
+TEST_BROWSER=firefox bundle exec rspec spec/system/ticket/zoom_spec.rb
 ```
 
-The browser is shown by default. Set `SELENIUM_BROWSER_HEADLESS=1` to hide it:
+The browser is shown by default. Set `TEST_BROWSER_HEADLESS=1` to hide it:
 
 ```sh
-SELENIUM_BROWSER_HEADLESS=1 SELENIUM_BROWSER=playwright bundle exec rspec spec/system/ticket/zoom_spec.rb
+TEST_BROWSER_HEADLESS=1 bundle exec rspec spec/system/ticket/zoom_spec.rb
 ```
 
-In the devcontainer there is no display to show the browser on, so the variable is required there. The `with-selenium`
-stack already sets it for the whole container; the default stack does not.
-
-`SELENIUM_BROWSER=playwright` runs Chromium, `SELENIUM_BROWSER=playwright_firefox` runs Playwright's Firefox build
-(see the one-time setup above). Examples tagged with `mobile_user_agent` automatically use the mobile variant of the
-driver.
+When the browser is launched inside a devcontainer, there is no display to show it on, so the variable is required
+there. Examples tagged with `mobile_user_agent` automatically use the mobile variant of the driver.
 
 ## Traces
 
@@ -110,11 +107,12 @@ action was performed on. This needs DOM snapshots, which are **off by default**:
 and cost 27-46% of the runtime of a desktop spec. Turn them on for a single run when you need them:
 
 ```sh
-PLAYWRIGHT_TRACE=full SELENIUM_BROWSER=playwright bundle exec rspec spec/system/ticket/zoom_spec.rb
+PLAYWRIGHT_TRACE=full bundle exec rspec spec/system/ticket/zoom_spec.rb
 ```
 
 ### Limitations
 
+- Examples tagged with `required_envs` are not traced, because they work with real credentials.
 - Only the default Capybara session is traced. Additional sessions opened via `using_session` run in their own browser
   context and do not appear in the trace.
 - The trace file is named after the example, so a retried example (see `rspec-retry`) leaves only the trace of its last
@@ -122,13 +120,24 @@ PLAYWRIGHT_TRACE=full SELENIUM_BROWSER=playwright bundle exec rspec spec/system/
 
 ## Traces in CI
 
-The `capybara:playwright` lane runs in every pipeline alongside `capybara:chrome`. It never gates the pipeline, so a red
-Playwright lane does not block a merge request.
-
-Its traces are part of the job artifacts (kept on failure, for one week), next to the screenshots and logs. Download the
-artifacts of the failed job and open the `.zip` from `tmp/playwright-traces/` as described above.
+The traces of the `capybara:*` lanes are part of the job artifacts (kept on failure, for one week), next to the
+screenshots and logs. Download the artifacts of the failed job and open the `.zip` from `tmp/playwright-traces/` as
+described above.
 
 CI does not use the local browsers - it talks to the `zammad-playwright` service container via `PLAYWRIGHT_SERVER_URL`.
+
+## Remote Debugging via Chromium DevTools
+
+The devcontainer Playwright stack also provides an out-of-the-box live view of the headless browser via DevTools. Headless
+Chromium can stream its screen to Chrome DevTools without any X server. The debugging port is automatically forwarded at
+`9222` to the host. On your host open `chrome://inspect`, add `localhost:9222` under "Configure...", and click "inspect"
+on the page. You get a live screencast and can interact with it. Pause the spec with `binding.pry` or a `sleep` to look
+around. The devcontainer sets `PLAYWRIGHT_REMOTE_DEBUGGING_PORT=9222` for this; set it yourself to get the same outside
+of it.
+
+Chromium binds that port on `127.0.0.1` and, once that is taken, on `::1` if IPv6 is available. When neither is free, the
+launch of the next browser hangs until it times out. Run a single spec file at a time, and unset the variable for specs
+that open more browser sessions (`using_session`).
 
 ## Version Lockstep
 
@@ -147,7 +156,8 @@ Bumping the gem therefore also means bumping `package.json` and the CI variable 
 
 | File | Purpose |
 | --- | --- |
-| `spec/support/capybara/playwright_driver.rb` | Driver registration, browser and context options, version check |
+| `spec/support/playwright/browser.rb` | Browser launch and server connection, launch options, version check |
+| `spec/support/capybara/playwright_driver.rb` | Driver registration, context options |
 | `spec/support/capybara/playwright_traces.rb` | Trace recording and the keep-on-failure logic |
 | `spec/support/capybara/playwright_driver_patches.rb` | Compensations for gaps in `capybara-playwright-driver` |
 

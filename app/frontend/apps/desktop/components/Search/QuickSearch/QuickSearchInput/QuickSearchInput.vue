@@ -32,7 +32,7 @@ const resetInput = () => {
 }
 
 const goToSearchView = () => {
-  router.push({ name: 'Search', params: { searchTerm: searchValue.value } })
+  router.push({ name: 'Search', params: { searchTerm: searchValue.value || null } })
   resetInput()
 }
 
@@ -51,6 +51,11 @@ watch(isSearchActive, (isActive) =>
 )
 
 useOnEmitter('focus-quick-search-field', () => inputSearchInstance.value?.focus())
+useOnEmitter('set-quick-search-field', (value) => {
+  searchValue.value = value
+  isSearchActive.value = true
+  inputSearchInstance.value?.focus()
+})
 useOnEmitter('reset-quick-search-field', () => resetInput())
 </script>
 

@@ -1,6 +1,7 @@
 // Copyright (C) 2012-2026 Zammad Foundation, https://zammad-foundation.org/
 
 import { loadErrorMessages, loadDevMessages } from '@apollo/client/dev'
+import { cacheSizes } from '@apollo/client/utilities'
 import { setup as setupA11y, toBeAccessible } from '@sa11y/vitest'
 import * as domMatchers from '@testing-library/jest-dom/matchers'
 import { toBeDisabled } from '@testing-library/jest-dom/matchers'
@@ -19,6 +20,11 @@ import type { TestingLibraryMatchers } from '@testing-library/jest-dom/matchers'
 loadDevMessages()
 loadErrorMessages()
 
+// Specs assert on object identity across cache updates; with the default limits
+//  Apollo drops memoized results of large lists and hands out new objects.
+cacheSizes['inMemoryCache.executeSelectionSet'] = 1_000_000
+cacheSizes['inMemoryCache.executeSubSelectedArray'] = 1_000_000
+
 vi.hoisted(() => {
   globalThis.__ = (source) => {
     return source
@@ -34,20 +40,13 @@ vi.hoisted(() => {
   if (typeof CSS?.escape === 'function') {
     CSS.escape = CSS.escape.bind(CSS)
   }
-
-  // Suppress Apollo's devtools-suggestion timer. The timer fires 10 s after
-  // ApolloClient construction; if the jsdom environment is torn down first,
-  // the callback throws "ReferenceError: window is not defined". Setting
-  // __DEV__ = false makes Apollo skip the timer entirely (see connectToDevTools
-  // in @apollo/client/core). loadDevMessages/loadErrorMessages are unaffected.
-  ;(globalThis as any).__DEV__ = false
 })
 
 window.sw = new ServiceWorkerHelper()
 
 configure({
   testIdAttribute: 'data-test-id',
-  // Must stay below the outer `testTimeout` (vite.config.mjs) with real margin — see
+  // Must stay below the outer `testTimeout` (vitest.config.mjs) with real margin — see
   // tests/support/vitest-wrapper.ts for why equal values cause misleading failures.
   asyncUtilTimeout: process.env.CI ? 20_000 : 1_000,
 })
@@ -197,7 +196,7 @@ vi.mock('#shared/components/Form/fields/FieldEditor/FieldEditorWrapper.vue', asy
 
       // eslint-disable-next-line vue/no-mutating-props
       Object.assign(props.context, {
-        focus: vi.fn(),
+        focus: vi.fn(() => document.getElementById(props.context.id)?.focus()),
         addSignature: vi.fn(),
         removeSignature: vi.fn(),
       })
@@ -249,16 +248,17 @@ vi.mock('@vueuse/core', async () => {
 beforeEach((context) => {
   context.skipConsole = false
 
+  // Resetting drops an implementation a test set on the console spies, so it cannot silence later tests.
   if (!vi.isMockFunction(console.warn)) {
     vi.spyOn(console, 'warn').mockClear()
   } else {
-    vi.mocked(console.warn).mockClear()
+    vi.mocked(console.warn).mockReset()
   }
 
   if (!vi.isMockFunction(console.error)) {
     vi.spyOn(console, 'error').mockClear()
   } else {
-    vi.mocked(console.error).mockClear()
+    vi.mocked(console.error).mockReset()
   }
 })
 

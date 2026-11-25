@@ -20,9 +20,12 @@ import type {
 
 const canReplyAll = (article: TicketArticle) => {
   const addresses = [article.to, article.cc]
-  if (article.sender?.name === EnumTicketArticleSenderName.Customer) {
+  const recipientIsSystem = article.to?.parsed?.some((address) => address.isSystemAddress)
+
+  if (article.sender?.name === EnumTicketArticleSenderName.Customer || recipientIsSystem) {
     addresses.push(article.from)
   }
+
   const foreignRecipients = addresses
     .flatMap((address) => address?.parsed || [])
     .filter((address) => address.emailAddress && !address.isSystemAddress)
@@ -55,6 +58,7 @@ const actionPlugin: TicketArticleActionPlugin = {
           label: sender === EnumTicketArticleSenderName.Agent ? __('Follow up') : __('Reply'),
           icon: 'reply',
           alwaysVisible: true,
+          quotesSelection: true,
           perform: (t, a, o) => replyToEmail(t, a, o, config),
         },
         {
@@ -77,6 +81,7 @@ const actionPlugin: TicketArticleActionPlugin = {
           sender === EnumTicketArticleSenderName.Agent ? __('Follow up to all') : __('Reply all'),
         icon: 'reply-alt',
         alwaysVisible: true,
+        quotesSelection: true,
         perform: (t, a, o) => replyToEmail(t, a, o, config, true),
       })
     }

@@ -6,7 +6,7 @@ class FormUpdater::Updater
   # Context from GraphQL or possibly other environments.
   # It must respond to :current_user and :current_user? for session information (see Gql::Context::CurrentUserAware).
   # It may respond to :schema with an object providing :id_for_object to perform ID mappings like in Gql::ZammadSchema.
-  attr_reader :context, :current_user, :relation_fields, :meta, :data, :id, :object, :result, :flags
+  attr_reader :context, :current_user, :relation_fields, :meta, :data, :id, :object, :result, :flags, :option_signatures
 
   def initialize(context:, relation_fields:, meta:, data:, id: nil)
     @context         = context
@@ -15,8 +15,9 @@ class FormUpdater::Updater
     @id              = id
     @current_user    = context[:current_user]
 
-    @result = {}
-    @flags  = {}
+    @result            = {}
+    @flags             = {}
+    @option_signatures = {}
 
     # Build lookup for relation fields for better usage.
     @relation_fields = relation_fields.to_h do |relation_field|
@@ -24,8 +25,10 @@ class FormUpdater::Updater
     end
   end
 
+  # An `id` in the request reaches this for an updater without an object, so it fails as a regular
+  #   GraphQL error, like a missing permission declaration below.
   def object_type
-    raise NotImplementedError
+    raise "#{self.class.name} has no object type."
   end
 
   def self.updaters
@@ -36,8 +39,15 @@ class FormUpdater::Updater
     true
   end
 
+  # Every updater states who may use it, an empty list being the explicit choice to allow any user.
+  #   Not a NotImplementedError, which GraphQL would not handle, so a missing one is a regular error.
   def self.required_permissions
-    []
+    raise "#{name} needs to declare its required permissions."
+  end
+
+  # The policy query the object of an `id` is loaded with, e.g. :update? for a form that edits it.
+  def self.object_pundit_method
+    :show?
   end
 
   def authorized?
@@ -47,7 +57,7 @@ class FormUpdater::Updater
 
     # The authorized function needs to be implemented for any updaters which have a `id`.
     if id
-      @object = Gql::ZammadSchema.authorized_object_from_id id, type: object_type, user: current_user
+      @object = Gql::ZammadSchema.authorized_object_from_id id, type: object_type, user: current_user, query: self.class.object_pundit_method
     end
 
     true
@@ -60,8 +70,9 @@ class FormUpdater::Updater
     handle_updater_flags if self.class.method_defined?(:handle_updater_flags)
 
     {
-      fields: result,
-      flags:  flags
+      fields:            result,
+      flags:             flags,
+      option_signatures: option_signatures,
     }
   end
 
@@ -74,8 +85,22 @@ class FormUpdater::Updater
   # Attributes by default. A form whose fields are not attributes of its object overrides them —
   #   FormUpdater::Updater::KnowledgeBase::Answer::Edit does, where the title lives on a
   #   translation and the publication state is derived from three timestamps.
+  #
+  # The field names come from the request, so a user who may see only part of the object, like a
+  #   customer their ticket, gets no further than its attributes visible to them.
   def object_field?(field)
-    object.respond_to?(field)
+    return false if !object.respond_to?(field)
+    return true if !object_authorization.respond_to?(:field_authorized?)
+
+    object_visible_attributes.include?(field.to_s) && object_authorization.field_authorized?(field)
+  end
+
+  def object_authorization
+    @object_authorization ||= Pundit.policy(current_user, object).public_send(self.class.object_pundit_method)
+  end
+
+  def object_visible_attributes
+    @object_visible_attributes ||= ObjectManager::Object.new(object.class.name).attributes(current_user, object).pluck(:name)
   end
 
   def object_field_value(field)
@@ -113,14 +138,86 @@ class FormUpdater::Updater
 
   def resolve_relation_fields
     relation_fields.each do |name, relation_field|
-      relation_resolver = get_relation_resolver(relation_field)
-
       result_initialize_field(name)
 
-      result[relation_field[:name]][:options] = relation_resolver.options
+      apply_relation_options(name, relation_field)
 
       ensure_field_value_int(result[relation_field[:name]])
     end
+  end
+
+  def apply_relation_options(name, relation_field)
+    apply_options(name, -> { relation_options_key(relation_field) }) { relation_options(relation_field) }
+  end
+
+  # Also for a field an updater lists by itself, so that its list is kept and signed like those of the relation fields.
+  #
+  # @param key_source [#call] reads what the list is built from; nil stands for a list that is built with every result
+  # @yieldreturn [Array<Hash>] the list, built only where no kept one answers
+  def apply_options(name, key_source, &)
+    key     = key_source.call
+    options = options_to_send(name, FormUpdater::OptionCache.signature(key)) do
+      list, key = FormUpdater::OptionCache.fetch(key, key_source, &)
+
+      # A list that had to be built may be of another state than the key read before it.
+      option_signatures[name] = FormUpdater::OptionCache.signature(key)
+
+      list
+    end
+
+    option_signatures.compact!
+
+    result[name][:options] = options if options
+  end
+
+  # A list the form holds already is not sent again: the form names it by the signature it got with it, which stands
+  #   for everything the list is built from. A list that lacks the field's value is sent all the same, as the form
+  #   clears such a value only against a list that arrives.
+  #
+  # @param signature [String, nil] nil for a list without one, which is sent with every result
+  # @yieldreturn [Array<Hash>] the list, asked for only where it is needed; it may take the signature back
+  # @return [Array<Hash>, nil] nil where the form keeps the list it holds
+  def options_to_send(name, signature)
+    option_signatures[name] = signature if signature
+
+    held   = signature.present? && signature == known_option_signatures[name]
+    values = field_values(name)
+    return if held && values.empty?
+
+    options = yield
+    return if held && option_signatures[name] == signature && values.subset?(FormUpdater::OptionList.selectable_values(options))
+
+    options
+  end
+
+  # Anything but a map of signatures names none, so that every list is sent.
+  def known_option_signatures
+    @known_option_signatures ||= meta[:known_option_signatures].is_a?(Hash) ? meta[:known_option_signatures] : {}
+  end
+
+  # The values the field holds once the result is applied: a value of the result, else the form's own.
+  def field_values(name)
+    value = result[name].key?(:value) ? result[name][:value] : data[name]
+
+    Array(value).compact_blank.to_set(&:to_s)
+  end
+
+  def relation_options(relation_field)
+    relation_resolver(relation_field).options
+  end
+
+  # @return [Object, nil] what the field's options are built from, nil for options that are built on every request
+  def relation_options_key(relation_field)
+    relation_resolver(relation_field).options_key
+  end
+
+  # One per field, so that a list and its key come from the same relation, with whatever that read once.
+  def relation_resolver(relation_field)
+    relation_resolvers[relation_field[:name]] ||= get_relation_resolver(relation_field)
+  end
+
+  def relation_resolvers
+    @relation_resolvers ||= {}
   end
 
   def ensure_field_value_int(field)
@@ -149,5 +246,13 @@ class FormUpdater::Updater
 
   def result_initialize_field(name)
     result[name] ||= {}
+  end
+
+  # Attachments are copied into the upload cache of the form the request names, which has to be
+  #   one the current user may add to.
+  def authorize_form_upload_cache!
+    Pundit.authorize(current_user, UploadCache.new(meta[:form_id]), :add?)
+  rescue Pundit::NotAuthorizedError => e
+    raise Exceptions::Forbidden, e.message
   end
 end

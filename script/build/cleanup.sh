@@ -6,7 +6,7 @@ rm app/assets/javascripts/app/controllers/layout_ref.coffee
 rm -rf app/assets/javascripts/app/views/layout_ref/
 
 # tests
-rm -rf test spec app/frontend/tests app/frontend/cypress
+rm -rf test spec app/frontend/tests
 find app/frontend/ -type d -name __tests__ -exec rm -rf {} +
 rm .rspec
 
@@ -23,6 +23,7 @@ rm coffeelint.json
 rm .markdownlint.yml
 rm .overcommit.*
 rm .gitleaks.toml
+rm .bundler-audit.yml
 
 # Yard
 rm .yardopts

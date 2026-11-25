@@ -1,6 +1,7 @@
 // Copyright (C) 2012-2026 Zammad Foundation, https://zammad-foundation.org/
 
 import { useMutation } from '@vue/apollo-composable'
+import { nextTick } from 'vue'
 
 import { SampleTypedMutationDocument } from '#tests/fixtures/graphqlSampleTypes.ts'
 import type {
@@ -17,7 +18,7 @@ import MutationHandler from '../MutationHandler.ts'
 
 const mutationFunctionCallSpy = vi.fn()
 
-let mutationSampleResult: Record<string, unknown> = {
+const defaultMutationSampleResult = () => ({
   Sample: {
     __typename: 'Sample',
     id: 1,
@@ -25,7 +26,9 @@ let mutationSampleResult: Record<string, unknown> = {
     text: 'Test Text',
     errors: null,
   },
-}
+})
+
+let mutationSampleResult: Record<string, unknown> = defaultMutationSampleResult()
 
 let errorType = 'Exceptions::UnknownError'
 
@@ -66,10 +69,19 @@ const mockClient = (error = false, errorType = 'GraphQL') => {
 describe('MutationHandler', () => {
   const sampleMutation = () => {
     mutationFunctionCallSpy()
+
     return useMutation<SampleUpdateMutation, SampleUpdateMutationVariables>(
       SampleTypedMutationDocument,
     )
   }
+
+  // Two examples mutate these for their scenario, and the notification store
+  // accumulates across examples.
+  beforeEach(() => {
+    mutationSampleResult = defaultMutationSampleResult()
+    errorType = 'Exceptions::UnknownError'
+    useNotifications().clearAllNotifications()
+  })
 
   describe('constructor', () => {
     beforeEach(() => {
@@ -109,11 +121,22 @@ describe('MutationHandler', () => {
       expect(mutationHandlerObject.loading().value).toBe(false)
     })
 
-    it('loading state should be changed after called send function', () => {
+    it('loading state should be changed after called send function', async () => {
       expect.assertions(1)
+      createMockClient([
+        {
+          operationDocument: SampleTypedMutationDocument,
+          handler: () =>
+            new Promise((resolve) => {
+              setTimeout(() => resolve({ data: mutationSampleResult }), 10)
+            }),
+        },
+      ])
       const mutationHandlerObject = new MutationHandler(sampleMutation())
-      mutationHandlerObject.send()
+      const sending = mutationHandlerObject.send()
+      await nextTick()
       expect(mutationHandlerObject.loading().value).toBe(true)
+      await sending
     })
 
     it('loading state will be updated', async () => {
@@ -167,6 +190,21 @@ describe('MutationHandler', () => {
         errors: userErrorObject.errors,
         generalErrors: userErrorObject.generalErrors,
         fieldErrors: userErrorObject.fieldErrors,
+      })
+    })
+
+    // `mutate` takes one options object; `send` must merge the override
+    // options and the variables into it.
+    it('merges override options into the mutate call', async () => {
+      const mutationHandlerObject = new MutationHandler(sampleMutation())
+
+      const mutateSpy = vi.spyOn(mutationHandlerObject.operationResult, 'mutate')
+
+      await mutationHandlerObject.send({ id: 1, Sample: {} }, { errorPolicy: 'all' })
+
+      expect(mutateSpy).toHaveBeenCalledWith({
+        errorPolicy: 'all',
+        variables: { id: 1, Sample: {} },
       })
     })
   })

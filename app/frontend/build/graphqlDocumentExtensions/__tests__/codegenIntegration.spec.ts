@@ -65,14 +65,28 @@ describe('documentTransforms propagation through near-operation-file preset', ()
   // A merged fragment takes a different path through the plugins than merged
   // root fields (the spread is a node we synthesize, not one copied from a
   // parsed document), so it is generated through the plugins the repo config
-  // uses for its document outputs.
+  // uses for its document outputs. The vue-apollo plugin is given with a path
+  // relative to the working directory, as the repository config does.
   it('generates output for a merged fragment through operations and vue-apollo plugins', async () => {
     const content = await generate('fragmentMerge', [
       'typescript-operations',
-      'typescript-vue-apollo',
+      './app/frontend/build/vueApolloV5Plugin.js',
     ])
 
     expect(content).toContain('userDetailSearch')
     expect(content).toContain('...userDetailSearch')
+    expect(content).toContain("import * as VueApolloComposable from '@vue/apollo-composable';")
+    expect(content).toContain('VueApolloComposable.useQuery.Options')
+  })
+
+  // An operation importing a fragment document only brings along the fragments
+  // the preset knows of, never one an extension merged into that document.
+  it('lets a fragment document bring along a fragment merged into it', async () => {
+    const content = await generate('fragmentDocumentBase', [
+      './app/frontend/build/vueApolloV5Plugin.js',
+    ])
+
+    expect(content).toContain('...userEntityAttributes')
+    expect(content).toMatch(/\$\{UserEntityAttributesFragmentDoc\}`/)
   })
 })

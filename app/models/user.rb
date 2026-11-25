@@ -34,7 +34,7 @@ class User < ApplicationModel
 
   SENSITIVE_FIELDS = %i[password].freeze
 
-  has_and_belongs_to_many :organizations,          after_add: %i[cache_update create_organization_add_history], after_remove: %i[cache_update create_organization_remove_history], before_add: %i[check_organization_uniqueness ensure_different_organizations_on_commit], class_name: 'Organization'
+  has_and_belongs_to_many :organizations,          after_add: %i[cache_update create_organization_add_history note_membership_change], after_remove: %i[cache_update create_organization_remove_history note_membership_change], before_add: %i[check_organization_uniqueness ensure_different_organizations_on_commit], class_name: 'Organization'
   has_and_belongs_to_many :overviews,              dependent: :nullify
   has_many                :tokens,                 after_add: :cache_update, after_remove: :cache_update, dependent: :destroy
   has_many                :authorizations,         after_add: :cache_update, after_remove: :cache_update, dependent: :destroy
@@ -183,9 +183,10 @@ returns
 
 =end
 
-  def fullname(email_fallback: true, recipient_line: false)
+  # @param name_format [String, nil] the format to follow in place of the setting, for a caller that reads it once
+  def fullname(email_fallback: true, recipient_line: false, name_format: nil)
     # Email sending: always first name last name (regardless of setting)
-    format = recipient_line ? 'first_last' : Setting.get('user_name_format')
+    format = recipient_line ? 'first_last' : (name_format || Setting.get('user_name_format'))
 
     name = display_name_from_parts(format)
 
@@ -389,13 +390,16 @@ returns
         email:         hash['info']['email'],
         image_source:  hash['info']['image'],
         web:           url,
-        address:       hash['info']['location'],
         note:          hash['info']['description'],
         source:        hash['provider'],
         role_ids:      Role.signup_role_ids,
         updated_by_id: 1,
         created_by_id: 1,
       }
+
+      # Admins can delete the address attribute in the object manager.
+      data[:address] = hash['info']['location'] if has_attribute?(:address)
+
       if hash['info']['first_name'].present? && hash['info']['last_name'].present?
         data[:firstname] = hash['info']['first_name']
         data[:lastname] = hash['info']['last_name']

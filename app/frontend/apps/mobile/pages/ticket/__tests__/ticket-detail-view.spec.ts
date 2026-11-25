@@ -1,6 +1,5 @@
 // Copyright (C) 2012-2026 Zammad Foundation, https://zammad-foundation.org/
 
-import { ApolloError } from '@apollo/client/errors'
 import { getNode } from '@formkit/core'
 import { getAllByTestId, getByLabelText, getByRole } from '@testing-library/vue'
 import { flushPromises } from '@vue/test-utils'
@@ -25,6 +24,7 @@ import {
   type TicketArticleRetrySecurityProcessMutation,
 } from '#shared/graphql/types.ts'
 import { convertToGraphQLId } from '#shared/graphql/utils.ts'
+import { QueryHandler } from '#shared/server/apollo/handler/index.ts'
 import { SYSTEM_USER_ID, SYSTEM_USER_INTERNAL_ID } from '#shared/utils/constants.ts'
 
 import { TicketWithMentionLimitDocument } from '#mobile/entities/ticket/graphql/queries/ticketWithMentionLimit.api.ts'
@@ -263,10 +263,10 @@ test("redirects to error page, if can't find ticket", async () => {
     'The ticket 9866 could not be found',
   )
   mockGraphQLSubscription(TicketUpdatesDocument).error(
-    new ApolloError({ errorMessage: "Couldn't find Ticket with 'id'=9866" }),
+    new Error("Couldn't find Ticket with 'id'=9866"),
   )
   mockGraphQLSubscription(TicketArticleUpdatesDocument).error(
-    new ApolloError({ errorMessage: "Couldn't find Ticket with 'id'=9866" }),
+    new Error("Couldn't find Ticket with 'id'=9866"),
   )
 
   await visitView('/tickets/9866')
@@ -1008,6 +1008,69 @@ it('correctly redirects from ticket hash-based routes with other ids', async () 
   expect(route.params).toEqual({ internalId: '1' })
 })
 
+it('ignores a pending article scroll after navigating away', async () => {
+  const { waitUntilTicketLoaded } = mockTicketDetailViewGql({
+    mockFrontendObjectAttributes: true,
+  })
+
+  let finishLoadingArticles!: () => void
+  const pendingArticles = new Promise<{ data: null }>((resolve) => {
+    finishLoadingArticles = () => resolve({ data: null })
+  })
+  const fetchMore = vi
+    .spyOn(QueryHandler.prototype, 'fetchMore')
+    .mockReturnValueOnce(pendingArticles)
+  onTestFinished(() => fetchMore.mockRestore())
+
+  await visitView('/tickets/1#article-20')
+  await waitUntilTicketLoaded()
+  await vi.waitFor(() => expect(fetchMore).toHaveBeenCalledOnce())
+
+  const router = getTestRouter()
+  router.restoreMethods()
+  await router.push('/tickets/1/information')
+
+  const scrollCount = vi.mocked(Element.prototype.scrollIntoView).mock.calls.length
+  finishLoadingArticles()
+  await flushPromises()
+
+  expect(router.currentRoute.value.fullPath).toBe('/tickets/1/information')
+  expect(Element.prototype.scrollIntoView).toHaveBeenCalledTimes(scrollCount)
+})
+
+it('leaves the scroll position to the browser when coming back to the articles', async () => {
+  const { waitUntilTicketLoaded } = mockTicketDetailViewGql({
+    mockFrontendObjectAttributes: true,
+  })
+
+  vi.spyOn(window, 'scrollTo').mockReturnValue()
+
+  const view = await visitView('/tickets/1')
+  await waitUntilTicketLoaded()
+  await view.findByRole('button', { name: 'Add reply' })
+
+  const main = view.getByRole('main')
+  const scrollHeight = vi.spyOn(main, 'scrollHeight', 'get').mockImplementation(() => {
+    return main.querySelector('[id^="article-"]') ? window.innerHeight + 1000 : window.innerHeight
+  })
+  onTestFinished(() => scrollHeight.mockRestore())
+
+  const router = getTestRouter()
+  router.restoreMethods()
+
+  expect(Element.prototype.scrollIntoView).toHaveBeenCalledTimes(1)
+
+  await router.push('/tickets/1/information')
+
+  // Going back restores the saved position, so the cached articles must not be scrolled to the
+  //   bottom on top of it.
+  router.back()
+
+  expect(await view.findByRole('button', { name: 'Scroll down' })).toBeInTheDocument()
+
+  expect(Element.prototype.scrollIntoView).toHaveBeenCalledTimes(1)
+})
+
 it("scrolls to the bottom the first time, but doesn't trigger rescroll on subsequent updates", async () => {
   const newArticlesQuery = mockArticleQuery(
     {
@@ -1267,12 +1330,16 @@ describe('unprocessable email', () => {
     const articlesList = view.getByRole('group', { name: 'Articles' })
     const alert = getByRole(articlesList, 'alert')
 
-    expect(alert).toHaveClasses(['border-yellow', 'bg-yellow-highlight', 'text-yellow'])
+    expect(alert.firstElementChild).toHaveClasses([
+      'border-yellow',
+      'bg-yellow-highlight',
+      'text-yellow',
+    ])
     expect(alert).toHaveTextContent(
       'This ticket was created because the email could not be processed.',
     )
-    expect(getByRole(alert, 'button', { name: 'Download raw email' })).toBeInTheDocument()
-    expect(getByRole(alert, 'button', { name: 'Download processing log' })).toBeInTheDocument()
+    expect(getByRole(alert, 'button', { name: 'Raw email' })).toBeInTheDocument()
+    expect(getByRole(alert, 'button', { name: 'Processing log' })).toBeInTheDocument()
 
     expect(articlesList.firstElementChild).toBe(alert)
     expect(view.getByTestId('ticket-title')).not.toContainElement(alert)
@@ -1288,6 +1355,6 @@ describe('unprocessable email', () => {
 
     await waitUntilTicketLoaded()
 
-    expect(view.queryByText('Download raw email')).not.toBeInTheDocument()
+    expect(view.queryByText('Raw email')).not.toBeInTheDocument()
   })
 })

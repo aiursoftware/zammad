@@ -11,11 +11,11 @@ read and how to turn a violation into a useful comment. When a convention change
 
 ## Consumers
 
-| Consumer                        | Lives in    | Uses these rules for                        |
-| ------------------------------- | ----------- | ------------------------------------------- |
-| `.dev/agents/code-reviewer.md`  | core repo   | Reviewing changes in a fresh context        |
-| `code-review` skill             | skills repo | Local review, delegates to the agent above  |
-| `review-mr` skill               | skills repo | Reviewing a GitLab MR interactively         |
+| Consumer                       | Lives in    | Uses these rules for                       |
+| ------------------------------ | ----------- | ------------------------------------------ |
+| `.dev/agents/code-reviewer.md` | core repo   | Reviewing changes in a fresh context       |
+| `zammad-code-review` skill     | skills repo | Local review, delegates to the agent above |
+| `zammad-review-mr` skill       | skills repo | Reviewing a GitLab MR interactively        |
 
 When a rule changes, it changes **here** and every consumer picks it up. Do not copy rule text into
 a consumer.
@@ -33,6 +33,7 @@ authority, and they change.
 | GraphQL types, mutations, queries, subscriptions      | `graphql_patterns.md`             |
 | Knowledge base code in the new stack                  | `knowledge_base_patterns.md`      |
 | Vue components, composables, routing, the form system | `frontend_patterns.md`            |
+| GraphQL operation calls in the Vue frontend           | `frontend_patterns.md`            |
 | Addon extensions to the Vue frontend                  | `frontend_addon_layer.md`         |
 | New models used by the legacy CoffeeScript stack      | `legacy_model_patterns.md`        |
 | Specs, test setup, test helpers                       | `testing.md`                      |

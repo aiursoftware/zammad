@@ -3,7 +3,7 @@
 import { computed, type ComputedRef, ref, type Ref, toRef } from 'vue'
 
 import { useUserQuery } from '#shared/entities/user/graphql/queries/user.api.ts'
-import { useUserObjectAttributesStore } from '#shared/entities/user/stores/objectAttributes.ts'
+import { useUserEntityAttributesStore } from '#shared/entities/user/stores/entityAttributes.ts'
 import { UserUpdatesDocument } from '#shared/graphql/subscriptions/userUpdates.api.ts'
 import type {
   UserUpdatesSubscriptionVariables,
@@ -15,7 +15,7 @@ import { QueryHandler } from '#shared/server/apollo/handler/index.ts'
 import type { GraphQLHandlerError } from '#shared/types/error.ts'
 import { normalizeEdges } from '#shared/utils/helpers.ts'
 
-import type { WatchQueryFetchPolicy } from '@apollo/client/core'
+import type { WatchQueryFetchPolicy } from '@apollo/client'
 
 export const SECONDARY_ORGANIZATIONS_FETCH_COUNT = 5
 
@@ -31,14 +31,15 @@ export const useUserDetail = (
   const hasLoadedMore = ref(false)
 
   const userQuery = new QueryHandler(
-    useUserQuery(
-      () => ({
+    useUserQuery({
+      variables: () => ({
         userId: userId.value!,
         secondaryOrganizationsCount: SECONDARY_ORGANIZATIONS_FETCH_COUNT,
         hasOrganizationCounts,
       }),
-      () => ({ enabled: Boolean(userId.value), fetchPolicy }),
-    ),
+      enabled: () => Boolean(userId.value),
+      fetchPolicy,
+    }),
     {
       errorCallback,
     },
@@ -82,7 +83,7 @@ export const useUserDetail = (
     })
   }
 
-  const viewScreenAttributes = toRef(useUserObjectAttributesStore(), 'viewScreenAttributes')
+  const viewScreenAttributes = toRef(useUserEntityAttributesStore(), 'viewScreenAttributes')
 
   const allSecondaryOrganizations = computed(() =>
     normalizeEdges(user.value?.secondaryOrganizations),
@@ -108,7 +109,7 @@ export const useUserDetail = (
     loadingWithoutCachedResult,
     user,
     userQuery,
-    objectAttributes: viewScreenAttributes,
+    entityAttributes: viewScreenAttributes,
     secondaryOrganizations,
     fetchMoreSecondaryOrganizations,
   }

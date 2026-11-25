@@ -5,7 +5,8 @@ require 'rails_helper'
 RSpec.describe 'WCL Activity Stream filters', type: :request do
   let(:group)              { create(:group) }
   let(:other_group)        { create(:group) }
-  let(:inaccessible_group) { create(:group) }
+  # New groups give the agent role access (Group::CustomerSelectable); this one must stay closed.
+  let(:inaccessible_group) { create(:group).tap { |group| RoleGroup.where(group_id: group.id).delete_all } }
   let(:agent)              { create(:agent, groups: [group, other_group]) }
   let(:teammate)           { create(:agent, groups: [group]) }
 

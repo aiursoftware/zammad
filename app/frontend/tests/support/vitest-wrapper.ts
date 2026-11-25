@@ -2,12 +2,12 @@
 
 import { vi } from 'vitest'
 
-// Must stay well below the outer `testTimeout` (vite.config.mjs), which is shared across the
+// Must stay well below the outer `testTimeout` (vitest.config.mjs), which is shared across the
 // whole test — not reset per wait. A wait called partway through a test only has whatever
 // budget the outer timeout has left, so equal values (as CI's used to be, 30s/30s) mean the
 // outer timeout — with its unhelpful "test timed out" message pointing at the wrong line —
 // wins the race for any wait that runs after other awaits in the same test.
-const DEFAULT_TIMEOUT = process.env.CI ? 20_000 : 1_000
+const DEFAULT_TIMEOUT = import.meta.env.CI ? 20_000 : 1_000
 
 /**
  * Enhanced wrapper around vi.waitUntil with better error handling and consistent timeout behavior

@@ -2,9 +2,9 @@ import * as Types from '#shared/graphql/types.ts';
 
 import gql from 'graphql-tag';
 import { UserAttributesFragmentDoc } from '../../../../../../../graphql/fragments/userAttributes.api';
+import { UserPersonalSettingsFragmentDoc } from '../../../../../../../graphql/fragments/userPersonalSettings.api';
+import { ObjectAttributeValuesFragmentDoc } from '../../../../../../../graphql/fragments/objectAttributeValues.api';
 import * as VueApolloComposable from '@vue/apollo-composable';
-import * as VueCompositionApi from 'vue';
-export type ReactiveFunction<TParam> = () => TParam;
 
 export const AutocompleteSearchUserDocument = gql`
     query autocompleteSearchUser($input: AutocompleteSearchUserInput!) {
@@ -26,11 +26,13 @@ export const AutocompleteSearchUserDocument = gql`
     }
   }
 }
-    ${UserAttributesFragmentDoc}`;
-export function useAutocompleteSearchUserQuery(variables: Types.AutocompleteSearchUserQueryVariables | VueCompositionApi.Ref<Types.AutocompleteSearchUserQueryVariables> | ReactiveFunction<Types.AutocompleteSearchUserQueryVariables>, options: VueApolloComposable.UseQueryOptions<Types.AutocompleteSearchUserQuery, Types.AutocompleteSearchUserQueryVariables> | VueCompositionApi.Ref<VueApolloComposable.UseQueryOptions<Types.AutocompleteSearchUserQuery, Types.AutocompleteSearchUserQueryVariables>> | ReactiveFunction<VueApolloComposable.UseQueryOptions<Types.AutocompleteSearchUserQuery, Types.AutocompleteSearchUserQueryVariables>> = {}) {
-  return VueApolloComposable.useQuery<Types.AutocompleteSearchUserQuery, Types.AutocompleteSearchUserQueryVariables>(AutocompleteSearchUserDocument, variables, options);
+    ${UserAttributesFragmentDoc}
+${UserPersonalSettingsFragmentDoc}
+${ObjectAttributeValuesFragmentDoc}`;
+export function useAutocompleteSearchUserQuery(options: VueApolloComposable.useQuery.Options<Types.AutocompleteSearchUserQuery, Types.AutocompleteSearchUserQueryVariables>) {
+  return VueApolloComposable.useQuery<Types.AutocompleteSearchUserQuery, Types.AutocompleteSearchUserQueryVariables>(AutocompleteSearchUserDocument, options);
 }
-export function useAutocompleteSearchUserLazyQuery(variables?: Types.AutocompleteSearchUserQueryVariables | VueCompositionApi.Ref<Types.AutocompleteSearchUserQueryVariables> | ReactiveFunction<Types.AutocompleteSearchUserQueryVariables>, options: VueApolloComposable.UseQueryOptions<Types.AutocompleteSearchUserQuery, Types.AutocompleteSearchUserQueryVariables> | VueCompositionApi.Ref<VueApolloComposable.UseQueryOptions<Types.AutocompleteSearchUserQuery, Types.AutocompleteSearchUserQueryVariables>> | ReactiveFunction<VueApolloComposable.UseQueryOptions<Types.AutocompleteSearchUserQuery, Types.AutocompleteSearchUserQueryVariables>> = {}) {
-  return VueApolloComposable.useLazyQuery<Types.AutocompleteSearchUserQuery, Types.AutocompleteSearchUserQueryVariables>(AutocompleteSearchUserDocument, variables, options);
+export function useAutocompleteSearchUserLazyQuery(options?: VueApolloComposable.useLazyQuery.Options<Types.AutocompleteSearchUserQuery, Types.AutocompleteSearchUserQueryVariables>) {
+  return VueApolloComposable.useLazyQuery<Types.AutocompleteSearchUserQuery, Types.AutocompleteSearchUserQueryVariables>(AutocompleteSearchUserDocument, options);
 }
-export type AutocompleteSearchUserQueryCompositionFunctionResult = VueApolloComposable.UseQueryReturn<Types.AutocompleteSearchUserQuery, Types.AutocompleteSearchUserQueryVariables>;
+export type AutocompleteSearchUserQueryCompositionFunctionResult = VueApolloComposable.useQuery.Result<Types.AutocompleteSearchUserQuery, Types.AutocompleteSearchUserQueryVariables>;

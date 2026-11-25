@@ -35,8 +35,7 @@ class TicketOverview extends App.PopoverProviderAjax
 
     @buildHtmlTitle(ticket: ticket)
 
-  # 'replaceOnShow' shows the tip again regardless of the pointer, so a response arriving
-  #   after the tip hid would bring it back while another row is hovered.
+  # A response for a tip that already hid is of no use any more.
   onHide: (event, elem) ->
     ticket = @ticketFor(elem)
     App.Ajax.abort(@requestIdFor(ticket)) if ticket
@@ -48,6 +47,11 @@ class TicketOverview extends App.PopoverProviderAjax
   fetch: (event, elem) ->
     ticket = @ticketFor(elem)
     return if !ticket
+
+    # The content is for agents only, so a ticket seen as its customer keeps just the headline.
+    if ticket.currentView() isnt 'agent'
+      $(elem).attr('data-content', @renderContent(ticket, {}))
+      return
 
     cached = @cachedDataFor(ticket)
     if cached

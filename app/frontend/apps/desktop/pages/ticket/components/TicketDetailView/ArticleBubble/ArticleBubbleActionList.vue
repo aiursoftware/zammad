@@ -3,6 +3,10 @@
 <script setup lang="ts">
 import { computed, onUnmounted, ref } from 'vue'
 
+import {
+  NotificationTypes,
+  useNotifications,
+} from '#shared/components/CommonNotifications/index.ts'
 import { useTicketArticleReplyAction } from '#shared/entities/ticket/composables/useTicketArticleReplyAction.ts'
 import type { TicketArticle } from '#shared/entities/ticket/types.ts'
 import { getTicketView } from '#shared/entities/ticket/utils/getTicketView.ts'
@@ -47,30 +51,30 @@ const isTranslationFailed = computed(
   () => articleTranslation.translationFor(props.article.id)?.status === 'error',
 )
 
-// One control in all states, always named by its action: the article body names a running
-// translation and the failure. A running translation cannot be stopped, aria-busy says so.
-const translationToggleLabel = computed(() => {
-  if (isTranslationPending.value) return __('Translate article')
-  if (isTranslationFailed.value) return __('Dismiss alert')
+// The article body names a running translation and a failure, and offers the retry for the latter.
+// A running translation cannot be stopped, aria-busy says so.
+const isTranslationToggleDisabled = computed(
+  () => isTranslationPending.value || isTranslationFailed.value,
+)
 
-  return isTranslationActive.value ? __('Show original') : __('Translate article')
-})
+// One control in all states, always named by its action.
+const translationToggleLabel = computed(() =>
+  isTranslationActive.value && !isTranslationToggleDisabled.value
+    ? __('Show original')
+    : __('Translate article'),
+)
 
 // Styled like the menu button next to it (CommonActionMenu's neutral variants); active = blue icon.
 const translationToggleClasses = computed(() => {
-  const base = 'outline-offset-0! hover:outline-none! border!'
+  const base =
+    'outline-offset-0! hover:outline-none! border! border-neutral-100! dark:border-gray-900!'
 
-  const border = isTranslationFailed.value
-    ? 'border-red-500! dark:border-red-500!'
-    : 'border-neutral-100! dark:border-gray-900!'
-
-  const hover = isTranslationPending.value
+  const hover = isTranslationToggleDisabled.value
     ? 'cursor-default'
     : 'dark:hover:border-blue-700! hover:border-blue-800!'
 
   const color = (() => {
-    if (isTranslationPending.value) return 'text-[#8E9299]! dark:text-[#8E9299]!'
-    if (isTranslationFailed.value) return 'text-red-500! dark:text-red-500!'
+    if (isTranslationToggleDisabled.value) return 'text-normal/50!'
     if (isTranslationActive.value) return 'text-blue-800! dark:text-blue-800!'
 
     return 'text-normal!'
@@ -81,15 +85,13 @@ const translationToggleClasses = computed(() => {
       ? 'bg-neutral-50! hover:bg-white! hover:dark:bg-gray-500! dark:bg-gray-500!'
       : 'bg-blue-100! dark:bg-stone-500!'
 
-  return `${base} ${border} ${hover} ${color} ${background}`
+  return `${base} ${hover} ${color} ${background}`
 })
 
-// A failure is put away like a translation; the menu asks again.
 const toggleTranslation = () => {
-  if (isTranslationPending.value) return
+  if (isTranslationToggleDisabled.value) return
 
-  if (isTranslationActive.value || isTranslationFailed.value)
-    articleTranslation.showOriginal(props.article.id)
+  if (isTranslationActive.value) articleTranslation.showOriginal(props.article.id)
   else articleTranslation.showTranslation(props.article.id)
 }
 
@@ -108,6 +110,8 @@ const { getNewArticleBody, openReplyForm } = useTicketArticleReplyAction(
 )
 
 const { isPending, isActionPending, performAction } = usePendingArticleAction()
+
+const { notify } = useNotifications()
 
 const disposeCallbacks: (() => unknown)[] = []
 
@@ -167,10 +171,26 @@ const actions = computed(() => {
             onClick: () => {
               if (!ticket.value) return
 
+              const selection = articleSelection(props.article.internalId)
+
+              // A translation takes the place of the original in the article body, so a quote of
+              //   it would read as if the customer had written it.
+              const isQuoteRefused =
+                !!(selection?.html || selection?.text) &&
+                articleTranslation.isTranslationDisplayed(props.article.id)
+
+              if (isQuoteRefused && action.quotesSelection)
+                notify({
+                  id: 'article-translation-quote-refused',
+                  type: NotificationTypes.Warn,
+                  message: __('Translated text cannot be quoted. Show the original to quote it.'),
+                })
+
               performAction(action, ticket.value, props.article, {
                 formId: form.value?.formId ?? '',
-                selection: articleSelection(props.article.internalId),
-                openReplyForm,
+                selection: isQuoteRefused ? undefined : selection,
+                openReplyForm: (values) =>
+                  openReplyForm({ ...values, answeredArticleId: props.article.id }),
                 getNewArticleBody,
               })
             },
@@ -227,9 +247,9 @@ const actions = computed(() => {
       v-tooltip="$t(translationToggleLabel)"
       :class="[translationToggleClasses, position === 'right' ? '-order-1' : 'order-1']"
       variant="neutral"
-      :aria-pressed="isTranslationActive && !isTranslationPending"
+      :aria-pressed="isTranslationActive && !isTranslationToggleDisabled"
       :aria-busy="isTranslationPending"
-      :aria-disabled="isTranslationPending || undefined"
+      :aria-disabled="isTranslationToggleDisabled || undefined"
       data-test-id="article-translation-toggle"
       icon-class="size-4! p-0.5"
       icon="translate"

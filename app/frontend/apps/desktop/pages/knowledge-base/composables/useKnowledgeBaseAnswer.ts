@@ -59,15 +59,15 @@ export const useKnowledgeBaseAnswer = (
   const onScreen = shallowRef(true)
 
   const knowledgeBaseAnswerQuery = new QueryHandler(
-    useKnowledgeBaseAnswerQuery(
-      () => ({
+    useKnowledgeBaseAnswerQuery({
+      variables: () => ({
         answerId: answerId?.value as string,
         locale: locale?.value,
         withBodyForEditing,
         withNavigation,
       }),
-      () => ({ enabled: Boolean(answerId?.value) }),
-    ),
+      enabled: () => Boolean(answerId?.value),
+    }),
     {
       // Opening an answer the user may not read (stale link, revoked access, an
       //   unpublished answer, a permission change) is answered with a 403 — route
@@ -114,12 +114,10 @@ export const useKnowledgeBaseAnswer = (
       //   flush, while this runs in the current one. The section keeps a single reader alive
       //   across answers, so an unpinned refetch would ask for the one being navigated away from -
       //   and a 404 for *that* answer would redirect away from the one being opened.
-      knowledgeBaseAnswerQuery
-        .refetch({
-          answerId: answerId?.value as string,
-          locale: locale?.value,
-        })
-        .catch(() => {})
+      knowledgeBaseAnswerQuery.refetch({
+        answerId: answerId?.value as string,
+        locale: locale?.value,
+      })
     },
     () => {
       onScreen.value = false
@@ -316,8 +314,8 @@ export const useKnowledgeBaseAnswer = (
   //   which would navigate away from the answer the user is currently reading just
   //   because a neighbour is out of reach.
   const prefetchNeighbourAnswer = (answerId: Ref<string | undefined>) => {
-    useKnowledgeBaseAnswerQuery(
-      () => ({
+    useKnowledgeBaseAnswerQuery({
+      variables: () => ({
         answerId: answerId.value as string,
         locale: locale?.value,
         // Inherited, not hardcoded: the identity that makes this a cache hit includes the
@@ -325,13 +323,11 @@ export const useKnowledgeBaseAnswer = (
         withBodyForEditing,
         withNavigation,
       }),
-      () => ({
-        enabled: Boolean(answerId.value),
-        // Only a neighbour that is genuinely new costs a request; stepping back
-        //   through already visited answers stays entirely in the cache.
-        fetchPolicy: 'cache-first',
-      }),
-    )
+      enabled: () => Boolean(answerId.value),
+      // Only a neighbour that is genuinely new costs a request; stepping back
+      //   through already visited answers stays entirely in the cache.
+      fetchPolicy: 'cache-first',
+    })
   }
 
   prefetchNeighbourAnswer(neighbourAnswerId('previousAnswer'))
@@ -359,16 +355,10 @@ export const useKnowledgeBaseAnswer = (
       //   a changed `answerId`/`locale` into the underlying query on its next
       //   reactivity flush, so a ping arriving in the same tick as a locale
       //   switch would otherwise refetch with the args being navigated away from.
-      // Caught, because QueryHandler.refetch *rejects* on failure: nothing awaits this one, and a
-      //   failed refresh is already handled by the handler itself (`operationError`, which
-      //   `answerConfirmed` above reads). Without it a ping arriving offline raises an unhandled
-      //   rejection - the same reason the handler's own reconnect refetch catches (QueryHandler).
-      knowledgeBaseAnswerQuery
-        .refetch({
-          answerId: answerId?.value as string,
-          locale: locale?.value,
-        })
-        .catch(() => {})
+      knowledgeBaseAnswerQuery.refetch({
+        answerId: answerId?.value as string,
+        locale: locale?.value,
+      })
     }
   })
 

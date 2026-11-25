@@ -4,6 +4,7 @@ import { getNode } from '@formkit/core'
 import { getByLabelText, getByRole, waitFor, within } from '@testing-library/vue'
 import { expect } from 'vitest'
 
+import { getGraphQLMockCalls } from '#tests/graphql/builders/mocks.ts'
 import { visitView } from '#tests/support/components/visitView.ts'
 import { mockApplicationConfig } from '#tests/support/mock-applicationConfig.ts'
 import { mockPermissions } from '#tests/support/mock-permissions.ts'
@@ -13,6 +14,7 @@ import {
   mockAutocompleteSearchRecipientQuery,
   waitForAutocompleteSearchRecipientQueryCalls,
 } from '#shared/components/Form/fields/FieldRecipient/graphql/queries/autocompleteSearch/recipient.mocks.ts'
+import { FormUpdaterDocument } from '#shared/components/Form/graphql/queries/formUpdater.api.ts'
 import { mockFormUpdaterQuery } from '#shared/components/Form/graphql/queries/formUpdater.mocks.ts'
 import {
   mockTicketUpdateMutation,
@@ -23,6 +25,7 @@ import { mockTicketQuery } from '#shared/entities/ticket/graphql/queries/ticket.
 import { getTicketUpdatesSubscriptionHandler } from '#shared/entities/ticket/graphql/subscriptions/ticketUpdates.mocks.ts'
 import { createDummyArticle } from '#shared/entities/ticket-article/__tests__/mocks/ticket-articles.ts'
 import { createDummyTicket } from '#shared/entities/ticket-article/__tests__/mocks/ticket.ts'
+import type { FormUpdaterQuery } from '#shared/graphql/types.ts'
 import { convertToGraphQLId } from '#shared/graphql/utils.ts'
 
 import { mockLinkListQuery } from '#desktop/entities/link/graphql/queries/linkList.mocks.ts'
@@ -467,6 +470,72 @@ describe('Ticket detail view', () => {
       )
     })
 
+    it('asks the form updater about a reply typed right after it opened', async () => {
+      mockTicketQuery({
+        ticket: createDummyTicket({
+          group: {
+            id: convertToGraphQLId('Group', 1),
+            emailAddress: {
+              name: 'Zammad Helpdesk',
+              emailAddress: 'zammad@localhost',
+            },
+          },
+          articleType: 'email',
+          defaultPolicy: {
+            update: true,
+            agentReadAccess: true,
+          },
+        }),
+      })
+
+      mockTicketArticlesQuery({
+        articles: {
+          totalCount: 1,
+          edges: [
+            {
+              node: createDummyArticle({
+                articleType: 'email',
+                internal: false,
+              }),
+            },
+          ],
+        },
+      })
+
+      mockFormUpdaterQuery({
+        formUpdater: {
+          fields: {},
+          flags: {
+            newArticlePresent: false,
+          },
+        },
+      })
+
+      const view = await visitView('/tickets/1')
+
+      const articles = await view.findAllByRole('article')
+
+      await view.events.click(await within(articles[0]).findByRole('button', { name: 'Reply' }))
+
+      // Typed within the input delay of the editor, so it is committed together with the reply's own body.
+      await view.events.type(await view.findByRole('textbox', { name: 'Text' }), 'Foo email')
+
+      await waitFor(() =>
+        expect(getGraphQLMockCalls<FormUpdaterQuery>(FormUpdaterDocument)).toContainEqual(
+          expect.objectContaining({
+            variables: expect.objectContaining({
+              meta: expect.objectContaining({
+                changedField: expect.objectContaining({
+                  name: 'body',
+                  newValue: expect.stringContaining('Foo email'),
+                }),
+              }),
+            }),
+          }),
+        ),
+      )
+    })
+
     it('hides CC behind an "Add CC" link until revealed', async () => {
       mockTicketQuery({
         ticket: createDummyTicket({
@@ -520,9 +589,19 @@ describe('Ticket detail view', () => {
 
       await view.events.click(view.getByRole('link', { name: 'Add CC' }))
 
-      // Revealing CC unhides the field, focuses it, and removes the link.
+      // Revealing CC unhides the field, opens its dropdown for typing, and removes the link.
       expect(view.getByLabelText('CC').closest('.formkit-outer')).not.toHaveClass('hidden')
-      expect(view.getByLabelText('CC')).toHaveFocus()
+      await waitFor(() =>
+        expect(view.getByLabelText('CC')).toHaveAttribute('aria-expanded', 'true'),
+      )
+      await waitFor(() =>
+        expect(
+          getByRole(
+            view.getByLabelText('CC').closest('.formkit-outer') as HTMLElement,
+            'searchbox',
+          ),
+        ).toHaveFocus(),
+      )
       expect(view.queryByRole('link', { name: 'Add CC' })).not.toBeInTheDocument()
     })
 
@@ -693,7 +772,11 @@ describe('Ticket detail view', () => {
 
       await getNode('form-ticket-edit-1')?.settled
 
-      await view.events.click(await view.findByRole('button', { name: 'Add internal note' }))
+      const toolbar = view.getByRole('toolbar', { name: 'Ticket actions' })
+
+      await view.events.click(
+        await within(toolbar).findByRole('button', { name: 'Add internal note' }),
+      )
 
       expect(await view.findByRole('heading', { level: 2, name: 'Reply' })).toBeInTheDocument()
 
@@ -812,8 +895,12 @@ describe('Ticket detail view', () => {
 
       await getNode('form-ticket-edit-1')?.settled
 
+      const toolbar = view.getByRole('toolbar', { name: 'Ticket actions' })
+
       // Discard changes inside the reply form
-      await view.events.click(await view.findByRole('button', { name: 'Add internal note' }))
+      await view.events.click(
+        await within(toolbar).findByRole('button', { name: 'Add internal note' }),
+      )
 
       expect(await view.findByRole('heading', { level: 2, name: 'Reply' })).toBeInTheDocument()
 
@@ -1169,7 +1256,8 @@ describe('Ticket detail view', () => {
       expect(await view.findByRole('button', { name: 'Update' })).toHaveClass('bg-green-200')
       expect(view.getByRole('button', { name: 'Drafts & macros' })).toHaveClass('bg-green-200')
 
-      await view.events.click(await view.findByRole('button', { name: 'Add internal note' }))
+      // The floating toolbar offers the same action under the same name.
+      await view.events.click(await view.findByTestId('ticket-detail-show-article-form-button'))
 
       expect(await view.findByRole('heading', { level: 2, name: 'Reply' })).toBeInTheDocument()
 

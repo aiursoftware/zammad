@@ -2,8 +2,6 @@ import * as Types from '#shared/graphql/types.ts';
 
 import gql from 'graphql-tag';
 import * as VueApolloComposable from '@vue/apollo-composable';
-import * as VueCompositionApi from 'vue';
-export type ReactiveFunction<TParam> = () => TParam;
 
 export const DetailSearchDocument = gql`
     query detailSearch($search: String!, $onlyIn: EnumSearchableModels!, $filter: SelectorNodeInput, $limit: Int = 30, $offset: Int, $orderBy: String, $orderDirection: EnumOrderDirection) {
@@ -79,6 +77,13 @@ export const DetailSearchDocument = gql`
         shared
         active
       }
+      ... on ChatSession {
+        id
+        internalId
+        name
+        sessionState: state
+        createdAt
+      }
       ... on KnowledgeBaseAnswerTranslation {
         id
         title
@@ -100,10 +105,10 @@ export const DetailSearchDocument = gql`
   }
 }
     `;
-export function useDetailSearchQuery(variables: Types.DetailSearchQueryVariables | VueCompositionApi.Ref<Types.DetailSearchQueryVariables> | ReactiveFunction<Types.DetailSearchQueryVariables>, options: VueApolloComposable.UseQueryOptions<Types.DetailSearchQuery, Types.DetailSearchQueryVariables> | VueCompositionApi.Ref<VueApolloComposable.UseQueryOptions<Types.DetailSearchQuery, Types.DetailSearchQueryVariables>> | ReactiveFunction<VueApolloComposable.UseQueryOptions<Types.DetailSearchQuery, Types.DetailSearchQueryVariables>> = {}) {
-  return VueApolloComposable.useQuery<Types.DetailSearchQuery, Types.DetailSearchQueryVariables>(DetailSearchDocument, variables, options);
+export function useDetailSearchQuery(options: VueApolloComposable.useQuery.Options<Types.DetailSearchQuery, Types.DetailSearchQueryVariables>) {
+  return VueApolloComposable.useQuery<Types.DetailSearchQuery, Types.DetailSearchQueryVariables>(DetailSearchDocument, options);
 }
-export function useDetailSearchLazyQuery(variables?: Types.DetailSearchQueryVariables | VueCompositionApi.Ref<Types.DetailSearchQueryVariables> | ReactiveFunction<Types.DetailSearchQueryVariables>, options: VueApolloComposable.UseQueryOptions<Types.DetailSearchQuery, Types.DetailSearchQueryVariables> | VueCompositionApi.Ref<VueApolloComposable.UseQueryOptions<Types.DetailSearchQuery, Types.DetailSearchQueryVariables>> | ReactiveFunction<VueApolloComposable.UseQueryOptions<Types.DetailSearchQuery, Types.DetailSearchQueryVariables>> = {}) {
-  return VueApolloComposable.useLazyQuery<Types.DetailSearchQuery, Types.DetailSearchQueryVariables>(DetailSearchDocument, variables, options);
+export function useDetailSearchLazyQuery(options?: VueApolloComposable.useLazyQuery.Options<Types.DetailSearchQuery, Types.DetailSearchQueryVariables>) {
+  return VueApolloComposable.useLazyQuery<Types.DetailSearchQuery, Types.DetailSearchQueryVariables>(DetailSearchDocument, options);
 }
-export type DetailSearchQueryCompositionFunctionResult = VueApolloComposable.UseQueryReturn<Types.DetailSearchQuery, Types.DetailSearchQueryVariables>;
+export type DetailSearchQueryCompositionFunctionResult = VueApolloComposable.useQuery.Result<Types.DetailSearchQuery, Types.DetailSearchQueryVariables>;

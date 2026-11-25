@@ -14,6 +14,7 @@ import { useUserCurrentTwoFactorRemoveMethodCredentialsMutation } from '#shared/
 import { useUserCurrentTwoFactorVerifyMethodConfigurationMutation } from '#shared/entities/user/current/graphql/mutations/two-factor/userCurrentTwoFactorVerifyMethodConfiguration.api.ts'
 import { useUserCurrentTwoFactorInitiateMethodConfigurationLazyQuery } from '#shared/entities/user/current/graphql/queries/two-factor/userCurrentTwoFactorInitiateMethodConfiguration.api.ts'
 import UserError from '#shared/errors/UserError.ts'
+import { getGraphQLErrorType } from '#shared/errors/utils.ts'
 import { MutationHandler, QueryHandler } from '#shared/server/apollo/handler/index.ts'
 import { GraphQLErrorTypes } from '#shared/types/error.ts'
 import type { ObjectLike } from '#shared/types/utils.ts'
@@ -81,8 +82,10 @@ const { redirectToPasswordCheck } = usePasswordCheckTwoFactor(props.formSubmitCa
 
 const configurationQuery = new QueryHandler(
   useUserCurrentTwoFactorGetMethodConfigurationQuery({
-    methodName: twoFactorPlugin.name,
-    token: props.token,
+    variables: {
+      methodName: twoFactorPlugin.name,
+      token: props.token,
+    },
   }),
   {
     errorNotificationMessage: __('Could not fetch security keys'),
@@ -160,7 +163,8 @@ const tableActions: MenuItem[] = [
 
       if (!removeCredentialsResult?.userCurrentTwoFactorRemoveMethodCredentials?.success) return
 
-      await configurationQuery.refetch()
+      const { error } = await configurationQuery.refetch()
+      if (error) return
 
       props.successCallback?.()
 
@@ -178,15 +182,13 @@ const loading = ref(false)
 const error = ref<string | null>(null)
 
 const initiateQuery = new QueryHandler(
-  useUserCurrentTwoFactorInitiateMethodConfigurationLazyQuery(
-    {
+  useUserCurrentTwoFactorInitiateMethodConfigurationLazyQuery({
+    variables: {
       methodName: twoFactorPlugin.name,
       token: props.token,
     },
-    {
-      fetchPolicy: 'no-cache',
-    },
-  ),
+    fetchPolicy: 'no-cache',
+  }),
 )
 
 const setupCredential = async () => {
@@ -198,7 +200,7 @@ const setupCredential = async () => {
   })
 
   if (
-    initiateQueryResult.error?.graphQLErrors?.[0]?.extensions?.type ===
+    getGraphQLErrorType(initiateQueryResult.error) ===
     'Gql::Concerns::HandlesPasswordRevalidationToken::InvalidTokenError'
   ) {
     redirectToPasswordCheck()

@@ -5,7 +5,7 @@ require 'rails_helper'
 RSpec.describe SearchKnowledgeBaseBackend do
   include_context 'basic Knowledge Base'
 
-  let(:instance) { described_class.new options }
+  let(:instance) { described_class.new options.merge(user: user) }
   let(:user)     { create(:admin) }
 
   let(:options) do
@@ -50,13 +50,20 @@ RSpec.describe SearchKnowledgeBaseBackend do
 
         # https://github.com/zammad/zammad/issues/3070
         it 'lists item with an attachment' do
-          expect(instance.search('Hello World', user: user)).to be_present
+          expect(instance.search('Hello World')).to be_present
         end
 
         context 'with big attachment' do
           before do
             url = "#{Setting.get('es_url')}/_all/_settings?preserve_existing=true"
             SearchIndexBackend.make_request_and_validate(url, data: { index: { 'highlight.max_analyzed_offset': 1000 } }, method: :put)
+          end
+
+          # An index setting outlives the database transaction: left in place, it makes Elasticsearch refuse to
+          #   highlight any longer text in a later example and fail the whole search.
+          after do
+            url = "#{Setting.get('es_url')}/_all/_settings"
+            SearchIndexBackend.make_request_and_validate(url, data: { index: { 'highlight.max_analyzed_offset': nil } }, method: :put)
           end
 
           let(:attachment) { fixture_file_upload('spec/fixtures/files/upload/lipsum.pdf') }
@@ -66,9 +73,50 @@ RSpec.describe SearchKnowledgeBaseBackend do
           end
 
           it 'lists item with an attachment' do
-            expect(instance.search('Suspendisse', user: user)).to be_present
+            expect(instance.search('Suspendisse')).to be_present
           end
         end
+      end
+    end
+
+    describe '#search without drafts and archived answers' do
+      let(:options) do
+        {
+          knowledge_base:              knowledge_base,
+          locale:                      primary_locale,
+          scope:                       nil,
+          flavor:                      :agent,
+          index:                       'KnowledgeBase::Answer::Translation',
+          include_drafts_and_archived: false,
+        }
+      end
+
+      let(:answers) do
+        %i[draft internal published archived].index_with do |state|
+          create(:knowledge_base_answer, state, category: category, translation_attributes: { title: "Kalimba #{state}" })
+        end
+      end
+
+      before do
+        answers
+        searchindex_model_reload([KnowledgeBase::Answer::Translation])
+      end
+
+      it 'leaves them out in Elasticsearch already, for an editor too', :aggregate_failures do
+        published = answers.values_at(:internal, :published).map { |answer| translation_id(answer) }
+
+        expect(instance.raw_results('kalimba').pluck(:id)).to match_array(published)
+        expect(instance.search('kalimba').pluck(:id)).to match_array(published)
+      end
+
+      it 'finds an answer published since the index took it, as the database says' do
+        answers[:draft].update!(internal_at: 1.minute.ago)
+
+        expect(instance.search('kalimba').pluck(:id)).to include(translation_id(answers[:draft]))
+      end
+
+      it 'refuses a search beyond answers, whose documents the answers would filter out' do
+        expect { described_class.new(options.except(:index)) }.to raise_error(ArgumentError)
       end
     end
 
@@ -97,7 +145,7 @@ RSpec.describe SearchKnowledgeBaseBackend do
 
       describe 'publication_state:draft' do
         let(:query)  { 'publication_state:draft' }
-        let(:result) { instance.search(query, user: user) }
+        let(:result) { instance.search(query) }
         let(:ids)    { result.pluck(:id).map(&:to_i) }
 
         it 'finds drafts' do
@@ -111,7 +159,7 @@ RSpec.describe SearchKnowledgeBaseBackend do
 
       describe 'tags:ai-generated' do
         let(:query)  { 'tags:ai-generated' }
-        let(:result) { instance.search(query, user: user) }
+        let(:result) { instance.search(query) }
         let(:ids)    { result.pluck(:id).map(&:to_i) }
 
         it 'finds ai-generated answers' do
@@ -125,7 +173,7 @@ RSpec.describe SearchKnowledgeBaseBackend do
 
       describe 'created_at:>now-14d' do
         let(:query)  { 'created_at:>now-14d' }
-        let(:result) { instance.search(query, user: user) }
+        let(:result) { instance.search(query) }
         let(:ids)    { result.pluck(:id).map(&:to_i) }
 
         it 'finds recently created answers' do
@@ -139,7 +187,7 @@ RSpec.describe SearchKnowledgeBaseBackend do
 
       describe 'edited_at:>now-3d' do
         let(:query)  { 'edited_at:>now-3d' }
-        let(:result) { instance.search(query, user: user) }
+        let(:result) { instance.search(query) }
         let(:ids)    { result.pluck(:id).map(&:to_i) }
 
         it 'finds recently updated answers' do
@@ -188,7 +236,7 @@ RSpec.describe SearchKnowledgeBaseBackend do
         end
       end
 
-      let(:result) { instance.search(search_term, user: user) }
+      let(:result) { instance.search(search_term) }
 
       before do
         matching_category
@@ -257,11 +305,6 @@ RSpec.describe SearchKnowledgeBaseBackend do
 
       # Mentions the term three times, each separated by more than the default fragment_size of 100
       #   characters, so Elasticsearch's default of up to five fragments returns several of them.
-      #
-      # Deliberately kept well under 1000 characters: the 'with big attachment' group above PUTs
-      #   highlight.max_analyzed_offset=1000 onto every index, and an index setting is not rolled
-      #   back with the database transaction. A body longer than that makes Elasticsearch refuse to
-      #   highlight the field and fail the whole request, which reads here as "found nothing".
       let(:long_body_match) do
         create(:knowledge_base_answer, :published, category: category, translation_attributes: { title: 'Percussion upkeep' }).tap do |elem|
           filler = 'Lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam. '
@@ -271,7 +314,7 @@ RSpec.describe SearchKnowledgeBaseBackend do
 
       def highlight_for(answer)
         instance
-          .search(search_term, user: user)
+          .search(search_term)
           .find { |elem| elem[:id] == translation_id(answer) }
           .fetch(:highlight)
       end
@@ -326,12 +369,21 @@ RSpec.describe SearchKnowledgeBaseBackend do
 
       it 'keeps the ampersand between the marked terms' do
         highlight = instance
-          .search('*', user: user)
+          .search('*')
           .find { |elem| elem[:id] == translation_id(ampersand_answer) }
           .dig(:highlight, 'title')
 
         expect(highlight.first).to eq("#{marked('Kalimba')} & #{marked('castanets')}")
       end
+    end
+  end
+
+  context 'without ES' do
+    it 'looks for the database\'s wildcards as they stand' do
+      create(:knowledge_base_answer, :published, category:, translation_attributes: { title: 'Printer offline' })
+      discount = create(:knowledge_base_answer, :published, category:, translation_attributes: { title: 'A discount of 50% for students' })
+
+      expect(instance.search('%').pluck(:id)).to eq([translation_id(discount)])
     end
   end
 
@@ -477,7 +529,7 @@ RSpec.describe SearchKnowledgeBaseBackend do
         end
 
         it 'first page is first 5 answers' do
-          results = instance.search(search_phrase, user: user, pagination: build(:pagination, params: { page: 1, per_page: 5 }))
+          results = instance.search(search_phrase, pagination: build(:pagination, params: { page: 1, per_page: 5 }))
 
           first_5 = answers.reverse.slice(0, 5)
 
@@ -485,7 +537,7 @@ RSpec.describe SearchKnowledgeBaseBackend do
         end
 
         it 'second page is next 5 answers' do
-          results = instance.search(search_phrase, user: user, pagination: build(:pagination, params: { page: 2, per_page: 5 }))
+          results = instance.search(search_phrase, pagination: build(:pagination, params: { page: 2, per_page: 5 }))
 
           next_5 = answers.reverse.slice(5, 5)
 
@@ -493,7 +545,7 @@ RSpec.describe SearchKnowledgeBaseBackend do
         end
 
         it 'last page may be partial' do
-          results = instance.search(search_phrase, user: user, pagination: build(:pagination, params: { page: 4, per_page: 6 }))
+          results = instance.search(search_phrase, pagination: build(:pagination, params: { page: 4, per_page: 6 }))
 
           last_page = answers.reverse.slice(18, 6)
 
@@ -501,7 +553,7 @@ RSpec.describe SearchKnowledgeBaseBackend do
         end
 
         it '5th page is empty' do
-          results = instance.search(search_phrase, user: user, pagination: build(:pagination, params: { page: 5, per_page: 5 }))
+          results = instance.search(search_phrase, pagination: build(:pagination, params: { page: 5, per_page: 5 }))
 
           expect(results).to be_blank
         end
@@ -521,7 +573,7 @@ RSpec.describe SearchKnowledgeBaseBackend do
       it "ID is an Integer when ES=#{elasticsearch}", searchindex: elasticsearch do
         handle_elasticsearch(elasticsearch)
 
-        first_result = instance.search(published_answer.translations.first.title, user: user).first
+        first_result = instance.search(published_answer.translations.first.title).first
         expect(first_result[:id]).to be_a(Integer)
       end
     end
@@ -536,7 +588,8 @@ RSpec.describe SearchKnowledgeBaseBackend do
         knowledge_base: knowledge_base,
         locale:         primary_locale,
         scope:          nil,
-        flavor:         ui_identifier
+        flavor:         ui_identifier,
+        user:           user
       }
 
       described_class.new options
@@ -549,7 +602,7 @@ RSpec.describe SearchKnowledgeBaseBackend do
 
         handle_elasticsearch(searchindex)
 
-        expect(instance.search(object.translations.first.title, user: user)).to be_present
+        expect(instance.search(object.translations.first.title)).to be_present
       end
     end
 
@@ -560,7 +613,7 @@ RSpec.describe SearchKnowledgeBaseBackend do
 
         handle_elasticsearch(searchindex)
 
-        expect(instance.search(object.translations.first.title, user: user)).to be_blank
+        expect(instance.search(object.translations.first.title)).to be_blank
       end
     end
 
@@ -615,6 +668,7 @@ RSpec.describe SearchKnowledgeBaseBackend do
         let(:user)   { create(:agent)  }
 
         include_examples 'verify given search backend', permissions: :none, ui: :agent
+        include_examples 'verify given search backend', permissions: :none, ui: :public
       end
 
       context 'with editor with full access to answer' do
@@ -630,6 +684,36 @@ RSpec.describe SearchKnowledgeBaseBackend do
         let(:user)   { create(:agent)  }
 
         include_examples 'verify given search backend', permissions: :none, ui: :agent
+        include_examples 'verify given search backend', permissions: :none, ui: :public
+      end
+
+      # The categories a reader can still read are theirs in the agent flavor only.
+      context 'with reader with access to another category' do
+        let(:user) { create(:agent) }
+
+        context 'with internal answer' do
+          let(:object) { internal_answer_in_other_category }
+
+          include_examples 'verify given search backend', permissions: :agent, ui: :agent
+          include_examples 'verify given search backend', permissions: :agent, ui: :public
+        end
+
+        context 'with its category' do
+          let(:object) { internal_answer_in_other_category.category }
+
+          include_examples 'verify given search backend', permissions: :agent, ui: :agent
+          include_examples 'verify given search backend', permissions: :agent, ui: :public
+        end
+
+        it 'resolves no accessible categories on the help site' do
+          objects = [internal_answer_in_other_category, internal_answer_in_other_category.category]
+          handle_elasticsearch(false)
+          allow(KnowledgeBase::AccessibleCategories).to receive(:for_user).and_call_original
+
+          objects.each { |object| expected_visibility_instance(:public).search(object.translations.first.title) }
+
+          expect(KnowledgeBase::AccessibleCategories).not_to have_received(:for_user)
+        end
       end
 
       context 'with editor with full access to category' do
@@ -640,10 +724,13 @@ RSpec.describe SearchKnowledgeBaseBackend do
         include_examples 'verify given search backend', permissions: :all, ui: :public
       end
 
+      # The agent flavor as well: the client picks the flavor, and an anonymous request with it has
+      #   to get the public result rather than an error.
       context 'with unauthorized user and public answer' do
         let(:object) { published_answer }
         let(:user)   { nil }
 
+        include_examples 'verify given search backend', permissions: :all, ui: :agent
         include_examples 'verify given search backend', permissions: :all, ui: :public
       end
 
@@ -651,7 +738,190 @@ RSpec.describe SearchKnowledgeBaseBackend do
         let(:object) { internal_answer }
         let(:user)   { nil }
 
+        include_examples 'verify given search backend', permissions: :none, ui: :agent
         include_examples 'verify given search backend', permissions: :none, ui: :public
+      end
+
+      # Granular grants narrow the knowledge base permissions; a user without any is not narrowed to
+      #   nothing but sees published content, like KnowledgeBase::Answer.visible_to_user lets them
+      #   browse it.
+      context 'with user without knowledge base permission' do
+        let(:user) { create(:user, roles: [create(:role, permission_names: %w[ticket.agent])]) }
+
+        context 'with published answer' do
+          let(:object) { published_answer }
+
+          include_examples 'verify given search backend', permissions: :all, ui: :agent
+          include_examples 'verify given search backend', permissions: :all, ui: :public
+        end
+
+        context 'with internal answer' do
+          let(:object) { internal_answer }
+
+          include_examples 'verify given search backend', permissions: :none, ui: :agent
+          include_examples 'verify given search backend', permissions: :none, ui: :public
+        end
+      end
+    end
+
+    # Own permission rows, not nested under the granular context above: an update replaces an
+    #   object's whole permission set and would drop that context's narrowing.
+    context 'with editor with limited access to the category' do
+      let(:editor_role) { create(:role, permission_names: %w[ticket.agent knowledge_base.editor]) }
+      let(:user)        { create(:user, roles: [editor_role]) }
+
+      # Internal and published before it was archived, so only the archived condition keeps it out.
+      let(:archived_answer) { create(:knowledge_base_answer, :internal, :published, archived_at: 1.day.ago, category: category) }
+
+      before do
+        KnowledgeBase::PermissionsUpdate
+          .new(limited_object)
+          .update! editor_role => limited_access
+      end
+
+      # Narrowed at the root, so the editor edits no category at all.
+      context 'when the access to the whole knowledge base is none' do
+        let(:limited_object) { knowledge_base }
+        let(:limited_access) { 'none' }
+
+        context 'with published answer' do
+          let(:object) { published_answer }
+
+          include_examples 'verify given search backend', permissions: :all, ui: :agent
+          include_examples 'verify given search backend', permissions: :all, ui: :public
+        end
+
+        context 'with draft answer' do
+          let(:object) { draft_answer }
+
+          include_examples 'verify given search backend', permissions: :none, ui: :agent
+          include_examples 'verify given search backend', permissions: :none, ui: :public
+        end
+
+        context 'with archived answer' do
+          let(:object) { archived_answer }
+
+          include_examples 'verify given search backend', permissions: :none, ui: :agent
+          include_examples 'verify given search backend', permissions: :none, ui: :public
+        end
+      end
+
+      context 'when the access is none' do
+        let(:limited_object) { category }
+        let(:limited_access) { 'none' }
+
+        context 'with category containing published answer' do
+          let(:object) { published_answer.category }
+
+          include_examples 'verify given search backend', permissions: :all, ui: :agent
+          include_examples 'verify given search backend', permissions: :all, ui: :public
+        end
+
+        context 'with internal answer' do
+          let(:object) { internal_answer }
+
+          include_examples 'verify given search backend', permissions: :none, ui: :agent
+          include_examples 'verify given search backend', permissions: :none, ui: :public
+        end
+
+        context 'with draft answer' do
+          let(:object) { draft_answer }
+
+          include_examples 'verify given search backend', permissions: :none, ui: :agent
+          include_examples 'verify given search backend', permissions: :none, ui: :public
+        end
+
+        context 'with archived answer' do
+          let(:object) { archived_answer }
+
+          include_examples 'verify given search backend', permissions: :none, ui: :agent
+          include_examples 'verify given search backend', permissions: :none, ui: :public
+        end
+
+        context 'with published answer' do
+          let(:object) { published_answer }
+
+          include_examples 'verify given search backend', permissions: :all, ui: :agent
+          include_examples 'verify given search backend', permissions: :all, ui: :public
+        end
+
+        context 'with category containing internal answer' do
+          let(:object) { internal_answer.category }
+
+          include_examples 'verify given search backend', permissions: :none, ui: :agent
+          include_examples 'verify given search backend', permissions: :none, ui: :public
+        end
+
+        context 'with draft answer in a category the editor still edits' do
+          let(:object) { draft_answer_in_other_category }
+
+          include_examples 'verify given search backend', permissions: :all, ui: :agent
+          include_examples 'verify given search backend', permissions: :all, ui: :public
+        end
+      end
+
+      context 'when the access is reader' do
+        let(:limited_object) { category }
+        let(:limited_access) { 'reader' }
+
+        context 'with internal answer' do
+          let(:object) { internal_answer }
+
+          include_examples 'verify given search backend', permissions: :agent, ui: :agent
+          include_examples 'verify given search backend', permissions: :agent, ui: :public
+        end
+
+        context 'with draft answer' do
+          let(:object) { draft_answer }
+
+          include_examples 'verify given search backend', permissions: :none, ui: :agent
+          include_examples 'verify given search backend', permissions: :none, ui: :public
+        end
+
+        context 'with archived answer' do
+          let(:object) { archived_answer }
+
+          include_examples 'verify given search backend', permissions: :none, ui: :agent
+          include_examples 'verify given search backend', permissions: :none, ui: :public
+        end
+
+        context 'with category containing internal answer' do
+          let(:object) { internal_answer.category }
+
+          include_examples 'verify given search backend', permissions: :agent, ui: :agent
+          include_examples 'verify given search backend', permissions: :agent, ui: :public
+        end
+      end
+    end
+  end
+
+  context 'with a category whose published content is translated to another locale only' do
+    let(:user) { nil }
+
+    def search_category(kb_locale)
+      described_class
+        .new(knowledge_base:, locale: kb_locale, flavor: :public, index: KnowledgeBase::Category::Translation.name)
+        .search('Polyglot')
+        .pluck(:id)
+    end
+
+    before do
+      category.translations.first.update!(title: 'Polyglot category')
+      create(:knowledge_base_category_translation, category:, kb_locale: alternative_locale, title: 'Polyglot category (lt)')
+      create(:knowledge_base_answer, :published, category:, translation_attributes: { kb_locale: alternative_locale })
+    end
+
+    [true, false].each do |searchindex|
+      context "when ES=#{searchindex}", searchindex: do
+        before { handle_elasticsearch(searchindex) }
+
+        it 'lists the category in that locale' do
+          expect(search_category(alternative_locale)).to eq([category.translations.find_by(kb_locale: alternative_locale).id])
+        end
+
+        it 'does not list the category in the locale without published content' do
+          expect(search_category(primary_locale)).to be_empty
+        end
       end
     end
   end

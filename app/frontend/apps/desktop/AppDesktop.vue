@@ -13,7 +13,7 @@ import useMetaTitle from '#shared/composables/useMetaTitle.ts'
 import { useOnEmitter } from '#shared/composables/useOnEmitter.ts'
 import usePushMessages from '#shared/composables/usePushMessages.ts'
 import { useUnknownAddressDetection } from '#shared/composables/useUnknownAddressDetection.ts'
-import { initializeDefaultObjectAttributes } from '#shared/entities/object-attributes/composables/useObjectAttributes.ts'
+import { initializeDefaultEntityAttributes } from '#shared/entities/core/attributes/composables/useEntityAttributes.ts'
 import { useApplicationStore } from '#shared/stores/application.ts'
 import { useAuthenticationStore } from '#shared/stores/authentication.ts'
 import { useLocaleStore } from '#shared/stores/locale.ts'
@@ -28,6 +28,7 @@ import { initializeConfirmationDialog } from '#desktop/components/CommonConfirma
 import CommonImageViewer from '#desktop/components/CommonImageViewer/CommonImageViewer.vue'
 import { useBrowserNotificationPermissionRequest } from '#desktop/composables/useBrowserNotification.ts'
 import { useConnection } from '#desktop/composables/useConnection.ts'
+import { useChatSessionStores } from '#desktop/entities/chat/composables/useChatSessionStores.ts'
 import { useCtiCallNotification } from '#desktop/entities/cti/composables/useCtiCallNotification.ts'
 import { useCtiCallPickup } from '#desktop/entities/cti/composables/useCtiCallPickup.ts'
 import { useTicketOverviewsStore } from '#desktop/entities/ticket/stores/ticketOverviews.ts'
@@ -115,7 +116,7 @@ watch(
 
     useUserCurrentTaskbarTabsStore()
     useTicketOverviewsStore()
-    initializeDefaultObjectAttributes()
+    initializeDefaultEntityAttributes()
     useAppUsageStore()
     useTicketBulkUpdateStore()
     useMobileDetection()
@@ -139,6 +140,9 @@ useCtiCallPickup()
 
 // Also at the app level: the agent is on any screen, or none, when a call rings.
 useCtiCallNotification()
+
+// Likewise for a waiting customer, an unanswered chat and a customer's message.
+useChatSessionStores()
 
 useBrowserNotificationPermissionRequest()
 </script>

@@ -251,6 +251,7 @@ class CreateBase < ActiveRecord::Migration[4.2]
       t.string  :name,                limit: 255, null: false
       t.string  :dir,                 limit: 9,   null: false, default: 'ltr'
       t.boolean :active,                          null: false, default: true
+      t.string  :translation_files_checksum, limit: 64, null: true
       t.timestamps limit: 3, null: false
     end
     add_index :locales, [:locale], unique: true
@@ -1096,6 +1097,17 @@ class CreateBase < ActiveRecord::Migration[4.2]
       t.timestamps limit: 3
 
       t.index :identifier, unique: true
+    end
+
+    create_table :ai_mcp_confirmations do |t|
+      t.string :request_id, limit: 36, null: false
+      t.string :action_digest, limit: 64, null: false
+      t.datetime :expires_at, limit: 3, null: false
+      t.datetime :consumed_at, limit: 3
+      t.timestamps limit: 3, null: false
+
+      t.index :request_id, unique: true
+      t.index :expires_at
     end
 
     create_table :recent_closes do |t|

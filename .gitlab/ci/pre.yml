@@ -1,8 +1,10 @@
 # Write CI cache once for faster runs
-# No `rules:` on purpose: filtered pipelines ($JOB_FILTER, $BROWSER_TEST_FILTER)
-#   need the cache, too.
+# Without the variable filters on purpose: filtered pipelines ($JOB_FILTER,
+#   $BROWSER_TEST_FILTER) need the cache, too.
 'write cache: ruby':
   stage: pre
+  rules:
+    - !reference [.rule_fragments, then_unless_vitest_browser_test_filter_only]
   cache: !reference [.cache, read_write_ruby]
   before_script:
     - !reference [.scripts, source_rvm]
@@ -10,7 +12,7 @@
     - !reference [.scripts, bundle_install]
   after_script: []
 
-# No `rules:` on purpose, see above.
+# No `rules:` on purpose: all filtered pipelines need the cache, too.
 'write cache: nodejs':
   stage: pre
   cache: !reference [.cache, read_write_nodejs]
@@ -29,11 +31,11 @@
   before_script:
     - test -d $HOME/.ssh || mkdir $HOME/.ssh
     - ssh-keyscan github.com >> $HOME/.ssh/known_hosts
-    - eval $(ssh-agent -s)
+    # ssh-agent is setgid, so ld.so would refuse the image's jemalloc LD_PRELOAD with an error.
+    - eval $(LD_PRELOAD= ssh-agent -s)
     - echo "$PUSH_TO_GITHUB_SSH_PRIVATE_KEY" | ssh-add -
     - ssh-add -l
   script:
-    - git fetch --unshallow
     - script/build/sync_repo.sh git@github.com:zammad/zammad.git
   after_script: []
 
@@ -52,7 +54,8 @@
   before_script:
     - test -d $HOME/.ssh || mkdir $HOME/.ssh
     - ssh-keyscan ftp.zammad.com >> $HOME/.ssh/known_hosts
-    - eval $(ssh-agent -s)
+    # ssh-agent is setgid, so ld.so would refuse the image's jemalloc LD_PRELOAD with an error.
+    - eval $(LD_PRELOAD= ssh-agent -s)
     - echo "$FTP_ZAMMAD_COM_SSH_PRIVATE_KEY" | ssh-add -
     - ssh-add -l
   script:

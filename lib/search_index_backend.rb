@@ -1,9 +1,15 @@
 # Copyright (C) 2012-2026 Zammad Foundation, https://zammad-foundation.org/
 
 class SearchIndexBackend
+  # Raised by a search that asks for it with :raise_on_failure, where Elasticsearch did not run it: a missing index, a
+  #   query it cannot parse, no answer. Without the option, such a search logs the error and finds nothing.
+  class SearchFailedError < StandardError; end
 
   SUPPORTED_ES_VERSION_MINIMUM   = '8.15.0'.freeze
   SUPPORTED_ES_VERSION_LESS_THAN = '10'.freeze
+
+  # How far a search may page by default: Elasticsearch refuses a page that ends beyond an index's window.
+  MAX_RESULT_WINDOW = 1_000_000
 
   STORE_NAMES           = %w[preferences data].freeze
   STORE_NAMES_PER_MODEL = {
@@ -163,6 +169,22 @@ add new object to search index
     return if url.blank?
 
     make_request_and_validate(url, data: data, method: :post)
+  end
+
+=begin
+
+update the given attributes of an object in the search index right away, the object is
+searchable when the call returns and attributes which are not given stay as they are
+
+  SearchIndexBackend.update_inline('Ticket', some_data_object)
+
+=end
+
+  def self.update_inline(type, data)
+    url = build_url(type: type, action: '_update', object_id: data['id'], with_pipeline: false, with_document_type: false, url_params: { refresh: 'wait_for', retry_on_conflict: 3 })
+    return if url.blank?
+
+    make_request_and_validate(url, data: { doc: data, doc_as_upsert: true }, method: :post, request_type: :inline)
   end
 
 =begin
@@ -396,24 +418,7 @@ remove whole data from index
     return if url.blank?
 
     # real search condition
-    condition = if query.blank?
-                  {
-                    match_all: {},
-                  }
-                else
-                  {
-                    'query_string' => {
-                      'query'            => append_wildcard_to_simple_query(query),
-                      'time_zone'        => Setting.get('timezone_default'),
-                      'default_operator' => 'AND',
-                      'analyze_wildcard' => true,
-                    }
-                  }
-                end
-
-    if query.present? && (fields = options.dig(:query_fields_by_indexes, index.to_sym))
-      condition['query_string']['fields'] = fields
-    end
+    condition = options[:query_condition] || build_query_condition(query, index, options)
 
     query_data = build_query(index, condition, options)
 
@@ -441,14 +446,19 @@ remove whole data from index
     data = if response.success?
              Array.wrap(response.data&.dig('hits', 'hits'))
            else
-             Rails.logger.error humanized_error(
+             error = humanized_error(
                verb:     'GET',
                url:      url,
                payload:  query_data,
                response: response,
              )
+             raise SearchFailedError, error if options[:raise_on_failure]
+
+             Rails.logger.error error
              []
            end
+
+    raise_incomplete_search(response, url) if options[:raise_on_failure]
 
     data.map! do |item|
       Rails.logger.debug { "... #{item['_type']} #{item['_id']}" }
@@ -481,6 +491,53 @@ remove whole data from index
     end
 
     data
+  end
+
+=begin
+
+builds the default fulltext condition of a search, which callers may replace via the :query_condition option of search_by_index
+
+@param query   [String] search query
+@param index   [String] index name
+@param options [Hash] search options (see build_query)
+
+  condition = SearchIndexBackend.build_query_condition('Nicole', 'User')
+
+=end
+
+  def self.build_query_condition(query, index, options = {})
+    return { match_all: {} } if query.blank?
+
+    build_query_string_condition(append_wildcard_to_simple_query(query), index, options)
+  end
+
+=begin
+
+builds the fulltext condition for a query which is used as it is
+
+@param query   [String] search query
+@param index   [String] index name
+@param options [Hash] search options (see build_query)
+
+  condition = SearchIndexBackend.build_query_string_condition('state.name:closed', 'Ticket')
+
+=end
+
+  def self.build_query_string_condition(query, index, options = {})
+    condition = {
+      'query_string' => {
+        'query'            => query,
+        'time_zone'        => Setting.get('timezone_default'),
+        'default_operator' => 'AND',
+        'analyze_wildcard' => true,
+      }
+    }
+
+    if (fields = options.dig(:query_fields_by_indexes, index.to_sym))
+      condition['query_string']['fields'] = fields
+    end
+
+    condition
   end
 
   def self.search_by_index_sort(index:, sort_by: nil, order_by: nil, fulltext: false)
@@ -753,6 +810,7 @@ generate url for index or document access (only for internal use)
 @option options [Integer] :from
 @option options [Integer] :limit
 @option options [Hash] :query_extension applied to ElasticSearch query
+@option options [Hash] :query_condition fulltext condition used instead of the default one (see build_query_condition)
 @option options [Array<String>] :order_by ordering directions, desc or asc
 @option options [Array<String>] :sort_by fields to sort by
 @option options [Array<String>] :fulltext If no sorting is defined the current fallback is the sorting by updated_at. But for fulltext searches it makes more sense to search by _score as default. This parameter allows to change to the fallback to _score.
@@ -766,7 +824,13 @@ generate url for index or document access (only for internal use)
 
   def self.build_query(index, condition, options = {})
     options[:from] = options[:from].presence || options[:offset].presence
-    options        = DEFAULT_QUERY_OPTIONS.merge(options.compact_blank.deep_symbolize_keys)
+    options        = options.deep_symbolize_keys
+
+    # An empty list restricts to nothing, only a missing one means no restriction,
+    # so it has to survive the compaction below.
+    ids = options[:ids]
+
+    options = DEFAULT_QUERY_OPTIONS.merge(options.compact_blank)
 
     data = {
       from:  options[:from],
@@ -786,8 +850,8 @@ generate url for index or document access (only for internal use)
 
     data[:query][:bool][:must].push condition
 
-    if options[:ids].present?
-      data[:query][:bool][:must].push({ ids: { values: options[:ids] } })
+    if !ids.nil?
+      data[:query][:bool][:must].push({ ids: { values: ids } })
     end
 
     if options[:condition].present?
@@ -825,16 +889,16 @@ refreshes all indexes to make previous request data visible in future requests
 helper method for making HTTP calls
 
 @param url [String] url
-@option params [Hash] :data is a payload hash
+@option params [Hash, String] :data is a payload hash, or a String to send as it is (line based bulk format)
 @option params [Symbol] :method is a HTTP method
-@option params [Symbol] :request_type selects the timeout profile; use `:reindex` for long-running reindex operations
+@option params [Symbol] :request_type selects the timeout profile; use `:reindex` for long-running reindex operations and `:inline` for index writes inside request paths
 
 @return UserAgent response
 
 =end
   def self.make_request(url, data: {}, method: :get, request_type: :default)
     Rails.logger.debug { "# curl -X #{method} \"#{url}\" " }
-    Rails.logger.debug { "-d '#{data.to_json}'" } if data.present?
+    Rails.logger.debug { "-d '#{data.is_a?(String) ? data : data.to_json}'" } if data.present?
 
     read_timeout, total_timeout = timeouts_for(request_type)
 
@@ -850,11 +914,27 @@ helper method for making HTTP calls
       verify_ssl:        Setting.get('es_ssl_verify'),
     }
 
+    if data.is_a?(String)
+      options[:send_as_raw_body]        = data
+      options[:do_not_follow_redirects] = true
+      data = {}
+    end
+
     response = UserAgent.send(method, url, data, options)
 
     Rails.logger.debug { "# #{response.code}" }
 
     response
+  end
+
+  # Elasticsearch answers a search that timed out or failed on a shard with success and the hits it got, which may be
+  #   none at all.
+  def self.raise_incomplete_search(response, url)
+    timed_out     = response.data&.dig('timed_out') == true
+    failed_shards = response.data&.dig('_shards', 'failed').to_i
+    return if !timed_out && failed_shards.zero?
+
+    raise SearchFailedError, "Elasticsearch did not complete the search at #{url}: timed out #{timed_out}, failed shards #{failed_shards}."
   end
 
   def self.timeouts_for(request_type)
@@ -863,6 +943,11 @@ helper method for making HTTP calls
       [
         ENV.fetch('ZAMMAD_HTTP_ELASTICSEARCH_REINDEX_READ_TIMEOUT', 600).to_i,
         ENV.fetch('ZAMMAD_HTTP_ELASTICSEARCH_REINDEX_TOTAL_TIMEOUT', 600).to_i,
+      ]
+    when :inline
+      [
+        ENV.fetch('ZAMMAD_HTTP_ELASTICSEARCH_INLINE_READ_TIMEOUT', 3).to_i,
+        ENV.fetch('ZAMMAD_HTTP_ELASTICSEARCH_INLINE_TOTAL_TIMEOUT', 3).to_i,
       ]
     else
       [
@@ -995,6 +1080,7 @@ helper method for making HTTP calls and raising error if response was not succes
       result[:properties][:article] = {
         type:              'nested',
         include_in_parent: true,
+        properties:        Ticket::Article.columns_hash.slice(*STORE_NAMES).transform_values { { type: 'flattened' } },
       }
     end
 
@@ -1017,7 +1103,7 @@ helper method for making HTTP calls and raising error if response was not succes
   def self.default_model_settings
     {
       'index.mapping.total_fields.limit'    => 2000,
-      'index.max_result_window'             => 1_000_000,
+      'index.max_result_window'             => MAX_RESULT_WINDOW,
       'analysis.analyzer.default.type'      => 'custom',
       'analysis.analyzer.default.tokenizer' => 'standard',
       'analysis.analyzer.default.filter'    => ['lowercase'],
@@ -1028,6 +1114,11 @@ helper method for making HTTP calls and raising error if response was not succes
     settings = default_model_settings
     settings['analysis.analyzer.default.filter'] |= ['asciifolding'] if Setting.get('es_asciifolding')
     settings.merge(Setting.get('es_model_settings')[model.name] || {})
+  end
+
+  # @return [Integer] how far a search of the model's index may page, as configured for it
+  def self.max_result_window(model)
+    model_settings(model)['index.max_result_window'].to_i
   end
 
   def self.all_settings
@@ -1168,13 +1259,47 @@ helper method for making HTTP calls and raising error if response was not succes
     }
   end
 
+  # Only media stand in by MIME type: document types list extensions an admin may ignore (text/plain lists .log).
+  ATTACHMENT_IGNORE_MEDIA_TYPES = %w[image video audio].freeze
+  ATTACHMENT_IGNORE_MIME_TYPE_ALIASES = {
+    'image/jpg'            => 'image/jpeg',
+    'image/jpe'            => 'image/jpeg',
+    'image/pjpeg'          => 'image/jpeg',
+    'image/x-jpeg'         => 'image/jpeg',
+    'image/x-jpg'          => 'image/jpeg',
+    'image/x-png'          => 'image/png',
+    'image/x-citrix-jpeg'  => 'image/jpeg',
+    'image/x-citrix-pjpeg' => 'image/jpeg',
+    'image/x-citrix-png'   => 'image/png',
+    'video/mpg'            => 'video/mpeg',
+    'video/x-mpeg'         => 'video/mpeg',
+    'video/x-quicktime'    => 'video/quicktime',
+  }.freeze
+
   def self.attachment_ignored?(attachment)
     return true if attachment.filename.blank?
 
-    extension = File.extname(attachment.filename).downcase
+    ignored_extensions = Setting.get('es_attachment_ignore')
+    return false if ignored_extensions.blank?
 
-    Setting.get('es_attachment_ignore').include?(extension)
+    extension = File.extname(attachment.filename).downcase
+    return true if ignored_extensions.include?(extension)
+
+    # Inline images are often stored as "noname" or under their Content-ID, so the extension says nothing.
+    return false if MIME::Types.type_for(extension).any?
+
+    attachment_media_extensions(attachment).any? { |media_extension| ignored_extensions.include?(".#{media_extension}") }
   end
+
+  def self.attachment_media_extensions(attachment)
+    mime_type = MIME::Type.simplified(attachment.try(:mime_type).to_s).to_s
+    mime_type = ATTACHMENT_IGNORE_MIME_TYPE_ALIASES.fetch(mime_type, mime_type)
+
+    MIME::Types[mime_type]
+      .select { |type| ATTACHMENT_IGNORE_MEDIA_TYPES.include?(type.media_type) }
+      .flat_map(&:extensions)
+  end
+  private_class_method :attachment_media_extensions
 
   def self.attachment_too_big?(attachment)
     return true if attachment.content.blank?

@@ -25,6 +25,8 @@ module ApplicationController::RendersModels
     # save object
     generic_object.save!
 
+    model_search_index_update(generic_object)
+
     model_item_render(generic_object, status: :created)
   end
 
@@ -51,7 +53,31 @@ module ApplicationController::RendersModels
 
     end
 
+    model_search_index_update(generic_object)
+
     model_item_render(generic_object)
+  end
+
+  # index right away so the client can re-run its current search after the response
+  def model_search_index_update(object)
+    return if !search_index_inline?
+
+    response.headers['X-Zammad-Search-Index-Updated'] = model_search_index_updated?(object).to_s
+  end
+
+  def model_search_index_updated?(object)
+    return true if !object.is_a?(HasSearchIndexBackend)
+
+    object.search_index_update_inline
+  rescue => e
+    Rails.logger.error "Unable to update search index for #{object.class}.find(#{object.id}) inline: #{e.inspect}"
+    false
+  end
+
+  def search_index_inline?
+    return false if !request.headers['X-Zammad-Search-Index-Inline'].to_s.casecmp?('true')
+
+    current_user.permissions?('admin.*')
   end
 
   def model_destroy_render(object, params)
@@ -122,22 +148,7 @@ module ApplicationController::RendersModels
   def model_search_render(object, params)
     paginate_with(max: 200, default: 50)
 
-    generic_objects = object.search(
-      query:            params[:query] || params[:term],
-      condition:        params[:condition],
-      ids:              params[:ids],
-      role_ids:         params[:role_ids],
-      group_ids:        params[:group_ids],
-      permissions:      params[:permissions],
-      only_total_count: response_only_total_count?,
-      sort_by:          params[:sort_by],
-      order_by:         params[:order_by],
-      offset:           pagination.offset,
-      limit:            pagination.limit,
-      current_user:     current_user,
-      full:             true,
-      with_total_count: true,
-    ) || { objects: [], total_count: 0 }
+    generic_objects = object.search(model_search_params(params)) || { objects: [], total_count: 0 }
 
     if response_only_total_count?
       model_search_render_result_only_total_count(generic_objects[:total_count])
@@ -158,6 +169,25 @@ module ApplicationController::RendersModels
 
       model_index_render_result(result)
     end
+  end
+
+  def model_search_params(params)
+    {
+      query:            params[:query] || params[:term],
+      condition:        params[:condition],
+      ids:              params[:ids].presence, # blank client input means no restriction, not a restriction to nothing
+      role_ids:         params[:role_ids],
+      group_ids:        params[:group_ids],
+      permissions:      params[:permissions],
+      only_total_count: response_only_total_count?,
+      sort_by:          params[:sort_by],
+      order_by:         params[:order_by],
+      offset:           pagination.offset,
+      limit:            pagination.limit,
+      current_user:     current_user,
+      full:             true,
+      with_total_count: true,
+    }
   end
 
   def model_search_render_result_only_total_count(total)

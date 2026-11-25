@@ -33,7 +33,10 @@ RSpec.describe Wcl::GraphNotifications do
     end
 
     context 'when switched off' do
-      before { graph }
+      before do
+        graph
+        Setting.set(described_class::SETTING, false)
+      end
 
       it 'picks none' do
         expect(described_class.channel).to be_nil

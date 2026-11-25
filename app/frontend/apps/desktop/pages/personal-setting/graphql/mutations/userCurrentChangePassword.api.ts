@@ -3,8 +3,6 @@ import * as Types from '#shared/graphql/types.ts';
 import gql from 'graphql-tag';
 import { ErrorsFragmentDoc } from '../../../../../../shared/graphql/fragments/errors.api';
 import * as VueApolloComposable from '@vue/apollo-composable';
-import * as VueCompositionApi from 'vue';
-export type ReactiveFunction<TParam> = () => TParam;
 
 export const UserCurrentChangePasswordDocument = gql`
     mutation userCurrentChangePassword($currentPassword: String!, $newPassword: String!) {
@@ -19,7 +17,7 @@ export const UserCurrentChangePasswordDocument = gql`
   }
 }
     ${ErrorsFragmentDoc}`;
-export function useUserCurrentChangePasswordMutation(options: VueApolloComposable.UseMutationOptions<Types.UserCurrentChangePasswordMutation, Types.UserCurrentChangePasswordMutationVariables> | ReactiveFunction<VueApolloComposable.UseMutationOptions<Types.UserCurrentChangePasswordMutation, Types.UserCurrentChangePasswordMutationVariables>> = {}) {
+export function useUserCurrentChangePasswordMutation(options: VueApolloComposable.useMutation.Options<Types.UserCurrentChangePasswordMutation, Types.UserCurrentChangePasswordMutationVariables> = {}) {
   return VueApolloComposable.useMutation<Types.UserCurrentChangePasswordMutation, Types.UserCurrentChangePasswordMutationVariables>(UserCurrentChangePasswordDocument, options);
 }
-export type UserCurrentChangePasswordMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<Types.UserCurrentChangePasswordMutation, Types.UserCurrentChangePasswordMutationVariables>;
+export type UserCurrentChangePasswordMutationCompositionFunctionResult = VueApolloComposable.useMutation.Result<Types.UserCurrentChangePasswordMutation, Types.UserCurrentChangePasswordMutationVariables>;

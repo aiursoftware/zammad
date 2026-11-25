@@ -52,16 +52,14 @@ export const useUserCurrentTaskbarTabsStore = defineStore('userCurrentTaskbarTab
     userTaskbarTabPluginByType[tabEntityType]
 
   const taskbarTabsQuery = new QueryHandler(
-    useUserCurrentTaskbarItemListQuery(
-      { app: EnumTaskbarApp.Desktop },
-      {
-        context: {
-          batch: {
-            active: false,
-          },
+    useUserCurrentTaskbarItemListQuery({
+      variables: { app: EnumTaskbarApp.Desktop },
+      context: {
+        batch: {
+          active: false,
         },
       },
-    ),
+    }),
   )
 
   const taskbarTabsRaw = taskbarTabsQuery.result()
@@ -207,7 +205,7 @@ export const useUserCurrentTaskbarTabsStore = defineStore('userCurrentTaskbarTab
       if (!updates.addItem && !updates.updateItem && !updates.removeItem)
         return null as unknown as UserCurrentTaskbarItemListQuery
 
-      if (!previous.userCurrentTaskbarItemList || updates.updateItem) return previous
+      if (!previous?.userCurrentTaskbarItemList || updates.updateItem) return previous
 
       const previousTaskbarTabList = previous.userCurrentTaskbarItemList
 

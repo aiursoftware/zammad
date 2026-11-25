@@ -114,6 +114,52 @@ RSpec.describe Service::Ticket::Create, current_user_id: -> { user.id } do
         )
     end
 
+    context 'when an article is present' do
+      before do
+        ticket_data[:article] = { body: Faker::Lorem.sentence }
+      end
+
+      it 'runs the core workflow validation only for the ticket data', :aggregate_failures do
+        allow(CoreWorkflow).to receive(:perform).and_call_original
+
+        expect(service_result.screen).to eq('create_middle')
+        expect(CoreWorkflow).to have_received(:perform)
+          .with(hash_including(payload: hash_including('request_id' => 'ChecksCoreWorkflow.validate_workflows')))
+          .once
+      end
+
+      context 'when a value of the ticket is not allowed' do
+        let(:open_state) { Ticket::State.find_by(name: 'open') }
+
+        before do
+          ticket_data[:state] = open_state
+          create(:core_workflow,
+                 object:  'Ticket',
+                 perform: {
+                   'ticket.state_id': {
+                     operator:      'remove_option',
+                     remove_option: [open_state.id.to_s]
+                   },
+                 })
+        end
+
+        it 'raises an error and creates no ticket' do
+          expect { service_result }
+            .to raise_error(Exceptions::ApplicationModel, "Invalid value '#{open_state.id}' for field 'state_id'!")
+            .and not_change(Ticket, :count)
+        end
+      end
+    end
+
+    it 'fills in the sender and the recipient of an agent\'s article, but keeps those of a prepared one', :aggregate_failures do
+      ticket_data[:article] = { body: 'Hello', type: 'phone', sender: 'Agent', to: 'someone@example.com' }
+
+      expect(service_result.articles.first.to).not_to eq('someone@example.com')
+
+      prepared = described_class.with_current_user(user).execute(ticket_data: ticket_data.merge(article: { body: 'Hello', type: 'phone', sender: 'Agent', to: 'someone@example.com' }), prepared_article: true)
+      expect(prepared.articles.first.to).to eq('someone@example.com')
+    end
+
     context 'when email article should be created, but to is not present' do
       let(:customer) { create(:customer, email: '') }
 
@@ -295,6 +341,26 @@ RSpec.describe Service::Ticket::Create, current_user_id: -> { user.id } do
 
         expect { service_result }
           .to raise_error(Exceptions::UnprocessableContent)
+      end
+
+      # A user who may not create the ticket never reaches the draft: the
+      #   transaction rolls the destroy back. Only a customer, who may create a
+      #   ticket in any group, can consume a draft they have no access to.
+      context 'when the user has no create access to the shared draft group' do
+        let(:user) { create(:customer) }
+
+        before { ticket_data[:customer] = user }
+
+        it 'raises error' do
+          expect { service_result }
+            .to raise_error(Pundit::NotAuthorizedError)
+        end
+
+        it 'does not destroy given shared draft' do
+          suppress(Pundit::NotAuthorizedError) { service_result }
+
+          expect(Ticket::SharedDraftStart).to exist(shared_draft.id)
+        end
       end
     end
 

@@ -708,6 +708,7 @@ RSpec.describe UserAgent, :aggregate_failures do
 
       before do
         allow(HostnameSafetyCheck).to receive(:validate!)
+        allow(HostnameSafetyCheck).to receive(:safe_addresses).and_return([])
       end
 
       context 'when safety validation is on' do
@@ -733,9 +734,13 @@ RSpec.describe UserAgent, :aggregate_failures do
 
           http_instance = instance_double(Net::HTTP).tap do |dbl|
             allow(dbl).to receive_messages(
+              :ipaddr           => resolved_ip,
+              :open_timeout     => 30,
               :open_timeout=    => nil,
               :read_timeout=    => nil,
               :set_debug_output => nil,
+              :start            => nil,
+              :started?         => false,
               :request          => nil,
               :proxy?           => false,
             )
@@ -747,7 +752,19 @@ RSpec.describe UserAgent, :aggregate_failures do
 
           described_class.get(url, {}, { validate_safety: true })
 
-          expect(http_instance).to have_received(:ipaddr=).with(resolved_ip)
+          expect(http_instance).to have_received(:ipaddr=).with(resolved_ip).at_least(:once)
+        end
+
+        it 'falls back to a safe address of the other family when the pinned IP is unreachable' do
+          # WebMock defers the socket to the first request by default, so start would never fail.
+          allow(WebMock).to receive(:net_http_connect_on_start?).and_return(true)
+          allow(HostnameSafetyCheck).to receive_messages(validate!: '2001:db8::1', safe_addresses: ['2001:db8::1', '203.0.113.10'])
+          allow(TCPSocket).to receive(:open).with('2001:db8::1', any_args).and_raise(Errno::ENETUNREACH)
+          allow(TCPSocket).to receive(:open).with('203.0.113.10', any_args).and_raise(StandardError)
+
+          described_class.get('http://localhost:3000/test', {}, { validate_safety: true })
+
+          expect(TCPSocket).to have_received(:open).with('203.0.113.10', any_args)
         end
 
         it 'connects to the pinned IP instead of re-resolving DNS' do
@@ -759,9 +776,9 @@ RSpec.describe UserAgent, :aggregate_failures do
           described_class.get('http://localhost:3000/test', {}, { validate_safety: true })
 
           expect(TCPSocket).to have_received(:open)
-            .with(resolved_ip, anything, anything, anything)
+            .with(resolved_ip, any_args)
           expect(TCPSocket).not_to have_received(:open)
-            .with(a_string_matching(%r{localhost}), anything, anything, anything)
+            .with(a_string_matching(%r{localhost}), any_args)
         end
       end
 
@@ -870,6 +887,155 @@ RSpec.describe UserAgent, :aggregate_failures do
     include_context 'when doing user agent tests'
   end
 
+  describe 'response size limit' do
+    let(:max_size) { 1024 }
+    let(:response) { described_class.get(url, {}, { max_response_size: max_size }) }
+
+    context 'with a stubbed response' do
+      let(:url)     { 'http://example.com/avatar' }
+      let(:headers) { {} }
+
+      before do
+        stub_request(:get, url).to_return(status: 200, body: body, headers: headers)
+      end
+
+      context 'when the body stays within the limit' do
+        let(:body) { 'x' * max_size }
+
+        it 'returns the body' do
+          expect(response).to be_success
+          expect(response.body).to eq(body)
+        end
+      end
+
+      context 'when the body exceeds the limit' do
+        let(:body) { 'x' * (max_size + 1) }
+
+        it 'fails the request' do
+          expect(response).not_to be_success
+          expect(response.error).to include('exceeds the allowed size')
+        end
+      end
+
+      context 'when the announced length exceeds the limit' do
+        let(:body)    { 'x' }
+        let(:headers) { { 'Content-Length' => (max_size + 1).to_s } }
+
+        it 'fails the request' do
+          expect(response).not_to be_success
+          expect(response.error).to include('exceeds the allowed size')
+        end
+      end
+
+      context 'when a raw request body is combined with the limit' do
+        let(:body) { '' }
+
+        before do
+          stub_request(:post, url).to_return(status: 200, body: 'x' * (max_size + 1))
+        end
+
+        it 'still enforces the limit on the raw-body request' do
+          result = described_class.post(url, {}, { max_response_size: max_size, send_as_raw_body: 'payload' })
+
+          expect(result).not_to be_success
+          expect(result.error).to include('exceeds the allowed size')
+        end
+      end
+    end
+
+    # WebMock reads the whole body before it hands the response over, also on a
+    # connection it lets through, so these run without it against a Rack app of their own.
+    context 'with a real connection' do
+      def stream_port
+        ENV.fetch('ZAMMAD_TEST_STREAM_PORT', 3012).to_i
+      end
+
+      let(:url)         { "http://127.0.0.1:#{stream_port}/avatar" }
+      let(:ready_token) { SecureRandom.hex(8) }
+
+      around do |example|
+        WebMock.disable!
+        example.run
+      ensure
+        WebMock.enable!
+      end
+
+      before do
+        token = ready_token
+        inner = rack_app
+        app = lambda do |env|
+          # The readiness probe checks this, so a stray listener on the port cannot stand in for the fixture.
+          next [200, {}, [token]] if env['PATH_INFO'] == '/__ready__'
+
+          inner.call(env)
+        end
+
+        thread = Thread.new do
+          Rack::Handler::Puma.run(app, Port: stream_port, Host: '127.0.0.1', Silent: true) do |launcher|
+            @puma_server = launcher
+          end
+        end
+        thread.report_on_exception = false
+        @puma_thread = thread
+
+        deadline = Process.clock_gettime(Process::CLOCK_MONOTONIC) + 5
+        begin
+          served_token = Net::HTTP.start('127.0.0.1', stream_port, open_timeout: 1, read_timeout: 1) do |http|
+            http.get('/__ready__').body
+          end
+          raise "Port #{stream_port} is held by another server." if served_token != ready_token
+        rescue Errno::ECONNREFUSED, Errno::ECONNRESET, EOFError, Net::OpenTimeout, Net::ReadTimeout
+          thread.join if !thread.alive? # re-raises the reason Puma could not boot
+          raise 'Streaming test server did not start in time.' if Process.clock_gettime(Process::CLOCK_MONOTONIC) > deadline
+
+          sleep 0.1
+          retry
+        end
+      end
+
+      after do
+        @puma_server&.stop # rubocop:disable RSpec/InstanceVariable
+        @puma_thread&.join(5) # rubocop:disable RSpec/InstanceVariable
+      end
+
+      context 'when the server streams more than the limit' do
+        let(:chunk)      { 'x' * 1024 }
+        let(:total_size) { 10.megabytes }
+        let(:served)     { [] }
+        let(:rack_app) do
+          counter = served
+          data    = chunk
+          count   = total_size / chunk.bytesize
+
+          lambda do |_env|
+            body = Enumerator.new do |yielder|
+              count.times do
+                yielder << data
+                counter << data.bytesize
+              end
+            end
+            [200, { 'content-type' => 'application/octet-stream' }, body]
+          end
+        end
+
+        it 'stops reading before the whole body arrives' do
+          expect(response).not_to be_success
+          expect(response.error).to include('exceeds the allowed size')
+          expect(served.sum).to be < total_size
+        end
+      end
+
+      context 'when the response has no body' do
+        let(:rack_app) { ->(_env) { [204, {}, []] } }
+
+        it 'returns no body' do
+          expect(response).to be_success
+          expect(response.body).to be_nil
+        end
+      end
+    end
+  end
+
   # Tests mocked proxy functionality in general.
   # Integration pipeline is optional and CI still passes if it fails.
   # This ensures that broken proxy functionality is easier to spot.
@@ -934,6 +1100,168 @@ RSpec.describe UserAgent, :aggregate_failures do
         described_class.get('http://example.com')
 
         expect(Net::HTTP).not_to have_received(:Proxy)
+      end
+    end
+  end
+
+  describe '.connect_with_address_fallback' do
+    let(:hostname)      { 'dualstack.example.com' }
+    let(:http)          { Net::HTTP.new(hostname, 443) }
+    let(:total_timeout) { 30 }
+    let(:attempts)      { [] }
+    let(:unreachable)   { [] }
+    let(:connect_error) { Errno::ENETUNREACH }
+
+    let(:safe_addresses) { ['2001:db8::1', '203.0.113.10'] }
+    let(:open_timeouts)  { [] }
+
+    before do
+      http.ipaddr       = '2001:db8::1'
+      http.open_timeout = total_timeout
+
+      allow(HostnameSafetyCheck).to receive(:safe_addresses).with(hostname).and_return(safe_addresses)
+
+      allow(http).to receive(:start) do
+        attempts << http.ipaddr
+        open_timeouts << http.open_timeout
+        raise connect_error if unreachable.include?(http.ipaddr)
+
+        http
+      end
+    end
+
+    context 'when the pinned address is reachable' do
+      it 'connects to it' do
+        described_class.connect_with_address_fallback(http, hostname, nil, total_timeout)
+
+        expect(attempts).to eq(['2001:db8::1'])
+      end
+    end
+
+    context 'when the pinned address is unreachable' do
+      let(:unreachable) { ['2001:db8::1'] }
+
+      it 'connects to the next safe address' do
+        described_class.connect_with_address_fallback(http, hostname, nil, total_timeout)
+
+        expect(attempts).to eq(['2001:db8::1', '203.0.113.10'])
+      end
+
+      context 'when its address family is not supported' do
+        let(:connect_error) { Errno::EAFNOSUPPORT }
+
+        it 'connects to the next safe address' do
+          described_class.connect_with_address_fallback(http, hostname, nil, total_timeout)
+
+          expect(attempts).to eq(['2001:db8::1', '203.0.113.10'])
+        end
+      end
+    end
+
+    context 'when the hostname has several addresses per family' do
+      let(:safe_addresses) { ['2001:db8::1', '2001:db8::2', '203.0.113.10', '203.0.113.11'] }
+      let(:unreachable)    { ['2001:db8::1', '203.0.113.10'] }
+
+      it 'tries only the pinned address and one address of the other family, each with half of the time' do
+        expect { described_class.connect_with_address_fallback(http, hostname, nil, total_timeout) }
+          .to raise_error(Errno::ENETUNREACH)
+
+        expect(attempts).to eq(['2001:db8::1', '203.0.113.10'])
+        expect(open_timeouts.first).to be_within(0.5).of(total_timeout / 2.0)
+      end
+    end
+
+    context 'when the hostname has addresses of one family only' do
+      let(:safe_addresses) { ['2001:db8::1', '2001:db8::2', '2001:db8::3'] }
+      let(:unreachable)    { ['2001:db8::1'] }
+
+      it 'connects to another address of the same family' do
+        described_class.connect_with_address_fallback(http, hostname, nil, total_timeout)
+
+        expect(attempts).to eq(['2001:db8::1', '2001:db8::2'])
+      end
+    end
+
+    context 'when the hostname has no other safe address' do
+      let(:safe_addresses) { ['2001:db8::1'] }
+
+      it 'gives the pinned address the full open timeout' do
+        described_class.connect_with_address_fallback(http, hostname, nil, total_timeout)
+
+        expect(attempts).to eq(['2001:db8::1'])
+        expect(open_timeouts.first).to be_within(0.5).of(total_timeout)
+      end
+    end
+
+    # Open timeout and total timeout are equal, as with the webhook defaults.
+    context 'when the pinned address silently drops the connection' do
+      let(:total_timeout) { 1 }
+      let(:unreachable)   { ['2001:db8::1'] }
+
+      before do
+        allow(http).to receive(:start) do
+          attempts << http.ipaddr
+
+          if unreachable.include?(http.ipaddr)
+            sleep http.open_timeout
+            raise Net::OpenTimeout
+          end
+
+          http
+        end
+      end
+
+      it 'connects to the next safe address within the total timeout' do
+        Timeout.timeout(total_timeout) do
+          described_class.connect_with_address_fallback(http, hostname, nil, total_timeout)
+        end
+
+        expect(attempts).to eq(['2001:db8::1', '203.0.113.10'])
+      end
+
+      it 'restores the configured open timeout' do
+        described_class.connect_with_address_fallback(http, hostname, nil, total_timeout)
+
+        expect(http.open_timeout).to eq(total_timeout)
+      end
+    end
+
+    context 'when no address is reachable' do
+      let(:unreachable) { ['2001:db8::1', '203.0.113.10'] }
+
+      it 'raises the error and keeps the pinned address' do
+        expect { described_class.connect_with_address_fallback(http, hostname, nil, total_timeout) }
+          .to raise_error(Errno::ENETUNREACH)
+
+        expect(attempts).to eq(['2001:db8::1', '203.0.113.10'])
+        expect(http.ipaddr).to eq('2001:db8::1')
+      end
+    end
+
+    context 'when the session of a previous attempt is still started' do
+      before do
+        allow(http).to receive(:started?).and_return(true, false)
+        allow(http).to receive(:finish)
+      end
+
+      it 'finishes it before pinning an address' do
+        described_class.connect_with_address_fallback(http, hostname, nil, total_timeout)
+
+        expect(http).to have_received(:finish)
+        expect(attempts).to eq(['2001:db8::1'])
+      end
+    end
+
+    context 'when the connection fails for another reason' do
+      before do
+        allow(http).to receive(:start).and_raise(OpenSSL::SSL::SSLError)
+      end
+
+      it 'does not try other addresses' do
+        expect { described_class.connect_with_address_fallback(http, hostname, nil, total_timeout) }
+          .to raise_error(OpenSSL::SSL::SSLError)
+
+        expect(http).to have_received(:start).once
       end
     end
   end

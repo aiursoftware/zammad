@@ -3,9 +3,10 @@
 require 'rails_helper'
 
 RSpec.describe 'Chat Handling', type: :system do
-  let(:agent_chat_switch_selector) { '#navigation .js-chatMenuItem .js-switch' }
-  let(:chat_url)                   { "/assets/chat/#{chat_url_type}.html?port=#{WS_PORT}" }
-  let(:chat_url_type)              { 'znuny' }
+  let(:agent_chat_switch_selector)    { '#navigation .js-chatMenuItem .js-switch' }
+  let(:agent_chat_switch_on_selector) { "#{agent_chat_switch_selector} input:checked" }
+  let(:chat_url)                      { "/assets/chat/#{chat_url_type}.html?port=#{WS_PORT}" }
+  let(:chat_url_type)                 { 'znuny' }
 
   def authenticate
     Setting.set('chat', true)
@@ -30,11 +31,22 @@ RSpec.describe 'Chat Handling', type: :system do
   end
 
   def enable_agent_chat
+    switch_agent_chat_on
+    click 'a[href="#customer_chat"]'
+  end
+
+  # The navigation menu is rendered anew while the app starts, e.g. when the chat
+  #   status arrives. A click whose switch is replaced between mouse down and up
+  #   gets lost, so it is repeated until the switch is on.
+  def switch_agent_chat_on
     wait_for_chat_topics_loaded
 
-    click agent_chat_switch_selector
+    wait.until do
+      click agent_chat_switch_selector if page.has_no_css?(agent_chat_switch_on_selector, visible: :all, wait: 0)
+      page.has_css?(agent_chat_switch_on_selector, visible: :all, wait: 2)
+    end
+
     wait_for_agent_chat_active
-    click 'a[href="#customer_chat"]'
   end
 
   # The widget asks for the agent availability right on load and removes itself
@@ -107,9 +119,7 @@ RSpec.describe 'Chat Handling', type: :system do
 
   shared_examples 'chat button is hidden after idle timeout' do
     it 'check that button is hidden after idle timeout', authenticated_as: :authenticate do
-      wait_for_chat_topics_loaded
-      click agent_chat_switch_selector
-      wait_for_agent_chat_active
+      switch_agent_chat_on
 
       using_session :customer do
         visit chat_url
@@ -468,6 +478,64 @@ RSpec.describe 'Chat Handling', type: :system do
     end
   end
 
+  context 'when renaming a chat session', authenticated_as: :authenticate do
+    let(:chat_window)     { '.active .chat-window' }
+    let(:chat_topic_name) { Chat.first.name }
+    let(:chat_session_id) { Chat::Session.last.id }
+
+    # The form has no submit button, it is sent when it gets closed again.
+    def rename_chat_session(name)
+      click "#{chat_window} .js-info"
+      find("#{chat_window} .js-metaForm input[name='name']").set(name)
+      click "#{chat_window} .js-info"
+    end
+
+    before do
+      visit '/'
+
+      enable_agent_chat
+
+      using_session :customer do
+        visit chat_url
+        open_chat_dialog
+      end
+
+      accept_chat
+    end
+
+    it 'shows the new name in the header and in the desktop notification' do
+      page.execute_script("App.Event.bind('notifyDesktop', function(data) { window.notifyDesktopTitle = data.title })")
+
+      rename_chat_session('VIP customer')
+
+      expect(page).to have_css("#{chat_window} .chat-name", text: "VIP customer ##{chat_session_id}")
+
+      using_session :customer do
+        check_content('.zammad-chat .zammad-chat-agent-status', 'Online')
+        send_customer_message('my name is customer')
+      end
+
+      check_content("#{chat_window} .chat-message--customer", 'my name is customer')
+      expect(page.evaluate_script('window.notifyDesktopTitle')).to eq('VIP customer')
+    end
+
+    it 'shows the chat topic name again after the name was cleared' do
+      rename_chat_session('VIP customer')
+
+      expect(page).to have_css("#{chat_window} .chat-name", text: "VIP customer ##{chat_session_id}")
+
+      rename_chat_session('')
+
+      expect(page).to have_css("#{chat_window} .chat-name", text: "#{chat_topic_name} ##{chat_session_id}")
+    end
+
+    it 'limits the name to the length of the database column' do
+      click "#{chat_window} .js-info"
+
+      expect(page).to have_css("#{chat_window} .js-metaForm input[name='name'][maxlength='250']")
+    end
+  end
+
   context 'when jquery variant is used' do
     before do
       visit '/'
@@ -509,9 +577,7 @@ RSpec.describe 'Chat Handling', type: :system do
   describe "Chat can't be closed after timeout #2471", authenticated_as: :authenticate do
     shared_examples 'test issue #2471' do
       it 'is able to close to the dialog after a idleTimeout happened' do
-        wait_for_chat_topics_loaded
-        click agent_chat_switch_selector
-        wait_for_agent_chat_active
+        switch_agent_chat_on
         using_session :customer do
 
           visit chat_url
@@ -565,6 +631,44 @@ RSpec.describe 'Chat Handling', type: :system do
           expect(page).to have_css('.js-submit', text: 'Download')
         end
       end
+    end
+  end
+
+  context 'when inserting a knowledge base answer into a message', authenticated_as: :authenticate, current_user_id: 1 do
+    let(:image) { Base64.strict_encode64(Rails.root.join('spec/fixtures/files/image/squares.png').binread) }
+    let(:answer) do
+      create(:knowledge_base_answer, published_at: 1.week.ago, translation_attributes: {
+               title:   'Return label',
+               content: build(:knowledge_base_answer_translation_content, body: "<p>Print the label.</p><img src='data:image/png;base64,#{image}'>")
+             })
+    end
+
+    def authenticate
+      answer
+      super
+    end
+
+    it 'inserts its text and its image', :aggregate_failures do
+      visit '/'
+
+      enable_agent_chat
+
+      using_session :customer do
+        visit chat_url
+        open_chat_dialog
+      end
+
+      accept_chat
+
+      input = find('.active .chat-window .js-customerChatInput')
+
+      input.send_keys('??')
+      'Ret'.chars.each { |letter| input.send_keys(letter) }
+
+      find(:text_module, answer.translations.first.id).click
+
+      expect(input).to have_text('Print the label.')
+      expect(input).to have_css('img[src^="data:image/"]')
     end
   end
 end

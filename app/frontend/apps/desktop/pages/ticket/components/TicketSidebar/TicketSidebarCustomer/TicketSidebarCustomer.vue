@@ -40,7 +40,7 @@ const isSystemCustomer = computed(() => isSystemUserId(customerId.value))
 const {
   user: customer,
   secondaryOrganizations,
-  objectAttributes,
+  entityAttributes,
   fetchMoreSecondaryOrganizations,
 } = useUserDetail(computed(() => (isSystemCustomer.value ? undefined : customerId.value)))
 
@@ -99,7 +99,7 @@ if (customerId.value) emit('show')
       :icon="sidebarPlugin.icon"
       :actions="noCustomerActions"
     >
-      <CommonLabel size="small">
+      <CommonLabel size="small" class="text-muted!">
         {{ $t('No customer assigned yet.') }}
       </CommonLabel>
     </TicketSidebarContent>
@@ -110,7 +110,7 @@ if (customerId.value) emit('show')
       :sidebar-plugin="sidebarPlugin"
       :customer="customer"
       :secondary-organizations="secondaryOrganizations"
-      :object-attributes="objectAttributes"
+      :entity-attributes="entityAttributes"
       :change-customer-menu-item="changeCustomerMenuItem"
       @load-more-secondary-organizations="fetchMoreSecondaryOrganizations"
     />

@@ -48,10 +48,15 @@ const config = {
   overwrite: true,
   schema: 'app/graphql/graphql_introspection.json',
   config: {
-    vueCompositionApiImportFrom: 'vue',
     addDocBlocks: false,
   },
   generates: {
+    './app/frontend/shared/graphql/possibleTypes.api.ts': {
+      plugins: ['fragment-matcher'],
+      config: {
+        useExplicitTyping: true,
+      },
+    },
     './app/frontend/shared/graphql/schema-types.ts': {
       config: {
         scalars,
@@ -87,7 +92,7 @@ const config = {
         importTypesNamespace: '',
         extension: '.api.ts',
       },
-      plugins: ['typescript-vue-apollo'],
+      plugins: ['./app/frontend/build/vueApolloV5Plugin.js'],
       config: {
         importOperationTypesFrom: 'Types',
       },

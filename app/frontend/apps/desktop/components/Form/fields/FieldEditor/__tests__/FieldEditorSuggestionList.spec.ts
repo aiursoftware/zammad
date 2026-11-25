@@ -361,6 +361,15 @@ describe('accessibility (combobox + listbox wiring)', () => {
     expect(view.getByText('Loading…')).toBeInTheDocument()
   })
 
+  it('shows loading instead of "no results" while a search is running', () => {
+    const view = renderComponent(FieldEditorSuggestionList, {
+      props: { query: 'a', items: [], type: 'text', command: vi.fn(), ...baseProps, loading: true },
+    })
+
+    expect(view.getByText('Loading…')).toBeInTheDocument()
+    expect(view.queryByText('No results found')).not.toBeInTheDocument()
+  })
+
   it('uses the listboxId prop to scope option ids', () => {
     const view = renderComponent(FieldEditorSuggestionList, {
       props: {
@@ -441,7 +450,7 @@ describe('answers related to the edited record', () => {
 
     expect(view.getByText('Start typing to search in knowledge base…')).toBeInTheDocument()
 
-    const linked = view.getByRole('group', { name: 'Linked' })
+    const linked = view.getByRole('group', { name: 'Linked knowledge' })
     const suggested = view.getByRole('group', { name: 'Suggested knowledge' })
 
     expect(
@@ -482,7 +491,7 @@ describe('answers related to the edited record', () => {
   it('keeps the sections while the first search term is still being searched for', () => {
     const { view } = renderRelatedList({ query: 'v' })
 
-    expect(view.getByRole('group', { name: 'Linked' })).toBeInTheDocument()
+    expect(view.getByRole('group', { name: 'Linked knowledge' })).toBeInTheDocument()
     expect(view.getByRole('group', { name: 'Suggested knowledge' })).toBeInTheDocument()
   })
 
@@ -491,7 +500,7 @@ describe('answers related to the edited record', () => {
       items: [relatedItem(1, 'VPN setup on company notebooks (Windows)', 'linked')],
     })
 
-    expect(view.getByRole('group', { name: 'Linked' })).toBeInTheDocument()
+    expect(view.getByRole('group', { name: 'Linked knowledge' })).toBeInTheDocument()
     expect(view.queryByRole('group', { name: 'Suggested knowledge' })).not.toBeInTheDocument()
   })
 

@@ -41,9 +41,10 @@ import {
 } from '../graphql/queries/userCurrentAvatarList.api.ts'
 import { UserCurrentAvatarUpdatesDocument } from '../graphql/subscriptions/userCurrentAvatarUpdates.api.ts'
 
-import type { ApolloCache, NormalizedCacheObject } from '@apollo/client/core'
+import type { ApolloCache } from '@apollo/client'
 
-const user = toRef(useSessionStore(), 'user')
+const session = useSessionStore()
+const user = toRef(session, 'user')
 
 const { breadcrumbItems } = useBreadcrumb()
 
@@ -95,7 +96,7 @@ const cropImageFlyout = useFlyout({
 })
 
 const modifyDefaultAvatarCache = (
-  cache: ApolloCache<NormalizedCacheObject>,
+  cache: ApolloCache,
   avatar: Avatar | undefined,
   newValue: boolean,
 ) => {
@@ -164,9 +165,7 @@ const storeAvatar = (image: ImageFileData) => {
 
   addAvatarMutation.send().then((data) => {
     if (data?.userCurrentAvatarAdd?.avatar) {
-      if (user.value) {
-        user.value.image = data.userCurrentAvatarAdd.avatar.imageHash
-      }
+      session.updateUser({ image: data.userCurrentAvatarAdd.avatar.imageHash })
 
       notify({
         id: 'avatar-upload-success',
@@ -213,9 +212,9 @@ const selectAvatar = (avatar: Avatar) => {
   modifyDefaultAvatarCache(cache, avatar, true)
 
   const accountAvatarSelectMutation = new MutationHandler(
-    useUserCurrentAvatarSelectMutation(() => ({
+    useUserCurrentAvatarSelectMutation({
       variables: { id: avatar.id },
-    })),
+    }),
     {
       errorNotificationMessage: __('The avatar could not be selected.'),
     },
@@ -239,7 +238,7 @@ const selectAvatar = (avatar: Avatar) => {
 
 const deleteAvatar = (avatar: Avatar) => {
   const accountAvatarDeleteMutation = new MutationHandler(
-    useUserCurrentAvatarDeleteMutation(() => ({
+    useUserCurrentAvatarDeleteMutation({
       variables: { id: avatar.id },
       update(cache) {
         if (avatar.default) {
@@ -249,7 +248,7 @@ const deleteAvatar = (avatar: Avatar) => {
         cache.evict({ id: cache.identify(avatar) })
         cache.gc()
       },
-    })),
+    }),
     {
       errorNotificationMessage: __('The avatar could not be deleted.'),
     },

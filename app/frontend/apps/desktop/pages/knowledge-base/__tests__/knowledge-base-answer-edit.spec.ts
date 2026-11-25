@@ -1,6 +1,6 @@
 // Copyright (C) 2012-2026 Zammad Foundation, https://zammad-foundation.org/
 
-import { ApolloLink, Observable, type FetchResult } from '@apollo/client/core'
+import { ApolloLink, Observable, type FetchResult } from '@apollo/client'
 import { getNode } from '@formkit/core'
 import { within } from '@testing-library/vue'
 
@@ -556,7 +556,7 @@ describe('knowledge base answer edit', () => {
     expect(sidebar).toContainElement(view.getByLabelText('Visibility'))
     expect(sidebar).toContainElement(view.getByLabelText('Category'))
     expect(
-      view.queryByLabelText('Tags'),
+      view.queryByRole('combobox', { name: 'Tags' }),
       'tags are edited from the sidebar, not this form',
     ).not.toBeInTheDocument()
   })

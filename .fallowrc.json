@@ -5,7 +5,6 @@
     "app/frontend/tests/vitest.setup.ts",
     "app/frontend/build/**/*.{js,mjs,ts}",
     "app/frontend/**/*.graphql",
-    "app/frontend/cypress/**/*.cy.ts",
     "app/frontend/shared/server/action_cable/types.ts"
   ],
   "dynamicallyLoaded": [
@@ -14,7 +13,7 @@
     "app/frontend/apps/*/pages/**/routes/*.ts",
     "app/frontend/apps/*/pages/authentication/after-auth/plugins/*.ts",
     "app/frontend/apps/*/server/apollo/cache/initializer/*.ts",
-    "app/frontend/shared/entities/*/stores/objectAttributes.ts",
+    "app/frontend/shared/entities/*/attributes.ts",
     "app/frontend/shared/entities/two-factor/plugins/*.ts",
     "app/frontend/shared/components/Form/fields/**/index.ts",
     "app/frontend/shared/form/theme/global/extensions/*.ts",
@@ -26,7 +25,6 @@
     "public/**",
     "tmp/**",
     ".dev/**",
-    "!.dev/cypress/**",
     "spec/**",
     ".eslint-plugin-zammad/**",
     "!app/frontend/build/**"
@@ -54,10 +52,6 @@
       "exports": ["EXTENSION_NAME"]
     },
     {
-      "file": "app/frontend/**/graphql/**/*.api.ts",
-      "exports": ["ReactiveFunction"]
-    },
-    {
       "file": "app/frontend/shared/graphql/schema-types.ts",
       "exports": ["*"]
     }
@@ -68,10 +62,6 @@
     "non-existing",
     "postcss-html"
   ],
-  "ignoreUnresolvedImports": ["cypress", "cypress/**"],
-  "workspaces": {
-    "patterns": [".dev/cypress"]
-  },
   "duplicates": {
     "near": true
   },
@@ -81,8 +71,7 @@
   "rules": {
     "complexity-crap": "off",
     "complexity-cyclomatic": "warn",
-    "complexity-cognitive": "warn",
-    "package-cycle": "off"
+    "complexity-cognitive": "warn"
   },
   "overrides": [
     {

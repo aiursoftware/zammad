@@ -75,6 +75,12 @@ AAAFoAAAAAAAAAkAAAAAEAAACQAAAAAQADk=" })
         expect(described_class.mask_sensitive_data(bearer)).to eq('Authorization: Bearer [FILTERED]')
       end
 
+      it 'masks a Bearer token with characters outside the RFC 6750 set completely' do
+        bearer = "Authorization: Bearer pa$$word#1:!x\nContent-Type: application/json"
+
+        expect(described_class.mask_sensitive_data(bearer)).to eq("Authorization: Bearer [FILTERED]\nContent-Type: application/json")
+      end
+
       it 'masks previously partially filtered dot-separated Bearer authorization headers completely' do
         bearer = [
           'Authorization: Bearer [FILTERED]',
@@ -98,6 +104,39 @@ AAAFoAAAAAAAAAkAAAAAEAAACQAAAAAQADk=" })
         header = "Authorization: DeepL-Auth-Key secret-key\nContent-Type: application/json"
 
         expect(described_class.mask_sensitive_data(header)).to eq("Authorization: DeepL-Auth-Key [FILTERED]\nContent-Type: application/json")
+      end
+    end
+
+    # GitLab authenticates with a PRIVATE-TOKEN header, which Net::HTTP logs in lowercase.
+    context 'when the input includes a token header' do
+      it 'masks the token but keeps the header name' do
+        header = 'private-token: s3cr3t'
+
+        expect(described_class.mask_sensitive_data(header)).to eq('private-token: [FILTERED]')
+      end
+
+      it 'masks the token regardless of the header case' do
+        header = 'PRIVATE-TOKEN: s3cr3t'
+
+        expect(described_class.mask_sensitive_data(header)).to eq('PRIVATE-TOKEN: [FILTERED]')
+      end
+
+      it 'masks other token headers too' do
+        header = 'x-auth-token: s3cr3t'
+
+        expect(described_class.mask_sensitive_data(header)).to eq('x-auth-token: [FILTERED]')
+      end
+
+      it 'keeps the surrounding headers' do
+        headers = "accept: */*\nprivate-token: s3cr3t\ncontent-type: application/json"
+
+        expect(described_class.mask_sensitive_data(headers)).to eq("accept: */*\nprivate-token: [FILTERED]\ncontent-type: application/json")
+      end
+
+      it 'keeps headers that only mention a token in their value' do
+        header = 'x-description: private-token: not a header'
+
+        expect(described_class.mask_sensitive_data(header)).to eq(header)
       end
     end
 
@@ -134,9 +173,11 @@ AAAFoAAAAAAAAAkAAAAAEAAACQAAAAAQADk=" })
       expect(http_log.errors[:facility]).to include('is not included in the list')
     end
 
-    it 'is valid with the translation facility' do
-      http_log.facility = 'content_translation'
-      expect(http_log).to be_valid
+    it 'is valid with the translation provider facilities', :aggregate_failures do
+      %w[DeepL LibreTranslate].each do |facility|
+        http_log.facility = facility
+        expect(http_log).to be_valid
+      end
     end
   end
 
@@ -224,7 +265,8 @@ AAAFoAAAAAAAAAkAAAAAEAAACQAAAAAQADk=" })
       expect(described_class.facility_to_permission('GitHub')).to eq('admin.integration')
       expect(described_class.facility_to_permission('webhook')).to eq('admin.webhook')
       expect(described_class.facility_to_permission('cti')).to eq('admin.integration')
-      expect(described_class.facility_to_permission('content_translation')).to eq('admin.integration')
+      expect(described_class.facility_to_permission('DeepL')).to eq('admin.integration')
+      expect(described_class.facility_to_permission('LibreTranslate')).to eq('admin.integration')
       expect(described_class.facility_to_permission('AI::Provider')).to eq('admin.ai_feedback_logs')
       expect(described_class.facility_to_permission('MicrosoftGraph')).to eq('admin.channel_microsoft_graph')
       expect(described_class.facility_to_permission('WhatsApp::Business')).to eq('admin.channel_whatsapp')
@@ -244,7 +286,7 @@ AAAFoAAAAAAAAAkAAAAAEAAACQAAAAAQADk=" })
     it 'returns a hash grouped by permissions with facilities' do
       expect(described_class.facilities_by_permission).to include(
         'admin.ai_feedback_logs'        => include('AI::Provider'),
-        'admin.integration'             => include('GitHub', 'content_translation'),
+        'admin.integration'             => include('GitHub', 'DeepL', 'LibreTranslate'),
         'admin.security'                => include('SAML'),
         'admin.webhook'                 => include('webhook'),
         'admin.channel_microsoft_graph' => include('MicrosoftGraph'),

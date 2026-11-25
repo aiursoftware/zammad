@@ -1,11 +1,11 @@
-/** Internal type. DO NOT USE DIRECTLY. */
-type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
-/** Internal type. DO NOT USE DIRECTLY. */
-export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 import type * as Types from './schema-types';
 
 export * from './schema-types'
 export type { Exact }
+/** Internal type. DO NOT USE DIRECTLY. */
+type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+/** Internal type. DO NOT USE DIRECTLY. */
+export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 export type BetaUiSendFeedbackMutationVariables = Exact<{
   input: Types.BetaUiFeedbackInput;
 }>;
@@ -19,7 +19,7 @@ export type KnowledgeBaseAnswerInfoForPopoverQueryVariables = Exact<{
 }>;
 
 
-export type KnowledgeBaseAnswerInfoForPopoverQuery = { knowledgeBaseAnswer: { __typename: 'KnowledgeBaseAnswer', id: string, translation: { __typename: 'KnowledgeBaseAnswerTranslation', id: string, title: string, maybeLocale: string | null | undefined, visibility: Types.EnumKnowledgeBaseVisibility, categoryTreeTranslation: Array<{ __typename: 'KnowledgeBaseCategoryTranslation', id: string, title: string }>, content: { __typename: 'KnowledgeBaseAnswerTranslationContent', bodyExcerpt: string | null | undefined }, answer: { __typename: 'KnowledgeBaseAnswer', id: string, archivedAt: string | null | undefined, publishedAt: string | null | undefined, internalAt: string | null | undefined, tags: Array<string> | null | undefined, category: { __typename: 'KnowledgeBaseCategory', id: string } }, kbLocale: { __typename: 'KnowledgeBaseLocale', systemLocale: { __typename: 'Locale', locale: string, name: string } } } | null | undefined } };
+export type KnowledgeBaseAnswerInfoForPopoverQuery = { knowledgeBaseAnswer: { __typename: 'KnowledgeBaseAnswer', id: string, translation: { __typename: 'KnowledgeBaseAnswerTranslation', id: string, title: string, maybeLocale: string | null | undefined, visibility: Types.EnumKnowledgeBaseVisibility, categoryTreeTranslation: Array<{ __typename: 'KnowledgeBaseCategoryTranslation', id: string, title: string }>, content: { __typename: 'KnowledgeBaseAnswerTranslationContent', id: string, bodyExcerpt: string | null | undefined }, answer: { __typename: 'KnowledgeBaseAnswer', id: string, archivedAt: string | null | undefined, publishedAt: string | null | undefined, internalAt: string | null | undefined, tags: Array<string> | null | undefined, category: { __typename: 'KnowledgeBaseCategory', id: string } }, kbLocale: { __typename: 'KnowledgeBaseLocale', systemLocale: { __typename: 'Locale', locale: string, name: string } } } | null | undefined } };
 
 export type OrganizationInfoForPopoverQueryVariables = Exact<{
   organizationId: string | number;
@@ -41,6 +41,7 @@ export type DetailSearchQueryVariables = Exact<{
 
 
 export type DetailSearchQuery = { search: { __typename: 'SearchResult', totalCount: number, items: Array<
+      | { __typename: 'ChatSession', id: string, internalId: number, name: string | null | undefined, createdAt: string, sessionState: Types.EnumChatSessionState }
       | { __typename: 'KnowledgeBaseAnswerTranslation', id: string, title: string, updatedAt: string, visibility: Types.EnumKnowledgeBaseVisibility, answer: { __typename: 'KnowledgeBaseAnswer', id: string, category: { __typename: 'KnowledgeBaseCategory', id: string } }, kbLocale: { __typename: 'KnowledgeBaseLocale', systemLocale: { __typename: 'Locale', locale: string } } }
       | { __typename: 'Organization', id: string, internalId: number, name: string | null | undefined, shared: boolean | null | undefined, active: boolean | null | undefined }
       | { __typename: 'Ticket', id: string, internalId: number, title: string, number: string, stateColorCode: Types.EnumTicketStateColorCode, createdAt: string, customer: { __typename: 'User', id: string, fullname: string | null | undefined }, owner: { __typename: 'User', id: string, fullname: string | null | undefined }, group: { __typename: 'Group', id: string, name: string | null | undefined }, state: { __typename: 'TicketState', id: string, name: string }, priority: { __typename: 'TicketPriority', id: string, name: string, uiColor: string | null | undefined }, policy: { __typename: 'PolicyTicket', update: boolean } }
@@ -49,31 +50,18 @@ export type DetailSearchQuery = { search: { __typename: 'SearchResult', totalCou
 
 export type QuickSearchQueryVariables = Exact<{
   search: string;
+  onlyIn: Array<Types.EnumSearchableModels> | Types.EnumSearchableModels;
   limit?: number | null | undefined;
 }>;
 
 
-export type QuickSearchQuery = { quickSearchOrganizations: { __typename: 'SearchResult', totalCount: number, items: Array<
-      | { __typename: 'KnowledgeBaseAnswerTranslation' }
-      | { __typename: 'Organization', id: string, internalId: number, name: string | null | undefined, active: boolean | null | undefined }
-      | { __typename: 'Ticket' }
-      | { __typename: 'User' }
-    > }, quickSearchTickets: { __typename: 'SearchResult', totalCount: number, items: Array<
-      | { __typename: 'KnowledgeBaseAnswerTranslation' }
-      | { __typename: 'Organization' }
-      | { __typename: 'Ticket', id: string, internalId: number, title: string, number: string, stateColorCode: Types.EnumTicketStateColorCode, state: { __typename: 'TicketState', id: string, name: string } }
-      | { __typename: 'User' }
-    > }, quickSearchKnowledgeBaseAnswers: { __typename: 'SearchResult', totalCount: number, items: Array<
+export type QuickSearchQuery = { searchGrouped: Array<{ __typename: 'SearchGroupedResult', model: Types.EnumSearchableModels, totalCount: number, items: Array<
+      | { __typename: 'ChatSession', id: string, internalId: number, name: string | null | undefined }
       | { __typename: 'KnowledgeBaseAnswerTranslation', id: string, title: string, visibility: Types.EnumKnowledgeBaseVisibility, kbLocale: { __typename: 'KnowledgeBaseLocale', systemLocale: { __typename: 'Locale', locale: string } }, answer: { __typename: 'KnowledgeBaseAnswer', id: string, category: { __typename: 'KnowledgeBaseCategory', id: string } } }
-      | { __typename: 'Organization' }
-      | { __typename: 'Ticket' }
-      | { __typename: 'User' }
-    > }, quickSearchUsers: { __typename: 'SearchResult', totalCount: number, items: Array<
-      | { __typename: 'KnowledgeBaseAnswerTranslation' }
-      | { __typename: 'Organization' }
-      | { __typename: 'Ticket' }
+      | { __typename: 'Organization', id: string, internalId: number, name: string | null | undefined, active: boolean | null | undefined }
+      | { __typename: 'Ticket', id: string, internalId: number, title: string, number: string, stateColorCode: Types.EnumTicketStateColorCode, state: { __typename: 'TicketState', id: string, name: string } }
       | { __typename: 'User', id: string, internalId: number, fullname: string | null | undefined, active: boolean | null | undefined }
-    > } };
+    > }> };
 
 export type SearchCountsQueryVariables = Exact<{
   search: string;
@@ -142,10 +130,11 @@ export type ChannelEmailGuessConfigurationMutation = { channelEmailGuessConfigur
 
 export type ChannelEmailSetNotificationConfigurationMutationVariables = Exact<{
   outboundConfiguration: Types.ChannelEmailOutboundConfigurationInput;
+  testAddress?: string | null | undefined;
 }>;
 
 
-export type ChannelEmailSetNotificationConfigurationMutation = { channelEmailSetNotificationConfiguration: { __typename: 'ChannelEmailSetNotificationConfigurationPayload', success: boolean | null | undefined, errors: Array<{ __typename: 'UserError', message: string, messagePlaceholder: Array<string> | null | undefined, field: string | null | undefined, exception: Types.EnumUserErrorException | null | undefined }> | null | undefined } | null | undefined };
+export type ChannelEmailSetNotificationConfigurationMutation = { channelEmailSetNotificationConfiguration: { __typename: 'ChannelEmailSetNotificationConfigurationPayload', success: boolean | null | undefined, refused: boolean | null | undefined, errors: Array<{ __typename: 'UserError', message: string, messagePlaceholder: Array<string> | null | undefined, field: string | null | undefined, exception: Types.EnumUserErrorException | null | undefined }> | null | undefined } | null | undefined };
 
 export type ChannelEmailValidateConfigurationInboundMutationVariables = Exact<{
   inboundConfiguration: Types.ChannelEmailInboundConfigurationInput;
@@ -170,6 +159,111 @@ export type ChannelEmailValidateConfigurationRoundtripMutationVariables = Exact<
 
 
 export type ChannelEmailValidateConfigurationRoundtripMutation = { channelEmailValidateConfigurationRoundtrip: { __typename: 'ChannelEmailValidateConfigurationRoundtripPayload', success: boolean, errors: Array<{ __typename: 'UserError', message: string, messagePlaceholder: Array<string> | null | undefined, field: string | null | undefined, exception: Types.EnumUserErrorException | null | undefined }> | null | undefined } | null | undefined };
+
+export type ChatAgentAttributesFragment = { __typename: 'User', id: string, internalId: number, firstname: string | null | undefined, lastname: string | null | undefined, fullname: string | null | undefined, image: string | null | undefined, vip: boolean | null | undefined, outOfOffice: boolean | null | undefined, outOfOfficeStartAt: string | null | undefined, outOfOfficeEndAt: string | null | undefined, active: boolean | null | undefined };
+
+export type ChatAgentStateAttributesFragment = { __typename: 'ChatAgentState', active: boolean, seatsAvailable: number, seatsTotal: number, topics: Array<{ __typename: 'ChatTopic', id: string, internalId: number, name: string, active: boolean }>, waitingQueues: Array<{ __typename: 'ChatWaitingQueue', topic: { __typename: 'ChatTopic', id: string, internalId: number, name: string, active: boolean }, sessions: Array<{ __typename: 'ChatSession', id: string, internalId: number, state: Types.EnumChatSessionState, name: string | null | undefined, url: string | null | undefined, remoteIp: string | null | undefined, dnsName: string | null | undefined, createdAt: string, updatedAt: string, geoIp: { __typename: 'ChatSessionGeoIp', countryName: string | null | undefined, countryCode: string | null | undefined, cityName: string | null | undefined } | null | undefined, topic: { __typename: 'ChatTopic', id: string, internalId: number, name: string, active: boolean }, user: { __typename: 'User', id: string, internalId: number, firstname: string | null | undefined, lastname: string | null | undefined, fullname: string | null | undefined, image: string | null | undefined, vip: boolean | null | undefined, outOfOffice: boolean | null | undefined, outOfOfficeStartAt: string | null | undefined, outOfOfficeEndAt: string | null | undefined, active: boolean | null | undefined } | null | undefined }> }>, runningSessions: Array<{ __typename: 'ChatSession', id: string, internalId: number, state: Types.EnumChatSessionState, name: string | null | undefined, url: string | null | undefined, remoteIp: string | null | undefined, dnsName: string | null | undefined, createdAt: string, updatedAt: string, geoIp: { __typename: 'ChatSessionGeoIp', countryName: string | null | undefined, countryCode: string | null | undefined, cityName: string | null | undefined } | null | undefined, topic: { __typename: 'ChatTopic', id: string, internalId: number, name: string, active: boolean }, user: { __typename: 'User', id: string, internalId: number, firstname: string | null | undefined, lastname: string | null | undefined, fullname: string | null | undefined, image: string | null | undefined, vip: boolean | null | undefined, outOfOffice: boolean | null | undefined, outOfOfficeStartAt: string | null | undefined, outOfOfficeEndAt: string | null | undefined, active: boolean | null | undefined } | null | undefined }>, availableAgents: Array<{ __typename: 'User', id: string, internalId: number, firstname: string | null | undefined, lastname: string | null | undefined, fullname: string | null | undefined, image: string | null | undefined, vip: boolean | null | undefined, outOfOffice: boolean | null | undefined, outOfOfficeStartAt: string | null | undefined, outOfOfficeEndAt: string | null | undefined, active: boolean | null | undefined }> };
+
+export type ChatMessageAttributesFragment = { __typename: 'ChatMessage', id: string, content: string, createdAt: string, createdBy: { __typename: 'User', id: string, internalId: number, firstname: string | null | undefined, lastname: string | null | undefined, fullname: string | null | undefined, image: string | null | undefined, vip: boolean | null | undefined, outOfOffice: boolean | null | undefined, outOfOfficeStartAt: string | null | undefined, outOfOfficeEndAt: string | null | undefined, active: boolean | null | undefined } | null | undefined };
+
+export type ChatPreferencesAttributesFragment = { __typename: 'ChatPreferences', maxWindows: number, alternativeName: string | null | undefined, avatarEnabled: boolean, hasTicketCreateAccess: boolean, topics: Array<{ __typename: 'ChatPreferencesTopic', active: boolean, phrases: Array<string>, topic: { __typename: 'ChatTopic', id: string, internalId: number, name: string, active: boolean } }> };
+
+export type ChatSessionAttributesFragment = { __typename: 'ChatSession', id: string, internalId: number, state: Types.EnumChatSessionState, name: string | null | undefined, url: string | null | undefined, remoteIp: string | null | undefined, dnsName: string | null | undefined, createdAt: string, updatedAt: string, geoIp: { __typename: 'ChatSessionGeoIp', countryName: string | null | undefined, countryCode: string | null | undefined, cityName: string | null | undefined } | null | undefined, topic: { __typename: 'ChatTopic', id: string, internalId: number, name: string, active: boolean }, user: { __typename: 'User', id: string, internalId: number, firstname: string | null | undefined, lastname: string | null | undefined, fullname: string | null | undefined, image: string | null | undefined, vip: boolean | null | undefined, outOfOffice: boolean | null | undefined, outOfOfficeStartAt: string | null | undefined, outOfOfficeEndAt: string | null | undefined, active: boolean | null | undefined } | null | undefined };
+
+export type ChatTopicAttributesFragment = { __typename: 'ChatTopic', id: string, internalId: number, name: string, active: boolean };
+
+export type ChatAgentAvailabilityUpdateMutationVariables = Exact<{
+  active: boolean;
+}>;
+
+
+export type ChatAgentAvailabilityUpdateMutation = { chatAgentAvailabilityUpdate: { __typename: 'ChatAgentAvailabilityUpdatePayload', active: boolean, errors: Array<{ __typename: 'UserError', message: string, messagePlaceholder: Array<string> | null | undefined, field: string | null | undefined, exception: Types.EnumUserErrorException | null | undefined }> | null | undefined } | null | undefined };
+
+export type ChatAgentHeartbeatMutationVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ChatAgentHeartbeatMutation = { chatAgentHeartbeat: { __typename: 'ChatAgentHeartbeatPayload', success: boolean, errors: Array<{ __typename: 'UserError', message: string, messagePlaceholder: Array<string> | null | undefined, field: string | null | undefined, exception: Types.EnumUserErrorException | null | undefined }> | null | undefined } | null | undefined };
+
+export type ChatPreferencesUpdateMutationVariables = Exact<{
+  preferences: Types.ChatPreferencesInput;
+}>;
+
+
+export type ChatPreferencesUpdateMutation = { chatPreferencesUpdate: { __typename: 'ChatPreferencesUpdatePayload', preferences: { __typename: 'ChatPreferences', maxWindows: number, alternativeName: string | null | undefined, avatarEnabled: boolean, hasTicketCreateAccess: boolean, topics: Array<{ __typename: 'ChatPreferencesTopic', active: boolean, phrases: Array<string>, topic: { __typename: 'ChatTopic', id: string, internalId: number, name: string, active: boolean } }> } | null | undefined, errors: Array<{ __typename: 'UserError', message: string, messagePlaceholder: Array<string> | null | undefined, field: string | null | undefined, exception: Types.EnumUserErrorException | null | undefined }> | null | undefined } | null | undefined };
+
+export type ChatSessionAcceptMutationVariables = Exact<{
+  topicId?: string | number | null | undefined;
+}>;
+
+
+export type ChatSessionAcceptMutation = { chatSessionAccept: { __typename: 'ChatSessionAcceptPayload', session: { __typename: 'ChatSession', id: string, internalId: number, state: Types.EnumChatSessionState, name: string | null | undefined, url: string | null | undefined, remoteIp: string | null | undefined, dnsName: string | null | undefined, createdAt: string, updatedAt: string, geoIp: { __typename: 'ChatSessionGeoIp', countryName: string | null | undefined, countryCode: string | null | undefined, cityName: string | null | undefined } | null | undefined, topic: { __typename: 'ChatTopic', id: string, internalId: number, name: string, active: boolean }, user: { __typename: 'User', id: string, internalId: number, firstname: string | null | undefined, lastname: string | null | undefined, fullname: string | null | undefined, image: string | null | undefined, vip: boolean | null | undefined, outOfOffice: boolean | null | undefined, outOfOfficeStartAt: string | null | undefined, outOfOfficeEndAt: string | null | undefined, active: boolean | null | undefined } | null | undefined } | null | undefined, errors: Array<{ __typename: 'UserError', message: string, messagePlaceholder: Array<string> | null | undefined, field: string | null | undefined, exception: Types.EnumUserErrorException | null | undefined }> | null | undefined } | null | undefined };
+
+export type ChatSessionEndMutationVariables = Exact<{
+  sessionId: string | number;
+}>;
+
+
+export type ChatSessionEndMutation = { chatSessionEnd: { __typename: 'ChatSessionEndPayload', session: { __typename: 'ChatSession', id: string, internalId: number, state: Types.EnumChatSessionState, name: string | null | undefined, url: string | null | undefined, remoteIp: string | null | undefined, dnsName: string | null | undefined, createdAt: string, updatedAt: string, geoIp: { __typename: 'ChatSessionGeoIp', countryName: string | null | undefined, countryCode: string | null | undefined, cityName: string | null | undefined } | null | undefined, topic: { __typename: 'ChatTopic', id: string, internalId: number, name: string, active: boolean }, user: { __typename: 'User', id: string, internalId: number, firstname: string | null | undefined, lastname: string | null | undefined, fullname: string | null | undefined, image: string | null | undefined, vip: boolean | null | undefined, outOfOffice: boolean | null | undefined, outOfOfficeStartAt: string | null | undefined, outOfOfficeEndAt: string | null | undefined, active: boolean | null | undefined } | null | undefined } | null | undefined, errors: Array<{ __typename: 'UserError', message: string, messagePlaceholder: Array<string> | null | undefined, field: string | null | undefined, exception: Types.EnumUserErrorException | null | undefined }> | null | undefined } | null | undefined };
+
+export type ChatSessionMessageAddMutationVariables = Exact<{
+  sessionId: string | number;
+  content: string;
+}>;
+
+
+export type ChatSessionMessageAddMutation = { chatSessionMessageAdd: { __typename: 'ChatSessionMessageAddPayload', message: { __typename: 'ChatMessage', id: string, content: string, createdAt: string, createdBy: { __typename: 'User', id: string, internalId: number, firstname: string | null | undefined, lastname: string | null | undefined, fullname: string | null | undefined, image: string | null | undefined, vip: boolean | null | undefined, outOfOffice: boolean | null | undefined, outOfOfficeStartAt: string | null | undefined, outOfOfficeEndAt: string | null | undefined, active: boolean | null | undefined } | null | undefined } | null | undefined, errors: Array<{ __typename: 'UserError', message: string, messagePlaceholder: Array<string> | null | undefined, field: string | null | undefined, exception: Types.EnumUserErrorException | null | undefined }> | null | undefined } | null | undefined };
+
+export type ChatSessionRenameMutationVariables = Exact<{
+  sessionId: string | number;
+  name: string;
+}>;
+
+
+export type ChatSessionRenameMutation = { chatSessionRename: { __typename: 'ChatSessionRenamePayload', session: { __typename: 'ChatSession', id: string, internalId: number, state: Types.EnumChatSessionState, name: string | null | undefined, url: string | null | undefined, remoteIp: string | null | undefined, dnsName: string | null | undefined, createdAt: string, updatedAt: string, geoIp: { __typename: 'ChatSessionGeoIp', countryName: string | null | undefined, countryCode: string | null | undefined, cityName: string | null | undefined } | null | undefined, topic: { __typename: 'ChatTopic', id: string, internalId: number, name: string, active: boolean }, user: { __typename: 'User', id: string, internalId: number, firstname: string | null | undefined, lastname: string | null | undefined, fullname: string | null | undefined, image: string | null | undefined, vip: boolean | null | undefined, outOfOffice: boolean | null | undefined, outOfOfficeStartAt: string | null | undefined, outOfOfficeEndAt: string | null | undefined, active: boolean | null | undefined } | null | undefined } | null | undefined, errors: Array<{ __typename: 'UserError', message: string, messagePlaceholder: Array<string> | null | undefined, field: string | null | undefined, exception: Types.EnumUserErrorException | null | undefined }> | null | undefined } | null | undefined };
+
+export type ChatSessionTransferMutationVariables = Exact<{
+  sessionId: string | number;
+  topicId: string | number;
+}>;
+
+
+export type ChatSessionTransferMutation = { chatSessionTransfer: { __typename: 'ChatSessionTransferPayload', session: { __typename: 'ChatSession', id: string, internalId: number, state: Types.EnumChatSessionState, name: string | null | undefined, url: string | null | undefined, remoteIp: string | null | undefined, dnsName: string | null | undefined, createdAt: string, updatedAt: string, geoIp: { __typename: 'ChatSessionGeoIp', countryName: string | null | undefined, countryCode: string | null | undefined, cityName: string | null | undefined } | null | undefined, topic: { __typename: 'ChatTopic', id: string, internalId: number, name: string, active: boolean }, user: { __typename: 'User', id: string, internalId: number, firstname: string | null | undefined, lastname: string | null | undefined, fullname: string | null | undefined, image: string | null | undefined, vip: boolean | null | undefined, outOfOffice: boolean | null | undefined, outOfOfficeStartAt: string | null | undefined, outOfOfficeEndAt: string | null | undefined, active: boolean | null | undefined } | null | undefined } | null | undefined, errors: Array<{ __typename: 'UserError', message: string, messagePlaceholder: Array<string> | null | undefined, field: string | null | undefined, exception: Types.EnumUserErrorException | null | undefined }> | null | undefined } | null | undefined };
+
+export type ChatSessionTypingMutationVariables = Exact<{
+  sessionId: string | number;
+}>;
+
+
+export type ChatSessionTypingMutation = { chatSessionTyping: { __typename: 'ChatSessionTypingPayload', success: boolean | null | undefined, errors: Array<{ __typename: 'UserError', message: string, messagePlaceholder: Array<string> | null | undefined, field: string | null | undefined, exception: Types.EnumUserErrorException | null | undefined }> | null | undefined } | null | undefined };
+
+export type ChatAgentStateQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ChatAgentStateQuery = { chatAgentState: { __typename: 'ChatAgentState', active: boolean, seatsAvailable: number, seatsTotal: number, topics: Array<{ __typename: 'ChatTopic', id: string, internalId: number, name: string, active: boolean }>, waitingQueues: Array<{ __typename: 'ChatWaitingQueue', topic: { __typename: 'ChatTopic', id: string, internalId: number, name: string, active: boolean }, sessions: Array<{ __typename: 'ChatSession', id: string, internalId: number, state: Types.EnumChatSessionState, name: string | null | undefined, url: string | null | undefined, remoteIp: string | null | undefined, dnsName: string | null | undefined, createdAt: string, updatedAt: string, geoIp: { __typename: 'ChatSessionGeoIp', countryName: string | null | undefined, countryCode: string | null | undefined, cityName: string | null | undefined } | null | undefined, topic: { __typename: 'ChatTopic', id: string, internalId: number, name: string, active: boolean }, user: { __typename: 'User', id: string, internalId: number, firstname: string | null | undefined, lastname: string | null | undefined, fullname: string | null | undefined, image: string | null | undefined, vip: boolean | null | undefined, outOfOffice: boolean | null | undefined, outOfOfficeStartAt: string | null | undefined, outOfOfficeEndAt: string | null | undefined, active: boolean | null | undefined } | null | undefined }> }>, runningSessions: Array<{ __typename: 'ChatSession', id: string, internalId: number, state: Types.EnumChatSessionState, name: string | null | undefined, url: string | null | undefined, remoteIp: string | null | undefined, dnsName: string | null | undefined, createdAt: string, updatedAt: string, geoIp: { __typename: 'ChatSessionGeoIp', countryName: string | null | undefined, countryCode: string | null | undefined, cityName: string | null | undefined } | null | undefined, topic: { __typename: 'ChatTopic', id: string, internalId: number, name: string, active: boolean }, user: { __typename: 'User', id: string, internalId: number, firstname: string | null | undefined, lastname: string | null | undefined, fullname: string | null | undefined, image: string | null | undefined, vip: boolean | null | undefined, outOfOffice: boolean | null | undefined, outOfOfficeStartAt: string | null | undefined, outOfOfficeEndAt: string | null | undefined, active: boolean | null | undefined } | null | undefined }>, availableAgents: Array<{ __typename: 'User', id: string, internalId: number, firstname: string | null | undefined, lastname: string | null | undefined, fullname: string | null | undefined, image: string | null | undefined, vip: boolean | null | undefined, outOfOffice: boolean | null | undefined, outOfOfficeStartAt: string | null | undefined, outOfOfficeEndAt: string | null | undefined, active: boolean | null | undefined }> } };
+
+export type ChatPreferencesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ChatPreferencesQuery = { chatPreferences: { __typename: 'ChatPreferences', maxWindows: number, alternativeName: string | null | undefined, avatarEnabled: boolean, hasTicketCreateAccess: boolean, topics: Array<{ __typename: 'ChatPreferencesTopic', active: boolean, phrases: Array<string>, topic: { __typename: 'ChatTopic', id: string, internalId: number, name: string, active: boolean } }> } };
+
+export type ChatSessionQueryVariables = Exact<{
+  sessionId: string | number;
+}>;
+
+
+export type ChatSessionQuery = { chatSession: { __typename: 'ChatSession', tags: Array<string>, id: string, internalId: number, state: Types.EnumChatSessionState, name: string | null | undefined, url: string | null | undefined, remoteIp: string | null | undefined, dnsName: string | null | undefined, createdAt: string, updatedAt: string, messages: Array<{ __typename: 'ChatMessage', id: string, content: string, createdAt: string, createdBy: { __typename: 'User', id: string, internalId: number, firstname: string | null | undefined, lastname: string | null | undefined, fullname: string | null | undefined, image: string | null | undefined, vip: boolean | null | undefined, outOfOffice: boolean | null | undefined, outOfOfficeStartAt: string | null | undefined, outOfOfficeEndAt: string | null | undefined, active: boolean | null | undefined } | null | undefined }>, geoIp: { __typename: 'ChatSessionGeoIp', countryName: string | null | undefined, countryCode: string | null | undefined, cityName: string | null | undefined } | null | undefined, topic: { __typename: 'ChatTopic', id: string, internalId: number, name: string, active: boolean }, user: { __typename: 'User', id: string, internalId: number, firstname: string | null | undefined, lastname: string | null | undefined, fullname: string | null | undefined, image: string | null | undefined, vip: boolean | null | undefined, outOfOffice: boolean | null | undefined, outOfOfficeStartAt: string | null | undefined, outOfOfficeEndAt: string | null | undefined, active: boolean | null | undefined } | null | undefined } };
+
+export type ChatAgentStateUpdatesSubscriptionVariables = Exact<{ [key: string]: never; }>;
+
+
+export type ChatAgentStateUpdatesSubscription = { chatAgentStateUpdates: { __typename: 'ChatAgentStateUpdatesPayload', agentState: { __typename: 'ChatAgentState', active: boolean, seatsAvailable: number, seatsTotal: number, topics: Array<{ __typename: 'ChatTopic', id: string, internalId: number, name: string, active: boolean }>, waitingQueues: Array<{ __typename: 'ChatWaitingQueue', topic: { __typename: 'ChatTopic', id: string, internalId: number, name: string, active: boolean }, sessions: Array<{ __typename: 'ChatSession', id: string, internalId: number, state: Types.EnumChatSessionState, name: string | null | undefined, url: string | null | undefined, remoteIp: string | null | undefined, dnsName: string | null | undefined, createdAt: string, updatedAt: string, geoIp: { __typename: 'ChatSessionGeoIp', countryName: string | null | undefined, countryCode: string | null | undefined, cityName: string | null | undefined } | null | undefined, topic: { __typename: 'ChatTopic', id: string, internalId: number, name: string, active: boolean }, user: { __typename: 'User', id: string, internalId: number, firstname: string | null | undefined, lastname: string | null | undefined, fullname: string | null | undefined, image: string | null | undefined, vip: boolean | null | undefined, outOfOffice: boolean | null | undefined, outOfOfficeStartAt: string | null | undefined, outOfOfficeEndAt: string | null | undefined, active: boolean | null | undefined } | null | undefined }> }>, runningSessions: Array<{ __typename: 'ChatSession', id: string, internalId: number, state: Types.EnumChatSessionState, name: string | null | undefined, url: string | null | undefined, remoteIp: string | null | undefined, dnsName: string | null | undefined, createdAt: string, updatedAt: string, geoIp: { __typename: 'ChatSessionGeoIp', countryName: string | null | undefined, countryCode: string | null | undefined, cityName: string | null | undefined } | null | undefined, topic: { __typename: 'ChatTopic', id: string, internalId: number, name: string, active: boolean }, user: { __typename: 'User', id: string, internalId: number, firstname: string | null | undefined, lastname: string | null | undefined, fullname: string | null | undefined, image: string | null | undefined, vip: boolean | null | undefined, outOfOffice: boolean | null | undefined, outOfOfficeStartAt: string | null | undefined, outOfOfficeEndAt: string | null | undefined, active: boolean | null | undefined } | null | undefined }>, availableAgents: Array<{ __typename: 'User', id: string, internalId: number, firstname: string | null | undefined, lastname: string | null | undefined, fullname: string | null | undefined, image: string | null | undefined, vip: boolean | null | undefined, outOfOffice: boolean | null | undefined, outOfOfficeStartAt: string | null | undefined, outOfOfficeEndAt: string | null | undefined, active: boolean | null | undefined }> } | null | undefined } };
+
+export type ChatSessionUpdatesSubscriptionVariables = Exact<{
+  sessionId: string | number;
+}>;
+
+
+export type ChatSessionUpdatesSubscription = { chatSessionUpdates: { __typename: 'ChatSessionUpdatesPayload', typing: boolean | null | undefined, notice: string | null | undefined, leftBy: string | null | undefined, closedBy: string | null | undefined, message: { __typename: 'ChatMessage', id: string, content: string, createdAt: string, createdBy: { __typename: 'User', id: string, internalId: number, firstname: string | null | undefined, lastname: string | null | undefined, fullname: string | null | undefined, image: string | null | undefined, vip: boolean | null | undefined, outOfOffice: boolean | null | undefined, outOfOfficeStartAt: string | null | undefined, outOfOfficeEndAt: string | null | undefined, active: boolean | null | undefined } | null | undefined } | null | undefined } };
 
 export type CtiSidebarAttributesFragment = { __typename: 'CtiSidebar', unhandledCount: number, ringingCalls: Array<{ __typename: 'CtiLog', id: string, direction: string, state: string, comment: string | null | undefined, from: string, fromPretty: string, fromComment: string | null | undefined, to: string, toComment: string | null | undefined, done: boolean, createdAt: string, fromMatches: Array<{ __typename: 'CtiLogCallerIdMatch', level: string, comment: string | null | undefined, user: { __typename: 'User', id: string, internalId: number, firstname: string | null | undefined, lastname: string | null | undefined, fullname: string | null | undefined, image: string | null | undefined, vip: boolean | null | undefined, outOfOffice: boolean | null | undefined, outOfOfficeStartAt: string | null | undefined, outOfOfficeEndAt: string | null | undefined, active: boolean | null | undefined } | null | undefined }> }> };
 
@@ -220,7 +314,7 @@ export type KnowledgeBaseAnswerPreInfoFragment = { __typename: 'KnowledgeBaseAns
 
 export type KnowledgeBaseAnswerTaskbarTabAttributesFragment = { __typename: 'KnowledgeBaseAnswerTranslation', id: string, title: string, visibility: Types.EnumKnowledgeBaseVisibility, kbLocale: { __typename: 'KnowledgeBaseLocale', id: string, systemLocale: { __typename: 'Locale', locale: string } } };
 
-export type KnowledgeBaseAnswerTranslationFragment = { __typename: 'KnowledgeBaseAnswerTranslation', id: string, title: string, maybeLocale: string | null | undefined, visibility: Types.EnumKnowledgeBaseVisibility, categoryTreeTranslation: Array<{ __typename: 'KnowledgeBaseCategoryTranslation', id: string, title: string }>, content: { __typename: 'KnowledgeBaseAnswerTranslationContent', bodyExcerpt: string | null | undefined }, answer: { __typename: 'KnowledgeBaseAnswer', id: string, archivedAt: string | null | undefined, publishedAt: string | null | undefined, internalAt: string | null | undefined, tags: Array<string> | null | undefined, category: { __typename: 'KnowledgeBaseCategory', id: string } }, kbLocale: { __typename: 'KnowledgeBaseLocale', systemLocale: { __typename: 'Locale', locale: string, name: string } } };
+export type KnowledgeBaseAnswerTranslationFragment = { __typename: 'KnowledgeBaseAnswerTranslation', id: string, title: string, maybeLocale: string | null | undefined, visibility: Types.EnumKnowledgeBaseVisibility, categoryTreeTranslation: Array<{ __typename: 'KnowledgeBaseCategoryTranslation', id: string, title: string }>, content: { __typename: 'KnowledgeBaseAnswerTranslationContent', id: string, bodyExcerpt: string | null | undefined }, answer: { __typename: 'KnowledgeBaseAnswer', id: string, archivedAt: string | null | undefined, publishedAt: string | null | undefined, internalAt: string | null | undefined, tags: Array<string> | null | undefined, category: { __typename: 'KnowledgeBaseCategory', id: string } }, kbLocale: { __typename: 'KnowledgeBaseLocale', systemLocale: { __typename: 'Locale', locale: string, name: string } } };
 
 export type KnowledgeBaseCategoryBreadcrumbFragment = { __typename: 'KnowledgeBaseCategory', breadcrumb: Array<{ __typename: 'KnowledgeBaseCategory', id: string, categoryIcon: string, iconSet: 'anticon' | 'FontAwesome' | 'material' | 'ionicons' | 'Simple-Line-Icons', visibility: Types.EnumKnowledgeBaseVisibility, translation: { __typename: 'KnowledgeBaseCategoryTranslation', id: string, title: string } | null | undefined }> };
 
@@ -446,7 +540,7 @@ export type LinkAddMutationVariables = Exact<{
 
 
 export type LinkAddMutation = { linkAdd: { __typename: 'LinkAddPayload', link: { __typename: 'Link', type: Types.EnumLinkType, item:
-        | { __typename: 'KnowledgeBaseAnswerTranslation', id: string, title: string, maybeLocale: string | null | undefined, visibility: Types.EnumKnowledgeBaseVisibility, categoryTreeTranslation: Array<{ __typename: 'KnowledgeBaseCategoryTranslation', id: string, title: string }>, content: { __typename: 'KnowledgeBaseAnswerTranslationContent', bodyExcerpt: string | null | undefined }, answer: { __typename: 'KnowledgeBaseAnswer', id: string, archivedAt: string | null | undefined, publishedAt: string | null | undefined, internalAt: string | null | undefined, tags: Array<string> | null | undefined, category: { __typename: 'KnowledgeBaseCategory', id: string } }, kbLocale: { __typename: 'KnowledgeBaseLocale', systemLocale: { __typename: 'Locale', locale: string, name: string } } }
+        | { __typename: 'KnowledgeBaseAnswerTranslation', id: string, title: string, maybeLocale: string | null | undefined, visibility: Types.EnumKnowledgeBaseVisibility, categoryTreeTranslation: Array<{ __typename: 'KnowledgeBaseCategoryTranslation', id: string, title: string }>, content: { __typename: 'KnowledgeBaseAnswerTranslationContent', id: string, bodyExcerpt: string | null | undefined }, answer: { __typename: 'KnowledgeBaseAnswer', id: string, archivedAt: string | null | undefined, publishedAt: string | null | undefined, internalAt: string | null | undefined, tags: Array<string> | null | undefined, category: { __typename: 'KnowledgeBaseCategory', id: string } }, kbLocale: { __typename: 'KnowledgeBaseLocale', systemLocale: { __typename: 'Locale', locale: string, name: string } } }
         | { __typename: 'Ticket', id: string, internalId: number, title: string, stateColorCode: Types.EnumTicketStateColorCode, state: { __typename: 'TicketState', id: string, name: string } }
        } | null | undefined, errors: Array<{ __typename: 'UserError', message: string, field: string | null | undefined }> | null | undefined } | null | undefined };
 
@@ -464,7 +558,7 @@ export type LinkListQueryVariables = Exact<{
 
 
 export type LinkListQuery = { linkList: Array<{ __typename: 'Link', type: Types.EnumLinkType, item:
-      | { __typename: 'KnowledgeBaseAnswerTranslation', id: string, title: string, maybeLocale: string | null | undefined, visibility: Types.EnumKnowledgeBaseVisibility, categoryTreeTranslation: Array<{ __typename: 'KnowledgeBaseCategoryTranslation', id: string, title: string }>, content: { __typename: 'KnowledgeBaseAnswerTranslationContent', bodyExcerpt: string | null | undefined }, answer: { __typename: 'KnowledgeBaseAnswer', id: string, archivedAt: string | null | undefined, publishedAt: string | null | undefined, internalAt: string | null | undefined, tags: Array<string> | null | undefined, category: { __typename: 'KnowledgeBaseCategory', id: string } }, kbLocale: { __typename: 'KnowledgeBaseLocale', systemLocale: { __typename: 'Locale', locale: string, name: string } } }
+      | { __typename: 'KnowledgeBaseAnswerTranslation', id: string, title: string, maybeLocale: string | null | undefined, visibility: Types.EnumKnowledgeBaseVisibility, categoryTreeTranslation: Array<{ __typename: 'KnowledgeBaseCategoryTranslation', id: string, title: string }>, content: { __typename: 'KnowledgeBaseAnswerTranslationContent', id: string, bodyExcerpt: string | null | undefined }, answer: { __typename: 'KnowledgeBaseAnswer', id: string, archivedAt: string | null | undefined, publishedAt: string | null | undefined, internalAt: string | null | undefined, tags: Array<string> | null | undefined, category: { __typename: 'KnowledgeBaseCategory', id: string } }, kbLocale: { __typename: 'KnowledgeBaseLocale', systemLocale: { __typename: 'Locale', locale: string, name: string } } }
       | { __typename: 'Ticket', id: string, internalId: number, title: string, stateColorCode: Types.EnumTicketStateColorCode, state: { __typename: 'TicketState', id: string, name: string } }
      }> | null | undefined };
 
@@ -475,7 +569,7 @@ export type LinkUpdatesSubscriptionVariables = Exact<{
 
 
 export type LinkUpdatesSubscription = { linkUpdates: { __typename: 'LinkUpdatesPayload', links: Array<{ __typename: 'Link', type: Types.EnumLinkType, item:
-        | { __typename: 'KnowledgeBaseAnswerTranslation', id: string, title: string, maybeLocale: string | null | undefined, visibility: Types.EnumKnowledgeBaseVisibility, categoryTreeTranslation: Array<{ __typename: 'KnowledgeBaseCategoryTranslation', id: string, title: string }>, content: { __typename: 'KnowledgeBaseAnswerTranslationContent', bodyExcerpt: string | null | undefined }, answer: { __typename: 'KnowledgeBaseAnswer', id: string, archivedAt: string | null | undefined, publishedAt: string | null | undefined, internalAt: string | null | undefined, tags: Array<string> | null | undefined, category: { __typename: 'KnowledgeBaseCategory', id: string } }, kbLocale: { __typename: 'KnowledgeBaseLocale', systemLocale: { __typename: 'Locale', locale: string, name: string } } }
+        | { __typename: 'KnowledgeBaseAnswerTranslation', id: string, title: string, maybeLocale: string | null | undefined, visibility: Types.EnumKnowledgeBaseVisibility, categoryTreeTranslation: Array<{ __typename: 'KnowledgeBaseCategoryTranslation', id: string, title: string }>, content: { __typename: 'KnowledgeBaseAnswerTranslationContent', id: string, bodyExcerpt: string | null | undefined }, answer: { __typename: 'KnowledgeBaseAnswer', id: string, archivedAt: string | null | undefined, publishedAt: string | null | undefined, internalAt: string | null | undefined, tags: Array<string> | null | undefined, category: { __typename: 'KnowledgeBaseCategory', id: string } }, kbLocale: { __typename: 'KnowledgeBaseLocale', systemLocale: { __typename: 'Locale', locale: string, name: string } } }
         | { __typename: 'Ticket', id: string, internalId: number, title: string, stateColorCode: Types.EnumTicketStateColorCode, state: { __typename: 'TicketState', id: string, name: string } }
        }> | null | undefined } };
 
@@ -1239,7 +1333,7 @@ export type TicketAiRelatedKnowledgeBaseAnswersQueryVariables = Exact<{
 }>;
 
 
-export type TicketAiRelatedKnowledgeBaseAnswersQuery = { ticketAIRelatedKnowledgeBaseAnswers: { __typename: 'TicketAIRelatedKnowledgeBaseAnswersResult', pending: boolean, answers: Array<{ __typename: 'TicketAIRelatedKnowledgeBaseAnswer', score: number, translation: { __typename: 'KnowledgeBaseAnswerTranslation', id: string, title: string, maybeLocale: string | null | undefined, visibility: Types.EnumKnowledgeBaseVisibility, categoryTreeTranslation: Array<{ __typename: 'KnowledgeBaseCategoryTranslation', id: string, title: string }>, content: { __typename: 'KnowledgeBaseAnswerTranslationContent', bodyExcerpt: string | null | undefined }, answer: { __typename: 'KnowledgeBaseAnswer', id: string, archivedAt: string | null | undefined, publishedAt: string | null | undefined, internalAt: string | null | undefined, tags: Array<string> | null | undefined, category: { __typename: 'KnowledgeBaseCategory', id: string } }, kbLocale: { __typename: 'KnowledgeBaseLocale', systemLocale: { __typename: 'Locale', locale: string, name: string } } } }> | null | undefined } };
+export type TicketAiRelatedKnowledgeBaseAnswersQuery = { ticketAIRelatedKnowledgeBaseAnswers: { __typename: 'TicketAIRelatedKnowledgeBaseAnswersResult', pending: boolean, answers: Array<{ __typename: 'TicketAIRelatedKnowledgeBaseAnswer', score: number, translation: { __typename: 'KnowledgeBaseAnswerTranslation', id: string, title: string, maybeLocale: string | null | undefined, visibility: Types.EnumKnowledgeBaseVisibility, categoryTreeTranslation: Array<{ __typename: 'KnowledgeBaseCategoryTranslation', id: string, title: string }>, content: { __typename: 'KnowledgeBaseAnswerTranslationContent', id: string, bodyExcerpt: string | null | undefined }, answer: { __typename: 'KnowledgeBaseAnswer', id: string, archivedAt: string | null | undefined, publishedAt: string | null | undefined, internalAt: string | null | undefined, tags: Array<string> | null | undefined, category: { __typename: 'KnowledgeBaseCategory', id: string } }, kbLocale: { __typename: 'KnowledgeBaseLocale', systemLocale: { __typename: 'Locale', locale: string, name: string } } } }> | null | undefined } };
 
 export type TicketAttachmentsQueryVariables = Exact<{
   ticketId: string | number;
@@ -1402,6 +1496,7 @@ export type SearchQueryVariables = Exact<{
 
 
 export type SearchQuery = { search: { __typename: 'SearchResult', totalCount: number, items: Array<
+      | { __typename: 'ChatSession' }
       | { __typename: 'KnowledgeBaseAnswerTranslation' }
       | { __typename: 'Organization', id: string, internalId: number, active: boolean | null | undefined, name: string | null | undefined, vip: boolean | null | undefined, updatedAt: string, members: { __typename: 'UserConnection', totalCount: number, edges: Array<{ __typename: 'UserEdge', node: { __typename: 'User', id: string, fullname: string | null | undefined } }> } | null | undefined, updatedBy: { __typename: 'User', id: string, fullname: string | null | undefined } | null | undefined, ticketsCount: { __typename: 'TicketCount', open: number, closed: number } | null | undefined }
       | { __typename: 'Ticket', id: string, internalId: number, title: string, number: string, updatedAt: string, stateColorCode: Types.EnumTicketStateColorCode, state: { __typename: 'TicketState', id: string, name: string }, priority: { __typename: 'TicketPriority', name: string, defaultCreate: boolean, uiColor: string | null | undefined }, customer: { __typename: 'User', id: string, internalId: number, fullname: string | null | undefined }, updatedBy: { __typename: 'User', id: string, fullname: string | null | undefined } | null | undefined }
@@ -1453,6 +1548,7 @@ export type AutocompleteSearchGenericQueryVariables = Exact<{
 
 
 export type AutocompleteSearchGenericQuery = { autocompleteSearchGeneric: Array<{ __typename: 'AutocompleteSearchGenericEntry', value: number, label: string, labelPlaceholder: Array<string> | null | undefined, heading: string | null | undefined, headingPlaceholder: Array<string> | null | undefined, disabled: boolean | null | undefined, object:
+      | { __typename: 'ChatSession' }
       | { __typename: 'KnowledgeBaseAnswerTranslation' }
       | { __typename: 'Organization', id: string, internalId: number, name: string | null | undefined, active: boolean | null | undefined, vip: boolean | null | undefined, allMembers: { __typename: 'UserConnection', edges: Array<{ __typename: 'UserEdge', node: { __typename: 'User', id: string, internalId: number, login: string | null | undefined, image: string | null | undefined, firstname: string | null | undefined, lastname: string | null | undefined, fullname: string | null | undefined, email: string | null | undefined, phone: string | null | undefined, outOfOffice: boolean | null | undefined, outOfOfficeStartAt: string | null | undefined, outOfOfficeEndAt: string | null | undefined, active: boolean | null | undefined, vip: boolean | null | undefined, hasSecondaryOrganizations: boolean | null | undefined } }> } | null | undefined }
       | { __typename: 'Ticket' }
@@ -1468,7 +1564,7 @@ export type AutocompleteSearchUserQuery = { autocompleteSearchUser: Array<{ __ty
 
 export type KnowledgeBaseAnswerSuggestionContentTransformMutationVariables = Exact<{
   translationId: string | number;
-  formId: string;
+  formId?: string | null | undefined;
 }>;
 
 
@@ -1555,7 +1651,7 @@ export type FormUpdaterQueryVariables = Exact<{
 }>;
 
 
-export type FormUpdaterQuery = { formUpdater: { __typename: 'FormUpdaterResult', fields: any, flags: any } };
+export type FormUpdaterQuery = { formUpdater: { __typename: 'FormUpdaterResult', fields: any, flags: any, optionSignatures: any } };
 
 export type ObjectManagerFrontendAttributesQueryVariables = Exact<{
   object: Types.EnumObjectManagerObjects;
@@ -1576,12 +1672,10 @@ export type OnlineNotificationDeleteAllMutationVariables = Exact<{ [key: string]
 
 export type OnlineNotificationDeleteAllMutation = { onlineNotificationDeleteAll: { __typename: 'OnlineNotificationDeleteAllPayload', success: boolean, errors: Array<{ __typename: 'UserError', message: string, messagePlaceholder: Array<string> | null | undefined, field: string | null | undefined, exception: Types.EnumUserErrorException | null | undefined }> | null | undefined } | null | undefined };
 
-export type OnlineNotificationMarkAllAsSeenMutationVariables = Exact<{
-  onlineNotificationIds: Array<string | number> | string | number;
-}>;
+export type OnlineNotificationMarkAllAsSeenMutationVariables = Exact<{ [key: string]: never; }>;
 
 
-export type OnlineNotificationMarkAllAsSeenMutation = { onlineNotificationMarkAllAsSeen: { __typename: 'OnlineNotificationMarkAllAsSeenPayload', onlineNotifications: Array<{ __typename: 'OnlineNotification', id: string, seen: boolean }> | null | undefined, errors: Array<{ __typename: 'UserError', message: string, messagePlaceholder: Array<string> | null | undefined, field: string | null | undefined, exception: Types.EnumUserErrorException | null | undefined }> | null | undefined } | null | undefined };
+export type OnlineNotificationMarkAllAsSeenMutation = { onlineNotificationMarkAllAsSeen: { __typename: 'OnlineNotificationMarkAllAsSeenPayload', success: boolean, errors: Array<{ __typename: 'UserError', message: string, messagePlaceholder: Array<string> | null | undefined, field: string | null | undefined, exception: Types.EnumUserErrorException | null | undefined }> | null | undefined } | null | undefined };
 
 export type OnlineNotificationSeenMutationVariables = Exact<{
   objectId: string | number;
@@ -1705,7 +1799,7 @@ export type AutocompleteSearchTagQuery = { autocompleteSearchTag: Array<{ __type
 
 export type SecurityStateFragment = { __typename: 'TicketArticleSecurityState', type: Types.EnumSecurityStateType | null | undefined, signingSuccess: boolean | null | undefined, signingMessage: string | null | undefined, encryptionSuccess: boolean | null | undefined, encryptionMessage: string | null | undefined };
 
-export type TicketArticleTranslationFragment = { __typename: 'TicketArticle', id: string, translation: { __typename: 'ContentTranslation', content: string | null | undefined, backend: string | null | undefined, translated: boolean | null | undefined } | null | undefined };
+export type TicketArticleTranslationFragment = { __typename: 'TicketArticle', id: string, translation: { __typename: 'TicketArticleTranslation', content: string | null | undefined, subject: string | null | undefined, backend: string | null | undefined, translated: boolean | null | undefined } | null | undefined };
 
 export type TicketArticleTranslationAvailabilityFragment = { __typename: 'TicketArticle', id: string, translationAvailable: boolean | null | undefined };
 
@@ -1754,7 +1848,7 @@ export type TicketArticleTranslateMutationVariables = Exact<{
 }>;
 
 
-export type TicketArticleTranslateMutation = { ticketArticleTranslate: { __typename: 'TicketArticleTranslatePayload', pendingBackend: string | null | undefined, article: { __typename: 'TicketArticle', id: string, translation: { __typename: 'ContentTranslation', content: string | null | undefined, backend: string | null | undefined, translated: boolean | null | undefined } | null | undefined }, translation: { __typename: 'ContentTranslation', translated: boolean | null | undefined } | null | undefined, analytics: { __typename: 'AIAnalyticsMetadata', run: { __typename: 'AIAnalyticsRun', id: string } | null | undefined, usage: { __typename: 'AIAnalyticsUsage', userHasProvidedFeedback: boolean | null | undefined } | null | undefined } | null | undefined } | null | undefined };
+export type TicketArticleTranslateMutation = { ticketArticleTranslate: { __typename: 'TicketArticleTranslatePayload', pendingBackend: string | null | undefined, article: { __typename: 'TicketArticle', id: string, translation: { __typename: 'TicketArticleTranslation', content: string | null | undefined, subject: string | null | undefined, backend: string | null | undefined, translated: boolean | null | undefined } | null | undefined }, translation: { __typename: 'TicketArticleTranslation', translated: boolean | null | undefined } | null | undefined, analytics: { __typename: 'AIAnalyticsMetadata', run: { __typename: 'AIAnalyticsRun', id: string } | null | undefined, usage: { __typename: 'AIAnalyticsUsage', userHasProvidedFeedback: boolean | null | undefined } | null | undefined } | null | undefined } | null | undefined };
 
 export type TicketArticleTranslateManyMutationVariables = Exact<{
   ticketId: string | number;
@@ -1768,7 +1862,7 @@ export type TicketArticleTranslateManyMutationVariables = Exact<{
 }>;
 
 
-export type TicketArticleTranslateManyMutation = { ticketArticleTranslateMany: { __typename: 'TicketArticleTranslateManyPayload', pendingArticleIds: Array<string>, pendingBackend: string | null | undefined, results: Array<{ __typename: 'TicketArticleTranslationResult', translated?: boolean | null | undefined, skipReason?: Types.EnumTicketArticleTranslationSkipReason | null | undefined, article: { __typename: 'TicketArticle', id: string, translationAvailable: boolean | null | undefined } & { __typename: 'TicketArticle', id?: string, translation?: { __typename: 'ContentTranslation', content: string | null | undefined, backend: string | null | undefined, translated: boolean | null | undefined } | null | undefined }, analytics?: { __typename: 'AIAnalyticsMetadata', run: { __typename: 'AIAnalyticsRun', id: string } | null | undefined, usage: { __typename: 'AIAnalyticsUsage', userHasProvidedFeedback: boolean | null | undefined } | null | undefined } | null | undefined }> } | null | undefined };
+export type TicketArticleTranslateManyMutation = { ticketArticleTranslateMany: { __typename: 'TicketArticleTranslateManyPayload', pendingArticleIds: Array<string>, pendingBackend: string | null | undefined, results: Array<{ __typename: 'TicketArticleTranslationResult', translated?: boolean | null | undefined, skipReason?: Types.EnumTicketArticleTranslationSkipReason | null | undefined, article: { __typename: 'TicketArticle', id: string, translationAvailable: boolean | null | undefined } & { __typename: 'TicketArticle', id?: string, translation?: { __typename: 'TicketArticleTranslation', content: string | null | undefined, subject: string | null | undefined, backend: string | null | undefined, translated: boolean | null | undefined } | null | undefined }, analytics?: { __typename: 'AIAnalyticsMetadata', run: { __typename: 'AIAnalyticsRun', id: string } | null | undefined, usage: { __typename: 'AIAnalyticsUsage', userHasProvidedFeedback: boolean | null | undefined } | null | undefined } | null | undefined }> } | null | undefined };
 
 export type TicketArticleQuotedHeaderQueryVariables = Exact<{
   articleId: string | number;
@@ -1788,7 +1882,7 @@ export type TicketArticleTranslationUpdatesSubscriptionVariables = Exact<{
 }>;
 
 
-export type TicketArticleTranslationUpdatesSubscription = { ticketArticleTranslationUpdates: { __typename: 'TicketArticleTranslationUpdatesPayload', article: { __typename: 'TicketArticle', id: string, translation: { __typename: 'ContentTranslation', content: string | null | undefined, backend: string | null | undefined, translated: boolean | null | undefined } | null | undefined } | null | undefined, translation: { __typename: 'ContentTranslation', translated: boolean | null | undefined } | null | undefined, error: { __typename: 'AsyncExecutionError', message: string, exception: string } | null | undefined, analytics: { __typename: 'AIAnalyticsMetadata', run: { __typename: 'AIAnalyticsRun', id: string } | null | undefined, usage: { __typename: 'AIAnalyticsUsage', userHasProvidedFeedback: boolean | null | undefined } | null | undefined } | null | undefined } };
+export type TicketArticleTranslationUpdatesSubscription = { ticketArticleTranslationUpdates: { __typename: 'TicketArticleTranslationUpdatesPayload', article: { __typename: 'TicketArticle', id: string, translation: { __typename: 'TicketArticleTranslation', content: string | null | undefined, subject: string | null | undefined, backend: string | null | undefined, translated: boolean | null | undefined } | null | undefined } | null | undefined, translation: { __typename: 'TicketArticleTranslation', translated: boolean | null | undefined } | null | undefined, error: { __typename: 'AsyncExecutionError', message: string, exception: string } | null | undefined, analytics: { __typename: 'AIAnalyticsMetadata', run: { __typename: 'AIAnalyticsRun', id: string } | null | undefined, usage: { __typename: 'AIAnalyticsUsage', userHasProvidedFeedback: boolean | null | undefined } | null | undefined } | null | undefined } };
 
 export type TicketSharedDraftStartAttributesFragment = { __typename: 'TicketSharedDraftStart', id: string, name: string | null | undefined, updatedAt: string, updatedBy: { __typename: 'User', id: string, internalId: number, firstname: string | null | undefined, lastname: string | null | undefined, fullname: string | null | undefined, email: string | null | undefined, phone: string | null | undefined, image: string | null | undefined, outOfOffice: boolean | null | undefined, outOfOfficeStartAt: string | null | undefined, outOfOfficeEndAt: string | null | undefined, active: boolean | null | undefined } | null | undefined };
 
@@ -1966,7 +2060,7 @@ export type TicketArticleUpdatesSubscriptionVariables = Exact<{
 }>;
 
 
-export type TicketArticleUpdatesSubscription = { ticketArticleUpdates: { __typename: 'TicketArticleUpdatesPayload', removeArticleId: string | null | undefined, addArticle: { __typename: 'TicketArticle', id: string, createdAt: string, sender: { __typename: 'TicketArticleSender', name: Types.EnumTicketArticleSenderName | null | undefined } | null | undefined } | null | undefined, updateArticle: { __typename: 'TicketArticle', id: string, internalId: number, messageId: string | null | undefined, subject: string | null | undefined, messageIdMd5: string | null | undefined, inReplyTo: string | null | undefined, contentType: string, preferences: any, bodyWithUrls: string, bodyRenderingError: boolean, internal: boolean, createdAt: string, detectedLanguage: string | null | undefined, timeUnit: number | null | undefined, from: { __typename: 'AddressesField', raw: string, parsed: Array<{ __typename: 'EmailAddressParsed', name: string | null | undefined, emailAddress: string | null | undefined, isSystemAddress: boolean }> | null | undefined } | null | undefined, to: { __typename: 'AddressesField', raw: string, parsed: Array<{ __typename: 'EmailAddressParsed', name: string | null | undefined, emailAddress: string | null | undefined, isSystemAddress: boolean }> | null | undefined } | null | undefined, cc: { __typename: 'AddressesField', raw: string, parsed: Array<{ __typename: 'EmailAddressParsed', name: string | null | undefined, emailAddress: string | null | undefined, isSystemAddress: boolean }> | null | undefined } | null | undefined, replyTo: { __typename: 'AddressesField', raw: string, parsed: Array<{ __typename: 'EmailAddressParsed', name: string | null | undefined, emailAddress: string | null | undefined, isSystemAddress: boolean }> | null | undefined } | null | undefined, attachmentsWithoutInline: Array<{ __typename: 'StoredFile', id: string, internalId: number, name: string, size: number | null | undefined, type: string | null | undefined, preferences: any }>, author: { __typename: 'User', id: string, fullname: string | null | undefined, firstname: string | null | undefined, lastname: string | null | undefined, email: string | null | undefined, active: boolean | null | undefined, image: string | null | undefined, vip: boolean | null | undefined, outOfOffice: boolean | null | undefined, outOfOfficeStartAt: string | null | undefined, outOfOfficeEndAt: string | null | undefined, authorizations: Array<{ __typename: 'Authorization', provider: string, uid: string, username: string | null | undefined }> | null | undefined }, type: { __typename: 'TicketArticleType', name: string | null | undefined, communication: boolean | null | undefined } | null | undefined, sender: { __typename: 'TicketArticleSender', name: Types.EnumTicketArticleSenderName | null | undefined } | null | undefined, securityState: { __typename: 'TicketArticleSecurityState', encryptionMessage: string | null | undefined, encryptionSuccess: boolean | null | undefined, signingMessage: string | null | undefined, signingSuccess: boolean | null | undefined, type: Types.EnumSecurityStateType | null | undefined } | null | undefined, mediaErrorState: { __typename: 'TicketArticleMediaErrorState', error: boolean | null | undefined } | null | undefined, accountedTimeType: { __typename: 'TicketTimeAccountingType', name: string } | null | undefined, highlightedTexts: Array<{ __typename: 'TicketArticleHighlightedText', startIndex: number, endIndex: number, colorClass: string }> | null | undefined } | null | undefined } };
+export type TicketArticleUpdatesSubscription = { ticketArticleUpdates: { __typename: 'TicketArticleUpdatesPayload', removeArticleId: string | null | undefined, refetchArticles: boolean | null | undefined, addArticle: { __typename: 'TicketArticle', id: string, createdAt: string, sender: { __typename: 'TicketArticleSender', name: Types.EnumTicketArticleSenderName | null | undefined } | null | undefined } | null | undefined, updateArticle: { __typename: 'TicketArticle', id: string, internalId: number, messageId: string | null | undefined, subject: string | null | undefined, messageIdMd5: string | null | undefined, inReplyTo: string | null | undefined, contentType: string, preferences: any, bodyWithUrls: string, bodyRenderingError: boolean, internal: boolean, createdAt: string, detectedLanguage: string | null | undefined, timeUnit: number | null | undefined, from: { __typename: 'AddressesField', raw: string, parsed: Array<{ __typename: 'EmailAddressParsed', name: string | null | undefined, emailAddress: string | null | undefined, isSystemAddress: boolean }> | null | undefined } | null | undefined, to: { __typename: 'AddressesField', raw: string, parsed: Array<{ __typename: 'EmailAddressParsed', name: string | null | undefined, emailAddress: string | null | undefined, isSystemAddress: boolean }> | null | undefined } | null | undefined, cc: { __typename: 'AddressesField', raw: string, parsed: Array<{ __typename: 'EmailAddressParsed', name: string | null | undefined, emailAddress: string | null | undefined, isSystemAddress: boolean }> | null | undefined } | null | undefined, replyTo: { __typename: 'AddressesField', raw: string, parsed: Array<{ __typename: 'EmailAddressParsed', name: string | null | undefined, emailAddress: string | null | undefined, isSystemAddress: boolean }> | null | undefined } | null | undefined, attachmentsWithoutInline: Array<{ __typename: 'StoredFile', id: string, internalId: number, name: string, size: number | null | undefined, type: string | null | undefined, preferences: any }>, author: { __typename: 'User', id: string, fullname: string | null | undefined, firstname: string | null | undefined, lastname: string | null | undefined, email: string | null | undefined, active: boolean | null | undefined, image: string | null | undefined, vip: boolean | null | undefined, outOfOffice: boolean | null | undefined, outOfOfficeStartAt: string | null | undefined, outOfOfficeEndAt: string | null | undefined, authorizations: Array<{ __typename: 'Authorization', provider: string, uid: string, username: string | null | undefined }> | null | undefined }, type: { __typename: 'TicketArticleType', name: string | null | undefined, communication: boolean | null | undefined } | null | undefined, sender: { __typename: 'TicketArticleSender', name: Types.EnumTicketArticleSenderName | null | undefined } | null | undefined, securityState: { __typename: 'TicketArticleSecurityState', encryptionMessage: string | null | undefined, encryptionSuccess: boolean | null | undefined, signingMessage: string | null | undefined, signingSuccess: boolean | null | undefined, type: Types.EnumSecurityStateType | null | undefined } | null | undefined, mediaErrorState: { __typename: 'TicketArticleMediaErrorState', error: boolean | null | undefined } | null | undefined, accountedTimeType: { __typename: 'TicketTimeAccountingType', name: string } | null | undefined, highlightedTexts: Array<{ __typename: 'TicketArticleHighlightedText', startIndex: number, endIndex: number, colorClass: string }> | null | undefined } | null | undefined } };
 
 export type TicketLiveUserUpdatesSubscriptionVariables = Exact<{
   key: string;

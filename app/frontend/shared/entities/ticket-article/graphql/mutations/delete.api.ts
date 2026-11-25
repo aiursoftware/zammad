@@ -3,8 +3,6 @@ import * as Types from '#shared/graphql/types.ts';
 import gql from 'graphql-tag';
 import { ErrorsFragmentDoc } from '../../../../graphql/fragments/errors.api';
 import * as VueApolloComposable from '@vue/apollo-composable';
-import * as VueCompositionApi from 'vue';
-export type ReactiveFunction<TParam> = () => TParam;
 
 export const TicketArticleDeleteDocument = gql`
     mutation ticketArticleDelete($articleId: ID!) {
@@ -16,7 +14,7 @@ export const TicketArticleDeleteDocument = gql`
   }
 }
     ${ErrorsFragmentDoc}`;
-export function useTicketArticleDeleteMutation(options: VueApolloComposable.UseMutationOptions<Types.TicketArticleDeleteMutation, Types.TicketArticleDeleteMutationVariables> | ReactiveFunction<VueApolloComposable.UseMutationOptions<Types.TicketArticleDeleteMutation, Types.TicketArticleDeleteMutationVariables>> = {}) {
+export function useTicketArticleDeleteMutation(options: VueApolloComposable.useMutation.Options<Types.TicketArticleDeleteMutation, Types.TicketArticleDeleteMutationVariables> = {}) {
   return VueApolloComposable.useMutation<Types.TicketArticleDeleteMutation, Types.TicketArticleDeleteMutationVariables>(TicketArticleDeleteDocument, options);
 }
-export type TicketArticleDeleteMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<Types.TicketArticleDeleteMutation, Types.TicketArticleDeleteMutationVariables>;
+export type TicketArticleDeleteMutationCompositionFunctionResult = VueApolloComposable.useMutation.Result<Types.TicketArticleDeleteMutation, Types.TicketArticleDeleteMutationVariables>;

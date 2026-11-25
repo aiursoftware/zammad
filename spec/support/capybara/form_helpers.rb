@@ -125,9 +125,7 @@ class ZammadFormFieldCapybaraElementDelegator < SimpleDelegator
 
     raise 'Field does not support searching for options' if !type_treeselect?
 
-    element.click
-
-    wait_until_opened
+    open_dropdown
 
     # calculate before closing, since we cannot access it, if dialog is closed
     is_multi_select = multi_select?
@@ -221,16 +219,14 @@ class ZammadFormFieldCapybaraElementDelegator < SimpleDelegator
 
     raise 'Element is not a field of type select' if !type_select?
 
-    element.click
-
-    wait_for_test_flag('common-select.opened')
+    open_dropdown
 
     # calculate before closing, since we cannot access it, if dialog is closed
     is_multi_select = multi_select?
 
     begin
       select_option_by_label(label, **find_options)
-    rescue Capybara::ElementNotFound, Selenium::WebDriver::Error::StaleElementReferenceError
+    rescue Capybara::ElementNotFound, Capybara::Playwright::Node::StaleReferenceError
       # An asynchronous form re-render (e.g. the processing of a form updater response of a
       #  previous field change) may close the dropdown again right after it was opened.
       # In this case open the dropdown once again and retry.
@@ -271,9 +267,7 @@ class ZammadFormFieldCapybaraElementDelegator < SimpleDelegator
 
     raise 'Element is not a field of type select' if !type_select?
 
-    element.click
-
-    wait_for_test_flag('common-select.opened')
+    open_dropdown
 
     raise 'Field does not support multiple selection' if !multi_select?
 
@@ -352,31 +346,18 @@ class ZammadFormFieldCapybaraElementDelegator < SimpleDelegator
   def select_date(date)
     raise 'Field does not support selecting dates' if !type_date? && !type_datetime?
 
-    element.click
-
-    wait_until_opened
-
     date = Date.parse(date) if !date.is_a?(Date) && !date.is_a?(DateTime) && !date.is_a?(Time)
 
-    element.find('[aria-label*="Open the years overlay"]').click
-    element.find('.dp__overlay_col', text: date.year).click
-    element.find('[aria-label*="Open the months overlay"]').click
-    element.find('.dp__overlay_col', text: date.strftime('%b')).click
+    open_date_picker
+    pick_date(date)
 
-    id = date.strftime('dp-%Y-%m-%d')
-    element.find_by_id(id).click # rubocop:disable Rails/DynamicFindBy
-
-    if desktop_view?
-      wait_until_closed_desktop_view
-      element.click
-      wait_until_opened_desktop_view
+    if block_given?
+      yield
+    elsif type_datetime?
+      finish_time_picker
     end
 
-    yield if block_given?
-
-    # close_date_picker(element)
-
-    # wait_until_closed
+    wait_until_closed
 
     maybe_wait_for_form_updater
 
@@ -395,20 +376,17 @@ class ZammadFormFieldCapybaraElementDelegator < SimpleDelegator
     datetime = DateTime.parse(datetime) if !datetime.is_a?(DateTime) && !datetime.is_a?(Time)
 
     select_date(datetime) do
-      element.find('[aria-label="Open the time picker"]').click
+      if desktop_view?
+        pick_time_desktop_view(datetime)
+      else
+        pick_time_mobile_view(datetime)
+      end
 
-      element.find('[aria-label*="Open the hours overlay"]').click
-      element.find('.dp__overlay_col', text: format('%02d', datetime.hour)).click
-
-      element.find('[aria-label*="Open the minutes overlay"]').click
-      element.find('.dp__overlay_col', text: format('%02d', datetime.min)).click
-
-      meridian_indicator = element.find('[aria-label="Toggle AM/PM mode"]')
-      meridian_indicator.click if meridian_indicator.text != datetime.strftime('%p')
+      finish_time_picker
     end
   end
 
-  # Types date into a date field.
+  # Types date into a date field (desktop view only, the mobile view offers no typing).
   #
   # Usage:
   #   find_datepicker('Date Picker').type_date(Date.today)
@@ -420,21 +398,10 @@ class ZammadFormFieldCapybaraElementDelegator < SimpleDelegator
     date = Date.parse(date) if !date.is_a?(Date)
 
     # TODO: Support locales other than `en`, depending on the language of the current user.
-    input_element.fill_in with: date.strftime('%m/%d/%Y')
-    input_element.send_keys :return
-
-    # wait_for_test_flag("field-date-time-#{field_id}.opened")
-
-    # close_date_picker(element)
-
-    # wait_for_test_flag("field-date-time-#{field_id}.closed")
-
-    maybe_wait_for_form_updater
-
-    self # support chaining
+    type_date_segments(date.strftime('%m%d%Y'))
   end
 
-  # Types date and time into a date field.
+  # Types date and time into a date field (desktop view only, the mobile view offers no typing).
   #
   # Usage:
   #   find_datepicker('Date Time').type_datetime(DateTime.now)
@@ -446,18 +413,7 @@ class ZammadFormFieldCapybaraElementDelegator < SimpleDelegator
     datetime = DateTime.parse(datetime) if !datetime.is_a?(DateTime) && !datetime.is_a?(Time)
 
     # TODO: Support locales other than `en`, depending on the language of the current user.
-    input_element.fill_in with: datetime.strftime('%m/%d/%Y %-l:%M %P')
-    input_element.send_keys :return
-
-    # wait_for_test_flag("field-date-time-#{field_id}.opened")
-
-    # close_date_picker(element)
-
-    # wait_for_test_flag("field-date-time-#{field_id}.closed")
-
-    maybe_wait_for_form_updater
-
-    self # support chaining
+    type_date_segments(datetime.strftime('%m%d%Y%I%M%p').downcase)
   end
 
   # Selects a choice in a radio form field.
@@ -587,11 +543,24 @@ class ZammadFormFieldCapybaraElementDelegator < SimpleDelegator
     input_element['data-multiple'] == 'true'
   end
 
+  # An autofocused dropdown field opens by itself once its surroundings settled, and a click would close it again.
+  def open_dropdown
+    if desktop_view?
+      element.assert_no_selector('[data-dropdown-opening]')
+
+      element.click if input_element['aria-expanded'] != 'true'
+    else
+      element.click
+    end
+
+    wait_until_opened
+  end
+
   def wait_until_opened
     return wait_until_opened_desktop_view if desktop_view?
     return wait_for_test_flag('common-select.opened') if type_select?
     return wait_for_test_flag("field-tree-select-#{field_id}.opened") if type_treeselect?
-    return wait_for_test_flag("field-date-time-#{field_id}.opened") if type_date? || type_datetime?
+    return wait_for_test_flag('field-date.opened') if type_date? || type_datetime?
     return wait_for_test_flag("field-tags-#{field_id}.opened") if type_tags?
     return wait_for_test_flag("field-auto-complete-#{field_id}.opened") if autocomplete?
 
@@ -601,7 +570,7 @@ class ZammadFormFieldCapybaraElementDelegator < SimpleDelegator
   def wait_until_opened_desktop_view
     return wait_for_test_flag('common-select.opened') if type_select? || type_tags? || autocomplete?
     return wait_for_test_flag('field-tree-select-input-dropdown.opened') if type_treeselect?
-    return wait_for_test_flag('field-date-time.opened') if type_date? || type_datetime?
+    return wait_for_test_flag('field-date.opened') if type_date? || type_datetime?
 
     raise "Couldn't detect if element was opened"
   end
@@ -610,7 +579,7 @@ class ZammadFormFieldCapybaraElementDelegator < SimpleDelegator
     return wait_until_closed_desktop_view if desktop_view?
     return wait_for_test_flag('common-select.closed') if type_select?
     return wait_for_test_flag("field-tree-select-#{field_id}.closed") if type_treeselect?
-    return wait_for_test_flag("field-date-time-#{field_id}.closed") if type_date? || type_datetime?
+    return wait_for_test_flag('field-date.closed') if type_date? || type_datetime?
     return wait_for_test_flag("field-tags-#{field_id}.closed") if type_tags?
     return wait_for_test_flag("field-auto-complete-#{field_id}.closed") if autocomplete?
 
@@ -620,7 +589,7 @@ class ZammadFormFieldCapybaraElementDelegator < SimpleDelegator
   def wait_until_closed_desktop_view
     return wait_for_test_flag('common-select.closed') if type_select? || type_tags? || autocomplete?
     return wait_for_test_flag('field-tree-select-input-dropdown.closed') if type_treeselect?
-    return wait_for_test_flag('field-date-time.closed') if type_date? || type_datetime?
+    return wait_for_test_flag('field-date.closed') if type_date? || type_datetime?
 
     raise "Couldn't detect if element was closed"
   end
@@ -669,9 +638,7 @@ class ZammadFormFieldCapybaraElementDelegator < SimpleDelegator
   end
 
   def search_for_tags_option(query, gql_filename: '', gql_number: 1)
-    element.click
-
-    wait_until_opened
+    open_dropdown
 
     within menu_element do
       # Filter input in desktop view is part of the element, not the dropdown/dialog.
@@ -698,11 +665,7 @@ class ZammadFormFieldCapybaraElementDelegator < SimpleDelegator
   end
 
   def search_for_autocomplete_option(query, label: query, gql_filename: '', gql_number: 1, already_open: false, use_action: false, **find_options)
-    if !already_open
-      element.click
-
-      wait_until_opened
-    end
+    open_dropdown if !already_open
 
     # calculate before closing, since we cannot access it, if dialog is closed
     is_multi_select = multi_select?
@@ -736,9 +699,7 @@ class ZammadFormFieldCapybaraElementDelegator < SimpleDelegator
   end
 
   def search_for_tags_options(queries, gql_filename: '', gql_number: 1)
-    element.click
-
-    wait_until_opened
+    open_dropdown
 
     raise 'Field does not support multiple selection' if !multi_select?
 
@@ -769,9 +730,7 @@ class ZammadFormFieldCapybaraElementDelegator < SimpleDelegator
   end
 
   def search_for_autocomplete_options(queries, labels: queries, gql_filename: '', gql_number: 1, use_action: false, **find_options)
-    element.click
-
-    wait_until_opened
+    open_dropdown
 
     within menu_element do
       queries.each_with_index do |query, index|
@@ -811,9 +770,7 @@ class ZammadFormFieldCapybaraElementDelegator < SimpleDelegator
   end
 
   def select_treeselect_option(label, **find_options)
-    element.click
-
-    wait_until_opened
+    open_dropdown
 
     # calculate before closing, since we cannot access it, if dialog is closed
     is_multi_select = multi_select?
@@ -832,9 +789,7 @@ class ZammadFormFieldCapybaraElementDelegator < SimpleDelegator
   end
 
   def select_tags_option(label, **find_options)
-    element.click
-
-    wait_until_opened
+    open_dropdown
 
     select_option_by_label(label, **find_options)
 
@@ -846,9 +801,7 @@ class ZammadFormFieldCapybaraElementDelegator < SimpleDelegator
   end
 
   def select_autocomplete_option(label, **find_options)
-    element.click
-
-    wait_until_opened
+    open_dropdown
 
     # calculate before closing, since we cannot access it, if dialog is closed
     is_multi_select = multi_select?
@@ -863,9 +816,7 @@ class ZammadFormFieldCapybaraElementDelegator < SimpleDelegator
   end
 
   def select_treeselect_options(labels, **find_options)
-    element.click
-
-    wait_until_opened
+    open_dropdown
 
     raise 'Field does not support multiple selection' if !multi_select?
 
@@ -887,9 +838,7 @@ class ZammadFormFieldCapybaraElementDelegator < SimpleDelegator
   end
 
   def select_tags_options(labels, **find_options)
-    element.click
-
-    wait_until_opened
+    open_dropdown
 
     raise 'Field does not support multiple selection' if !multi_select?
 
@@ -905,9 +854,7 @@ class ZammadFormFieldCapybaraElementDelegator < SimpleDelegator
   end
 
   def select_autocomplete_options(labels, **find_options)
-    element.click
-
-    wait_until_opened
+    open_dropdown
 
     raise 'Field does not support multiple selection' if !multi_select?
 
@@ -1005,7 +952,7 @@ class ZammadFormFieldCapybaraElementDelegator < SimpleDelegator
     input_element.click
 
     wait.until { input_element.evaluate_script(EDITOR_CARET_TO_START_JS) }
-  rescue Selenium::WebDriver::Error::TimeoutError
+  rescue BrowserTestHelper::Waiter::TimeoutError
     raise 'The caret did not stay at the start of the editor'
   end
 
@@ -1017,15 +964,105 @@ class ZammadFormFieldCapybaraElementDelegator < SimpleDelegator
     wait_for_form_updater(gql_number)
   end
 
-  # Click on the upper left corner of the date picker field to close it.
-  def close_date_picker(element)
-    element_width = element.native.size.width.to_i
-    element_height = element.native.size.height.to_i
-    element.click(x: -element_width / 2, y: -element_height / 2)
+  def clear_date
+    element.find('[role="button"][aria-label="Clear the value"]').click
+
+    maybe_wait_for_form_updater
+
+    self # support chaining
   end
 
-  def clear_date
-    element.find('[role="button"][aria-label="Clear selection"]').click
+  # The desktop view opens the panel with the icon button next to the input, the mobile view with
+  #   the input itself.
+  def open_date_picker
+    if desktop_view?
+      element.find('[role="button"][aria-label^="Choose date"], [role="button"][aria-label^="Change date"]').click
+    else
+      input_element.click
+    end
+
+    wait_until_opened
+  end
+
+  # The desktop panel is rendered at the end of the document, outside of the field.
+  def date_picker_panel
+    return page.document.find('[data-test-id="field-date-panel"]') if desktop_view?
+
+    element.find('[data-test-id="field-date-panel"]')
+  end
+
+  # Walks from the day view up to the decade view and back down to the day, so any date is reached
+  #   with a known number of clicks.
+  def pick_date(date)
+    panel = date_picker_panel
+
+    panel.find('button[aria-label="Open the months overlay"]').click
+    panel.find('button[aria-label="Open the years overlay"]').click
+
+    year_grid = panel.find('[role="grid"][aria-label="The year picker"]')
+    decades   = (date.year - year_grid.first('button').text.to_i) / 10
+
+    decades.abs.times do
+      panel.find("button[aria-label=\"#{decades.positive? ? 'Next' : 'Previous'} decade\"]").click
+    end
+
+    panel.find('[role="grid"][aria-label="The year picker"]').find('button', exact_text: date.year.to_s).click
+    panel.find("button[aria-label=\"#{date.strftime('%B %Y')}\"]").click
+    panel.find("button[aria-label=\"#{date.strftime('%A, %B')} #{date.day.ordinalize}, #{date.year}\"]").click
+  end
+
+  def twelve_hour_clock?(panel)
+    panel.has_css?('button[aria-label="Toggle AM/PM mode"]', wait: 0)
+  end
+
+  def pick_meridiem(panel, datetime)
+    return if !twelve_hour_clock?(panel)
+
+    toggle = panel.find('button[aria-label="Toggle AM/PM mode"]')
+    toggle.click if toggle.text.casecmp?(datetime.strftime('%p')) == false
+  end
+
+  def pick_time_desktop_view(datetime)
+    panel = date_picker_panel
+    hour  = twelve_hour_clock?(panel) ? datetime.strftime('%I') : datetime.strftime('%H')
+
+    # The number inputs apply their value once they are left.
+    panel.find('input[aria-label="Hours"]').fill_in(with: hour).send_keys(:tab)
+    panel.find('input[aria-label="Minutes"]').fill_in(with: datetime.strftime('%M')).send_keys(:tab)
+
+    pick_meridiem(panel, datetime)
+  end
+
+  # The minutes grid offers five-minute steps, the stepper covers the rest.
+  def pick_time_mobile_view(datetime)
+    panel = date_picker_panel
+    hour  = twelve_hour_clock?(panel) ? datetime.strftime('%I') : datetime.strftime('%H')
+
+    panel.find('button[aria-label="Open the hours overlay"]').click
+    panel.find('[role="option"]', exact_text: hour).click
+
+    nearest_minute = datetime.min / 5 * 5
+
+    panel.find('button[aria-label="Open the minutes overlay"]').click
+    panel.find('[role="option"]', exact_text: format('%02d', nearest_minute)).click
+
+    (datetime.min - nearest_minute).times do
+      panel.find('button[aria-label="Increment minutes value"]').click
+    end
+
+    pick_meridiem(panel, datetime)
+  end
+
+  def finish_time_picker
+    date_picker_panel.find('button', exact_text: 'Done').click
+  end
+
+  # The segmented input takes the digits group by group from the first one, a trailing tab leaves
+  #   the field and settles the entry. Keys only: a click behind the groups would open the panel.
+  def type_date_segments(text)
+    raise 'Typing into date fields is not supported on the mobile view, use select_date or select_datetime instead' if !desktop_view?
+
+    input_element.send_keys(:home, text, :tab)
 
     maybe_wait_for_form_updater
 

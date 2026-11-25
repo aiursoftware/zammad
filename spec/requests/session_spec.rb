@@ -5,11 +5,12 @@ require 'rails_helper'
 RSpec.describe 'Sessions endpoints', type: :request do
 
   describe 'GET /api/v1/sessions/switch/:id' do
-    let(:admin) { create(:admin) }
-    let(:agent) { create(:agent) }
+    let(:admin)          { create(:admin) }
+    let(:agent)          { create(:agent) }
+    let(:switching_user) { admin }
 
     before do
-      authenticated_as(admin)
+      authenticated_as(switching_user, via: :browser)
       get "/api/v1/sessions/switch/#{agent.id}", as: :json
     end
 
@@ -20,6 +21,41 @@ RSpec.describe 'Sessions endpoints', type: :request do
         auditable_name: "#{admin.fullname} → #{agent.fullname}",
         source_ip:      '127.0.0.1'
       )
+    end
+
+    context 'when the user has only the admin.user permission' do
+      let(:switching_user) { create(:user, roles: [create(:role, permission_names: ['admin.user'])]) }
+
+      it 'switches to the other user', :aggregate_failures do
+        expect(response).to have_http_status(:ok)
+        expect(request.session[:user_id]).to eq(agent.id)
+        expect(request.session[:switched_from_user_id]).to eq(switching_user.id)
+      end
+
+      it 'switches back to the original user', :aggregate_failures do
+        get '/api/v1/sessions/switch_back', as: :json
+
+        expect(response).to have_http_status(:ok)
+        expect(request.session[:user_id]).to eq(switching_user.id)
+        expect(request.session[:switched_from_user_id]).to be_nil
+      end
+    end
+
+    context 'when the user has only the admin.session permission' do
+      let(:switching_user) { create(:user, roles: [create(:role, permission_names: ['admin.session'])]) }
+
+      it 'refuses the switch and leaves the session unchanged', :aggregate_failures do
+        expect(response).to have_http_status(:forbidden)
+
+        get '/api/v1/users/me', as: :json
+
+        expect(json_response['id']).to eq(switching_user.id)
+        expect(request.session[:switched_from_user_id]).to be_nil
+      end
+
+      it 'creates no audit log entry' do
+        expect(AuditLog.find_by(auditable_type: 'User', auditable_id: agent.id, action_type: 'switch_to')).to be_nil
+      end
     end
   end
 
@@ -267,6 +303,36 @@ RSpec.describe 'Sessions endpoints', type: :request do
     end
   end
 
+  describe 'session ping' do
+    let(:password)    { SecureRandom.urlsafe_base64(20) }
+    let(:agent)       { create(:agent, password: password) }
+    let(:fingerprint) { SecureRandom.urlsafe_base64(40) }
+
+    def sign_in
+      post '/api/v1/signin', params: { fingerprint:, username: agent.login, password: }, as: :json
+    end
+
+    it 'stores no ping in an anonymous session' do
+      get '/api/v1/signshow', as: :json
+
+      expect(session[:ping]).to be_nil
+    end
+
+    it 'stores a ping when the user signs in' do
+      sign_in
+
+      expect(session[:ping]).to be_present
+    end
+
+    it 'refreshes the ping of a signed-in session' do
+      sign_in
+      travel 1.minute
+      get '/api/v1/signshow', params: { fingerprint: }, as: :json
+
+      expect(session[:ping]).to eq(Time.zone.now.iso8601)
+    end
+  end
+
   describe 'GET /auth/sso (single sign-on)' do
 
     before do
@@ -366,6 +432,11 @@ RSpec.describe 'Sessions endpoints', type: :request do
         before { Setting.set('maintenance_mode', true) }
 
         include_examples 'refusing the login with 403 Forbidden'
+
+        it 'does not update the last login' do
+          expect { get '/auth/sso', as: :json, headers: { 'X-Forwarded-User' => login } }
+            .not_to change { user.reload.last_login }
+        end
       end
 
       context 'in Import Mode' do
@@ -415,6 +486,78 @@ RSpec.describe 'Sessions endpoints', type: :request do
 
         it 'sets the :user_id session parameter on the client' do
           expect { get '/auth/sso', as: :json, headers: headers }
+            .to change { request&.session&.fetch(:user_id) }.to(user.id)
+        end
+
+        it 'updates the last login' do
+          freeze_time
+
+          expect { get '/auth/sso', as: :json, headers: headers }
+            .to change { user.reload.last_login }.from(nil).to(Time.zone.now)
+        end
+
+        context 'with failed logins before' do
+          let(:user) { create(:agent, login_failed: 2) }
+
+          it 'resets the failed logins' do
+            expect { get '/auth/sso', as: :json, headers: headers }
+              .to change { user.reload.login_failed }.from(2).to(0)
+          end
+        end
+      end
+    end
+
+    context 'with multiple user logins' do
+      let(:user)       { create(:agent) }
+      let(:other_user) { create(:agent) }
+
+      shared_examples 'refusing the login with 401 Unauthorized' do
+        it 'returns 401 Unauthorized' do
+          get '/auth/sso', as: :json, headers: headers, env: env
+
+          expect(response).to have_http_status(:unauthorized)
+          expect(json_response).to include('error' => 'The SSO environment variables and headers contain different user logins.')
+        end
+
+        it 'does not set the :user_id session parameter' do
+          expect { get '/auth/sso', as: :json, headers: headers, env: env }
+            .not_to change { request&.session&.fetch(:user_id, nil) }
+        end
+      end
+
+      context 'when "X-Forwarded-User" header and "HTTP_REMOTE_USER" request env var differ' do
+        let(:headers) { { 'X-Forwarded-User' => user.login } }
+        let(:env)     { { 'HTTP_REMOTE_USER' => other_user.login } }
+
+        include_examples 'refusing the login with 401 Unauthorized'
+      end
+
+      context 'when "X-Forwarded-User" header and "REMOTE_USER" request env var differ' do
+        let(:headers) { { 'X-Forwarded-User' => user.login } }
+        let(:env)     { { 'REMOTE_USER' => other_user.login } }
+
+        include_examples 'refusing the login with 401 Unauthorized'
+      end
+
+      context 'when "REMOTE_USER" and "HTTP_REMOTE_USER" request env vars differ' do
+        let(:headers) { {} }
+        let(:env)     { { 'REMOTE_USER' => user.login, 'HTTP_REMOTE_USER' => other_user.login } }
+
+        include_examples 'refusing the login with 401 Unauthorized'
+      end
+
+      context 'when all sources contain the same login' do
+        let(:headers) { { 'X-Forwarded-User' => user.login } }
+        let(:env)     { { 'REMOTE_USER' => user.login, 'HTTP_REMOTE_USER' => user.login.upcase } }
+
+        it 'returns a new user-session response' do
+          get '/auth/sso', as: :json, headers: headers, env: env
+
+          expect(response).to redirect_to('/#')
+        end
+
+        it 'sets the :user_id session parameter' do
+          expect { get '/auth/sso', as: :json, headers: headers, env: env }
             .to change { request&.session&.fetch(:user_id) }.to(user.id)
         end
       end
@@ -605,6 +748,52 @@ RSpec.describe 'Sessions endpoints', type: :request do
       it 'falls back to the SessionHelper.cleanup_expired cap' do
         expect { get '/auth/github/callback' }
           .to change { request && request.env['rack.session.options'][:expire_after] }.to(SessionHelper::MAX_SESSION_LIFETIME)
+      end
+    end
+
+    # The cookie expiry is refreshed on every request, so an actively used session keeps its cookie
+    # alive together with the ping-based server-side timeout instead of expiring a fixed time after
+    # login. See https://github.com/zammad/zammad/issues/6495
+    context 'with a follow-up request after the login' do
+      before do
+        Setting.set('session_timeout', { 'default' => '0', 'ticket.agent' => 1.week.seconds.to_s })
+        get '/auth/github/callback'
+      end
+
+      it 'refreshes the browser cookie lifetime' do
+        get '/api/v1/signshow', params: { fingerprint: 'fingerprint-6495' }, as: :json
+
+        expect(request.env['rack.session.options'][:expire_after]).to eq(1.week)
+      end
+
+      it 'sends the refreshed cookie to the browser' do
+        get '/api/v1/signshow', params: { fingerprint: 'fingerprint-6495' }, as: :json
+
+        expect(response.headers['Set-Cookie']).to include('expires=')
+      end
+
+      it 'looks up the session timeout only once' do
+        allow(SessionTimeoutJob::Session).to receive(:timeout_for).and_call_original
+
+        get '/api/v1/signshow', params: { fingerprint: 'fingerprint-6495' }, as: :json
+        get '/api/v1/signshow', params: { fingerprint: 'fingerprint-6495' }, as: :json
+
+        expect(SessionTimeoutJob::Session).not_to have_received(:timeout_for)
+      end
+    end
+
+    context 'with a follow-up request after a password login' do
+      let(:user) { create(:agent, password: 'dummy') }
+
+      before do
+        Setting.set('session_timeout', { 'default' => '0', 'ticket.agent' => 1.week.seconds.to_s })
+        post '/api/v1/signin', params: { username: user.login, password: 'dummy' }, as: :json
+      end
+
+      it 'leaves the browser cookie session-only' do
+        get '/api/v1/signshow', params: { fingerprint: 'fingerprint-6495' }, as: :json
+
+        expect(request.env['rack.session.options'][:expire_after]).to be_nil
       end
     end
   end

@@ -11,13 +11,13 @@
   timeout: 15 minutes
   variables:
     DOCKER_HOST: unix:///var/run/docker.sock
-    DEVCONTAINERS_CLI_VERSION: '0.89.0'
+    DEVCONTAINERS_CLI_VERSION: '0.91.0'
   before_script:
     - apk add --no-cache docker-cli docker-cli-buildx docker-compose
   after_script: []
   parallel:
     matrix:
-      - VARIANT: [default, with-caddy, with-ldap, with-mailserver, with-ollama, with-selenium]
+      - VARIANT: [default, with-caddy, with-ldap, with-mailserver, with-ollama, with-playwright]
   script:
     - npx --yes @devcontainers/cli@$DEVCONTAINERS_CLI_VERSION build
         --workspace-folder .

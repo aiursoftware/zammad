@@ -275,6 +275,41 @@ RSpec.describe Channel::EmailBuild, type: :model do
 
           include_context 'with attachment checks'
 
+          context 'with inline attachment' do
+            let(:content_id) { 'inline-image@example.com' }
+            let(:mail_body)  { %(<img src="cid:#{content_id}">) }
+            let(:filename)   { 'inline image äöü.jpg' }
+            let(:mime_type)  { 'image/jpeg' }
+            let(:store_attributes) do
+              super().merge(
+                preferences: {
+                  'Content-Type'        => mime_type,
+                  'Content-ID'          => content_id,
+                  'Content-Disposition' => 'inline',
+                }
+              )
+            end
+
+            let(:inline_part) do
+              Mail.new(mail.to_s).all_parts.find { |part| part.content_id == "<#{content_id}>" }
+            end
+
+            it 'includes the filename in the inline part headers (#6429)', :aggregate_failures do
+              encoded_filename = Mail::Encodings.decode_encode filename, :encode
+
+              expect(inline_part.content_type_parameters).to include('name' => encoded_filename)
+              expect(inline_part.content_disposition).to eq(%(inline; filename="#{encoded_filename}"))
+              expect(inline_part.mime_type).to eq(mime_type)
+            end
+
+            it 'keeps the filename when the mail is parsed again' do
+              expect(file_attachment).to include(
+                'filename'    => filename,
+                'preferences' => include('Content-ID' => content_id, 'Mime-Type' => mime_type)
+              )
+            end
+          end
+
           context 'when referenced inline attachment content is missing' do
             let(:content_id) { 'missing-inline-image@example.com' }
             let(:mail_body)  { %(<img src="cid:#{content_id}">) }
@@ -480,6 +515,21 @@ RSpec.describe Channel::EmailBuild, type: :model do
       it_behaves_like 'adding styles to the element'
     end
 
+    context 'when html element is an empty p' do
+      let(:html) do
+        <<~HTML.chomp
+          <p>some text</p><p></p><p dir="auto"></p><p>123</p>
+        HTML
+      end
+      let(:expected_html) do
+        <<~HTML.chomp
+          <p style="margin: 0;">some text</p><p style="margin: 0;"><br></p><p dir="auto"><br></p><p style="margin: 0;">123</p>
+        HTML
+      end
+
+      it_behaves_like 'adding styles to the element'
+    end
+
     context 'when html element is a hr' do
       let(:html) do
         <<~HTML.chomp
@@ -554,6 +604,10 @@ RSpec.describe Channel::EmailBuild, type: :model do
 
       it 'adds the original element' do
         expect(generated_html).to match html
+      end
+
+      it 'gives paragraphs no vertical margin' do
+        expect(generated_html).to match(%r{^\s*p \{[^\}]*margin: 0;})
       end
     end
 

@@ -16,10 +16,12 @@ const innerInvalidAndErrorClasses = () => {
 const textInputClasses = (classes: Classes = {}) =>
   extendClasses(classes, {
     wrapper: 'flex flex-col items-start justify-start',
+    // `formkit-disabled:pointer-events-auto` undoes the global wrapper rule, so
+    //   the content of a readonly field stays scrollable and selectable (#6494).
     input:
-      'w-[inherit] grow bg-transparent px-2.5 py-2 placeholder:text-stone-200 read-only:text-stone-200 dark:placeholder:text-neutral-500 dark:read-only:text-neutral-500',
+      'w-[inherit] grow bg-transparent px-2.5 py-2 placeholder:text-stone-200 read-only:text-stone-200 formkit-disabled:pointer-events-auto dark:placeholder:text-neutral-500 dark:read-only:text-neutral-500',
     label: 'mb-1 block text-sm text-normal',
-    inner: `flex h-10 w-full items-center bg-blue-200 text-contrast formkit-alternative-background:bg-neutral-50 focus-within:outline focus-within:outline-1 focus-within:-outline-offset-1 focus-within:outline-blue-800 hover:outline hover:outline-1 hover:-outline-offset-1 hover:outline-blue-600 hover:focus-within:outline-blue-800 dark:bg-gray-700 dark:formkit-alternative-background:bg-gray-500 dark:hover:outline-blue-900 dark:hover:focus-within:outline-blue-800 ${innerInvalidAndErrorClasses()}`,
+    inner: `flex h-10 w-full items-center bg-blue-200 text-contrast formkit-alternative-background:bg-neutral-50 focus-within:outline focus-within:outline-1 focus-within:-outline-offset-1 focus-within:outline-blue-800 hover:outline hover:outline-1 hover:-outline-offset-1 hover:outline-blue-600 hover:focus-within:outline-blue-800 formkit-disabled:hover:outline-hidden formkit-disabled:focus-within:outline-hidden dark:bg-gray-700 dark:formkit-alternative-background:bg-gray-500 dark:hover:outline-blue-900 dark:hover:focus-within:outline-blue-800 ${innerInvalidAndErrorClasses()}`,
   })
 
 // For select family of fields, we are styling the input element, since it has its own outline handling due to the
@@ -62,13 +64,21 @@ export const getCoreDesktopClasses: FormThemeExtension = (classes: FormThemeClas
     search: textInputClasses(classes.search),
     date: textInputClasses(classes.date),
     datetime: textInputClasses(classes.datetime),
+    daterange: extendClasses(classes.daterange, {
+      wrapper: 'flex flex-col items-start justify-start',
+      label: 'mb-1 block text-sm text-normal',
+      inner: 'w-full',
+    }),
     checkbox: {
       outer: 'leading-none',
       wrapper:
         'inline-flex items-center cursor-pointer select-none [&:has(:focus-visible)]:outline [&:has(:focus-visible)]:outline-1 [&:has(:focus-visible)]:outline-offset-1 [&:has(:focus-visible)]:rounded-xs [&:has(:focus-visible)]:outline-blue-800',
       label: 'mb-0! text-sm text-normal formkit-required:after:invisible',
-      inner: 'w-5 h-5 flex justify-center items-center ltr:mr-1 rtl:ml-1 formkit-label-hidden:m-0',
-      input: 'peer appearance-none focus:outline-hidden focus:ring-0 focus:ring-offset-0',
+      inner:
+        'relative isolate w-5 h-5 flex justify-center items-center ltr:mr-1 rtl:ml-1 formkit-label-hidden:m-0',
+      // The input covers the styled box, so the checkbox itself takes the click.
+      input:
+        'peer absolute inset-0 z-10 h-full w-full cursor-pointer appearance-none focus:outline-hidden focus:ring-0 focus:ring-offset-0',
       decorator:
         'w-3 h-3 relative border rounded-xs bg-transparent peer-hover:border-black dark:peer-hover:border-white formkit-is-checked:peer-hover:border-black formkit-is-checked:peer-hover:text-contrast dark:formkit-is-checked:peer-hover:border-white',
       decoratorIcon:
@@ -105,7 +115,7 @@ export const getCoreDesktopClasses: FormThemeExtension = (classes: FormThemeClas
     editor: extendClasses(classes.editor, {
       wrapper: 'max-w-full',
       input:
-        'min-h-[76px] text-sm text-(--editor-text-color) outline-hidden dark:text-(--editor-text-color-dark)',
+        'min-h-[76px] text-sm text-(--editor-text-color) outline-hidden formkit-disabled:pointer-events-auto dark:text-(--editor-text-color-dark)',
       inner:
         'group rounded-t-none bg-blue-200 dark:bg-gray-700 formkit-alternative-background:bg-neutral-50 dark:formkit-alternative-background:bg-gray-500',
     }),

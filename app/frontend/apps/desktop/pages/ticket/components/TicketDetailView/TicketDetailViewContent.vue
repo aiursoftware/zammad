@@ -52,7 +52,6 @@ import { useTicketArticleTranslation } from '#shared/entities/ticket-article/com
 import UserError from '#shared/errors/UserError.ts'
 import { EnumFormUpdaterId, EnumTaskbarApp, EnumUserErrorException } from '#shared/graphql/types.ts'
 import { convertToGraphQLId } from '#shared/graphql/utils.ts'
-import { QueryHandler } from '#shared/server/apollo/handler/index.ts'
 import { GraphQLErrorTypes, type GraphQLHandlerError } from '#shared/types/error.ts'
 
 import { useFlyout } from '#desktop/components/CommonFlyout/useFlyout.ts'
@@ -70,6 +69,7 @@ import TicketDetailBottomBar from '#desktop/pages/ticket/components/TicketDetail
 import { items as highlightMenuItems } from '#desktop/pages/ticket/components/TicketDetailView/TicketDetailTopBar/composables/useHighlightMenuState.ts'
 import { useTicketScreenBehavior } from '#desktop/pages/ticket/components/TicketDetailView/TicketScreenBehavior/useTicketScreenBehavior.ts'
 
+import { useAnsweredArticleTranslationNotice } from '../../composables/useAnsweredArticleTranslationNotice.ts'
 import { ARTICLES_INFORMATION_KEY } from '../../composables/useArticleContext.ts'
 import { useProvideTicketSidebar } from '../../composables/useProvideTicketSidebar.ts'
 import { useTicketArticleReply } from '../../composables/useTicketArticleReply.ts'
@@ -107,18 +107,23 @@ const { articleCount, addUnreadArticle, unreadArticleIds, clearUnreadArticles } 
   cleanupDependency: isReachingBottom,
 })
 
-const onAddArticleCallback = ({ articlesQuery, updates }: AddArticleCallbackArgs) => {
+const onAddArticleCallback = ({ refetchLoadedArticles, updates }: AddArticleCallbackArgs) => {
   // When we are at the end user is aware of the new article
   if (!isReachingBottom.value) addUnreadArticle(updates?.addArticle?.id as string)
 
-  return (articlesQuery as QueryHandler).refetch()
+  refetchLoadedArticles()
 }
 
-const { articleResult, articlesQuery, isLoadingArticles, loadedArticleSelections } =
-  useArticleDataHandler(ticketId, {
-    pageSize: 20,
-    onAddArticleCallback,
-  })
+const {
+  articleResult,
+  articlesQuery,
+  isLoadingArticles,
+  loadedArticleSelections,
+  loadPreviousArticles,
+} = useArticleDataHandler(ticketId, {
+  pageSize: 20,
+  onAddArticleCallback,
+})
 
 // The translations of this tab's articles live as long as the tab does.
 const articleTranslation = useTicketArticleTranslation(ticketId, {
@@ -128,6 +133,7 @@ const articleTranslation = useTicketArticleTranslation(ticketId, {
 provide(ARTICLES_INFORMATION_KEY, {
   articles: computed(() => articleResult.value),
   articlesQuery,
+  loadPreviousArticles,
 })
 
 const {
@@ -246,6 +252,12 @@ const groupId = computed(() =>
 
 const relatedKnowledge = useTicketRelatedKnowledge(ticket, ticketId)
 
+const { notice: answeredArticleTranslationNotice } = useAnsweredArticleTranslationNotice(
+  values,
+  articleResult,
+  articleTranslation,
+)
+
 const {
   ticketSchema,
   articleSchema,
@@ -262,6 +274,7 @@ const {
   additionalAddArticleNotes,
 } = useTicketEditForm(ticket, form, {
   knowledgeBaseRelatedAnswers: relatedKnowledge.editorRelatedAnswers,
+  articleBodyNotice: () => answeredArticleTranslationNotice.value,
 })
 
 const {
@@ -391,7 +404,7 @@ const ticketEditSchema = [
         isLayout: true,
         component: 'FormGroup',
         props: {
-          class: '@sm:*:col-span-1',
+          halfSizeFields: true,
           showDirtyMark: true,
         },
         children: [ticketSchema],
@@ -689,7 +702,9 @@ const onEditFormSettled = () => {
 const handleShowArticleForm = (
   articleType: string,
   performReply: AppSpecificTicketArticleType['performReply'],
-) => openReplyForm({ articleType, ...performReply?.(ticket.value!) })
+) =>
+  // Not opened from an article: `null`, as an absent value would keep the one of an earlier reply.
+  openReplyForm({ articleType, answeredArticleId: null, ...performReply?.(ticket.value!) })
 </script>
 
 <template>
@@ -799,7 +814,7 @@ const handleShowArticleForm = (
           :initial-entity-object="ticket"
           :form-updater-id="EnumFormUpdaterId.FormUpdaterUpdaterTicketEdit"
           :form-updater-additional-params="formUpdaterAdditionalParams"
-          use-object-attributes
+          use-entity-attributes
           :schema-component-library="{
             Teleport: markRaw(Teleport) as unknown as Component,
           }"

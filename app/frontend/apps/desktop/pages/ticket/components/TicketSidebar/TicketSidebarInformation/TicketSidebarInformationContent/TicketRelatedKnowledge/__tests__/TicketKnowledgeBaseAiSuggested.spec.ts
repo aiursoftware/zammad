@@ -88,6 +88,7 @@ const relatedAnswer = (id: number, title: string, score = 90): RelatedAnswer => 
     ],
     content: {
       __typename: 'KnowledgeBaseAnswerTranslationContent',
+      id: convertToGraphQLId('KnowledgeBase::Answer::Translation::Content', id),
       bodyExcerpt: null,
     },
     answer: {
@@ -126,7 +127,7 @@ describe('TicketKnowledgeBaseAiSuggested', () => {
       answers: [relatedAnswer(1, 'Reset your password'), relatedAnswer(2, 'Update billing')],
     })
 
-    expect(wrapper.getByText('Suggested knowledge')).toBeInTheDocument()
+    expect(wrapper.getByText('Suggested')).toBeInTheDocument()
     expect(await wrapper.findByText('Reset your password')).toBeInTheDocument()
     expect(wrapper.getByText('Update billing')).toBeInTheDocument()
 

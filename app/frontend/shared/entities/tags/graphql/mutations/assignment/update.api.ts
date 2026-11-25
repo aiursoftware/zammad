@@ -3,8 +3,6 @@ import * as Types from '#shared/graphql/types.ts';
 import gql from 'graphql-tag';
 import { ErrorsFragmentDoc } from '../../../../../graphql/fragments/errors.api';
 import * as VueApolloComposable from '@vue/apollo-composable';
-import * as VueCompositionApi from 'vue';
-export type ReactiveFunction<TParam> = () => TParam;
 
 export const TagAssignmentUpdateDocument = gql`
     mutation tagAssignmentUpdate($objectId: ID!, $tags: [String!]!) {
@@ -16,7 +14,7 @@ export const TagAssignmentUpdateDocument = gql`
   }
 }
     ${ErrorsFragmentDoc}`;
-export function useTagAssignmentUpdateMutation(options: VueApolloComposable.UseMutationOptions<Types.TagAssignmentUpdateMutation, Types.TagAssignmentUpdateMutationVariables> | ReactiveFunction<VueApolloComposable.UseMutationOptions<Types.TagAssignmentUpdateMutation, Types.TagAssignmentUpdateMutationVariables>> = {}) {
+export function useTagAssignmentUpdateMutation(options: VueApolloComposable.useMutation.Options<Types.TagAssignmentUpdateMutation, Types.TagAssignmentUpdateMutationVariables> = {}) {
   return VueApolloComposable.useMutation<Types.TagAssignmentUpdateMutation, Types.TagAssignmentUpdateMutationVariables>(TagAssignmentUpdateDocument, options);
 }
-export type TagAssignmentUpdateMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<Types.TagAssignmentUpdateMutation, Types.TagAssignmentUpdateMutationVariables>;
+export type TagAssignmentUpdateMutationCompositionFunctionResult = VueApolloComposable.useMutation.Result<Types.TagAssignmentUpdateMutation, Types.TagAssignmentUpdateMutationVariables>;

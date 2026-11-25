@@ -3,8 +3,6 @@ import * as Types from '#shared/graphql/types.ts';
 import gql from 'graphql-tag';
 import { ErrorsFragmentDoc } from '../../../../../graphql/fragments/errors.api';
 import * as VueApolloComposable from '@vue/apollo-composable';
-import * as VueCompositionApi from 'vue';
-export type ReactiveFunction<TParam> = () => TParam;
 
 export const UserCurrentAvatarDeleteDocument = gql`
     mutation userCurrentAvatarDelete($id: ID!) {
@@ -16,7 +14,7 @@ export const UserCurrentAvatarDeleteDocument = gql`
   }
 }
     ${ErrorsFragmentDoc}`;
-export function useUserCurrentAvatarDeleteMutation(options: VueApolloComposable.UseMutationOptions<Types.UserCurrentAvatarDeleteMutation, Types.UserCurrentAvatarDeleteMutationVariables> | ReactiveFunction<VueApolloComposable.UseMutationOptions<Types.UserCurrentAvatarDeleteMutation, Types.UserCurrentAvatarDeleteMutationVariables>> = {}) {
+export function useUserCurrentAvatarDeleteMutation(options: VueApolloComposable.useMutation.Options<Types.UserCurrentAvatarDeleteMutation, Types.UserCurrentAvatarDeleteMutationVariables> = {}) {
   return VueApolloComposable.useMutation<Types.UserCurrentAvatarDeleteMutation, Types.UserCurrentAvatarDeleteMutationVariables>(UserCurrentAvatarDeleteDocument, options);
 }
-export type UserCurrentAvatarDeleteMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<Types.UserCurrentAvatarDeleteMutation, Types.UserCurrentAvatarDeleteMutationVariables>;
+export type UserCurrentAvatarDeleteMutationCompositionFunctionResult = VueApolloComposable.useMutation.Result<Types.UserCurrentAvatarDeleteMutation, Types.UserCurrentAvatarDeleteMutationVariables>;

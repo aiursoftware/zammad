@@ -1,6 +1,8 @@
 # Copyright (C) 2012-2026 Zammad Foundation, https://zammad-foundation.org/
 
 class OmniAuth::Strategies::OidcDatabase < OmniAuth::Strategies::OpenIDConnect
+  include OmniAuth::Strategies::DatabaseSettings
+
   option :name, 'openid_connect'
 
   def self.setup
@@ -18,9 +20,10 @@ class OmniAuth::Strategies::OidcDatabase < OmniAuth::Strategies::OpenIDConnect
     auth_openid_connect_credentials['scope'] = auth_openid_connect_credentials['scope'].split.map(&:to_sym) if auth_openid_connect_credentials['scope'].is_a?(String)
 
     auth_openid_connect_credentials.compact_blank.merge(
-      discovery:      true,
-      response_type:  :code,
-      pkce:           ActiveModel::Type::Boolean.new.cast(auth_openid_connect_credentials['pkce']),
+      discovery:          true,
+      response_type:      :code,
+      client_auth_method: :none,
+      pkce:               ActiveModel::Type::Boolean.new.cast(auth_openid_connect_credentials['pkce']),
       client_options:,
     )
   end
@@ -32,12 +35,6 @@ class OmniAuth::Strategies::OidcDatabase < OmniAuth::Strategies::OpenIDConnect
     env['rack.session.options'][:expire_after] = nil
 
     session.destroy
-  end
-
-  def initialize(app, *args, &)
-    args[0] = self.class.setup
-
-    super
   end
 
   def decode_logout_token(logout_token)

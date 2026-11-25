@@ -52,17 +52,15 @@ class HttpLog < ApplicationModel
       end
   end
 
-  BEARER_REGEX = %r{
-    Authorization:\s*Bearer\s+
-    (?:\[FILTERED\]|[A-Za-z0-9\-._~+/]+=*(?:\[TRUNCATED\])?)
-    (?:\.(?:[A-Za-z0-9\-._~+/]+=*(?:\[TRUNCATED\])?)?)*
-  }ix
+  # Up to the next whitespace: a static API key of a self-hosted server is no RFC 6750 b64token and may hold any character.
+  BEARER_REGEX = %r{Authorization:\s*Bearer\s+\S+}i
 
-  BASIC_REGEX       = %r{Authorization:\s*Basic\s+[A-Za-z0-9+/]+=*}i
-  TOKEN_REGEX       = %r{(access[_-]?token|api[_-]?key|secret)(["']?\s*[:=]\s*["']?)[A-Za-z0-9\-_~+/=:.]+}ix
-  COOKIE_REGEX      = %r{Cookie:\s*((?:[^=;]+=[^;]+;?\s*)+)}i
-  QUERY_PARAM_REGEX = %r{([?&](?:access[_-]?token|api[_-]?key|secret)=)[^&]+}i
-  BASE64_REGEX      = %r{(data:.*?;base64,)?[A-Za-z0-9+/\r\n]*={0,3}}
+  BASIC_REGEX        = %r{Authorization:\s*Basic\s+[A-Za-z0-9+/]+=*}i
+  TOKEN_REGEX        = %r{(access[_-]?token|api[_-]?key|secret)(["']?\s*[:=]\s*["']?)[A-Za-z0-9\-_~+/=:.]+}ix
+  TOKEN_HEADER_REGEX = %r{^([\w-]+-token):[^\r\n]*}i
+  COOKIE_REGEX       = %r{Cookie:\s*((?:[^=;]+=[^;]+;?\s*)+)}i
+  QUERY_PARAM_REGEX  = %r{([?&](?:access[_-]?token|api[_-]?key|secret)=)[^&]+}i
+  BASE64_REGEX       = %r{(data:.*?;base64,)?[A-Za-z0-9+/\r\n]*={0,3}}
 
   # DeepL authenticates with a scheme of its own, which none of the regexes above describes.
   DEEPL_AUTH_KEY_REGEX = %r{Authorization:\s*DeepL-Auth-Key\s+\S+}i
@@ -89,25 +87,26 @@ optional you can put the max oldest chat entries as argument
   # Provide a mapping of facilities to required permissions as a function to be easily extendable in custom devs.
   def self.facilities_permission_lookup
     {
-      'AI::Provider'        => 'admin.ai_feedback_logs',
-      'check_mk'            => 'admin.integration',
-      'clearbit'            => 'admin.integration',
-      'cti'                 => 'admin.integration',
-      'EWS'                 => 'admin.integration',
-      'GitHub'              => 'admin.integration',
-      'GitLab'              => 'admin.integration',
-      'idoit'               => 'admin.integration',
-      'ldap'                => 'admin.integration',
-      'MicrosoftGraph'      => 'admin.channel_microsoft_graph',
-      'PGP'                 => 'admin.integration',
-      'placetel'            => 'admin.integration',
-      'S/MIME'              => 'admin.integration',
-      'SAML'                => 'admin.security',
-      'sipagte.io'          => 'admin.integration', # typo in facility name, keep for backward compatibility
-      'sipgate.io'          => 'admin.integration',
-      'content_translation' => 'admin.integration',
-      'webhook'             => 'admin.webhook',
-      'WhatsApp::Business'  => 'admin.channel_whatsapp',
+      'AI::Provider'       => 'admin.ai_feedback_logs',
+      'check_mk'           => 'admin.integration',
+      'clearbit'           => 'admin.integration',
+      'cti'                => 'admin.integration',
+      'DeepL'              => 'admin.integration',
+      'EWS'                => 'admin.integration',
+      'GitHub'             => 'admin.integration',
+      'GitLab'             => 'admin.integration',
+      'idoit'              => 'admin.integration',
+      'ldap'               => 'admin.integration',
+      'LibreTranslate'     => 'admin.integration',
+      'MicrosoftGraph'     => 'admin.channel_microsoft_graph',
+      'PGP'                => 'admin.integration',
+      'placetel'           => 'admin.integration',
+      'S/MIME'             => 'admin.integration',
+      'SAML'               => 'admin.security',
+      'sipagte.io'         => 'admin.integration', # typo in facility name, keep for backward compatibility
+      'sipgate.io'         => 'admin.integration',
+      'webhook'            => 'admin.webhook',
+      'WhatsApp::Business' => 'admin.channel_whatsapp',
     }
   end
 
@@ -134,6 +133,9 @@ optional you can put the max oldest chat entries as argument
     sanitized.gsub!(BEARER_REGEX, 'Authorization: Bearer [FILTERED]') # rubocop:disable Zammad/DetectTranslatableString
     sanitized.gsub!(BASIC_REGEX,  'Authorization: Basic [FILTERED]')  # rubocop:disable Zammad/DetectTranslatableString
     sanitized.gsub!(DEEPL_AUTH_KEY_REGEX, 'Authorization: DeepL-Auth-Key [FILTERED]') # rubocop:disable Zammad/DetectTranslatableString
+
+    # Mask token headers like GitLab's PRIVATE-TOKEN but keep their names
+    sanitized.gsub!(TOKEN_HEADER_REGEX, '\1: [FILTERED]')
 
     # Mask cookie values but keep names
     sanitized.gsub!(COOKIE_REGEX) do |_match|

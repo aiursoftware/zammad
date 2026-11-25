@@ -3,8 +3,6 @@ import * as Types from '#shared/graphql/types.ts';
 import gql from 'graphql-tag';
 import { ErrorsFragmentDoc } from '../../../../../../shared/graphql/fragments/errors.api';
 import * as VueApolloComposable from '@vue/apollo-composable';
-import * as VueCompositionApi from 'vue';
-export type ReactiveFunction<TParam> = () => TParam;
 
 export const KnowledgeBaseReorderAnswersDocument = gql`
     mutation knowledgeBaseReorderAnswers($categoryId: ID!, $sortingMode: EnumKnowledgeBaseSortingMode!, $answerIds: [ID!]) {
@@ -23,7 +21,7 @@ export const KnowledgeBaseReorderAnswersDocument = gql`
   }
 }
     ${ErrorsFragmentDoc}`;
-export function useKnowledgeBaseReorderAnswersMutation(options: VueApolloComposable.UseMutationOptions<Types.KnowledgeBaseReorderAnswersMutation, Types.KnowledgeBaseReorderAnswersMutationVariables> | ReactiveFunction<VueApolloComposable.UseMutationOptions<Types.KnowledgeBaseReorderAnswersMutation, Types.KnowledgeBaseReorderAnswersMutationVariables>> = {}) {
+export function useKnowledgeBaseReorderAnswersMutation(options: VueApolloComposable.useMutation.Options<Types.KnowledgeBaseReorderAnswersMutation, Types.KnowledgeBaseReorderAnswersMutationVariables> = {}) {
   return VueApolloComposable.useMutation<Types.KnowledgeBaseReorderAnswersMutation, Types.KnowledgeBaseReorderAnswersMutationVariables>(KnowledgeBaseReorderAnswersDocument, options);
 }
-export type KnowledgeBaseReorderAnswersMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<Types.KnowledgeBaseReorderAnswersMutation, Types.KnowledgeBaseReorderAnswersMutationVariables>;
+export type KnowledgeBaseReorderAnswersMutationCompositionFunctionResult = VueApolloComposable.useMutation.Result<Types.KnowledgeBaseReorderAnswersMutation, Types.KnowledgeBaseReorderAnswersMutationVariables>;

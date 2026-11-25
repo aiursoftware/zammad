@@ -2191,9 +2191,11 @@ fieldset > .form-group {
     pointer-events: none;
     cursor: not-allowed !important;
 
-    input:read-only.form-control:not(.js-input, .js-objectSelect) {
+    input:read-only.form-control:not(.js-input, .js-objectSelect),
+    textarea:read-only.form-control {
       pointer-events: auto;
       cursor: auto;
+      caret-color: transparent;
     }
   }
 
@@ -7443,6 +7445,19 @@ a.list-group-item.active > .badge,
 
   .alert {
     margin-bottom: 0;
+    padding: 10px 20px;
+    border: 1px solid var(--border-alt);
+    border-radius: 2px;
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  .alert-row {
+    margin: 0;
+  }
+
+  .alert-row + .alert-row {
+    margin-top: 10px;
   }
 
   &-actions {
@@ -9374,6 +9389,17 @@ a.list-group-item.active > .badge,
       margin-top: 3px;
     }
   }
+
+  .alert-link {
+    align-self: flex-end;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font-weight: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+  }
 }
 
 .tags,
@@ -9470,7 +9496,7 @@ a.list-group-item.active > .badge,
   fill: var(--highlight);
 }
 
-// Separate the "Suggested knowledge" section from the "+ Link" / "+ AI draft" controls above it.
+// Separate the "Suggested" section from the "+ Link" / "+ AI draft" controls above it.
 .kb-suggestions-title {
   margin-top: 20px;
 }
@@ -14220,9 +14246,10 @@ output {
     }
   }
 
+  // One line of text. A rem is 10px here, so 1.25rem would fall short of it.
   p {
-    margin: 8px 0;
-    min-height: 1.25rem;
+    margin: 0;
+    min-height: 20px;
   }
 
   & > table,
@@ -15984,6 +16011,11 @@ span.is-disabled {
 
     @include phone {
       margin-bottom: 10px;
+    }
+
+    // Answers keep the space between paragraphs that .richtext-content drops for articles.
+    p {
+      margin: 8px 0;
     }
   }
 

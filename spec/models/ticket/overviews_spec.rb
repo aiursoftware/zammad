@@ -156,7 +156,7 @@ RSpec.describe Ticket::Overviews do
 
       result = described_class.tickets_for_overview(overview, user)
 
-      expect(described_class.tickets_for_overview(overview, user).unscope(:order).count(:all).count).to eq(2)
+      expect(described_class.tickets_for_overview(overview, user).count_rows).to eq(2)
       expect(result.pluck(:id)).to contain_exactly(source_ticket.id, source_ticket2.id)
     end
 
@@ -714,6 +714,18 @@ RSpec.describe Ticket::Overviews do
             ]
           )
           expect(index_summary(agent2)).to eq(empty_agent2_summary)
+        end
+
+        it 'returns only the requested overviews' do
+          result = described_class.index(agent1, ['all_unassigned'])
+
+          expect(result.map { |entry| [entry[:overview][:view], entry[:tickets].pluck(:id), entry[:count]] })
+            .to eq([['all_unassigned', [ticket1.id, ticket3.id], 2]])
+        end
+
+        it 'leaves out the ticket lists but keeps the counts without tickets' do
+          expect(described_class.index(agent1, with_tickets: false))
+            .to eq(described_class.index(agent1).map { |entry| entry.except(:tickets) })
         end
 
         {

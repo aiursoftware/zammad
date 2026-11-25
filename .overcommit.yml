@@ -63,8 +63,6 @@ PreCommit:
       - 'vendor'
     include:
       - 'app/frontend/**/*'
-      - '**/*.cy.ts'
-      - '**/cypress/**/*.ts'
       - './vite.config.*'
       - './vitest.setup.ts'
   # Custom Eslint hook, necessary due to dropping of the "compact" formatter in v9.
@@ -83,6 +81,7 @@ PreCommit:
     include:
       - '**/*.js'
       - '**/*.ts'
+      - '**/*.mts'
       - '**/*.vue'
   Oxlint:
     required_executable: 'pnpm'
@@ -103,6 +102,7 @@ PreCommit:
     include:
       - 'app/frontend/**/*.js'
       - 'app/frontend/**/*.ts'
+      - 'app/frontend/**/*.mts'
       - 'app/frontend/**/*.vue'
       - '.eslint-plugin-zammad/**/*.js'
       - '.eslint-plugin-zammad/**/*.ts'

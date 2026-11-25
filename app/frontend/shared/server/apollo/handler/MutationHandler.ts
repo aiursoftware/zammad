@@ -2,46 +2,49 @@
 
 import UserError from '#shared/errors/UserError.ts'
 import type { UserErrors } from '#shared/types/error.ts'
-import type { OperationMutationResult } from '#shared/types/server/apollo/handler.ts'
+import type {
+  MutationOperationReturn,
+  MutationSendOptions,
+  OperationMutationResult,
+} from '#shared/types/server/apollo/handler.ts'
 
 import { BaseHandler } from './BaseHandler.ts'
 
-import type { OperationVariables } from '@apollo/client/core'
-import type { UseMutationReturn } from '@vue/apollo-composable'
+import type { OperationVariables } from '@apollo/client'
 import type { Ref } from 'vue'
 
 export default class MutationHandler<
   TResult = OperationMutationResult,
   TVariables extends OperationVariables = OperationVariables,
-> extends BaseHandler<TResult, TVariables, UseMutationReturn<TResult, TVariables>> {
+> extends BaseHandler<TResult, TVariables, MutationOperationReturn<TResult, TVariables>> {
   public async send(
     variables?: TVariables,
-    options?: Parameters<UseMutationReturn<TResult, TVariables>['mutate']>[1],
+    options?: MutationSendOptions<TResult, TVariables>,
   ): Promise<Maybe<TResult>> {
-    return new Promise((resolve, reject) => {
-      this.operationResult.mutate(variables, options).then((result) => {
-        if (!result) {
-          return reject(this.operationError().value)
-        }
+    // `mutate` resolves `{ data, error }` instead of rejecting; `BaseHandler`
+    // registers `onError`, so it never throws and the `result.error` branch
+    // below is the real error path.
+    const result = await this.operationResult.mutate({ ...options, variables })
 
-        if (result.data) {
-          const { errors } = Object.values(result.data)[0] as {
-            errors: UserErrors
-          }
+    // The error itself was already reported to 'onError' by vue-apollo.
+    if (result.error) {
+      throw this.operationError().value ?? result.error
+    }
 
-          if (errors?.length) {
-            const userErrors = new UserError(errors, this.handlerId)
+    const payload = result.data ? Object.values(result.data)[0] : undefined
+    const errors =
+      payload && typeof payload === 'object' && 'errors' in payload
+        ? (payload as { errors?: UserErrors }).errors
+        : undefined
 
-            return reject(userErrors)
-          }
-        }
+    if (errors?.length) {
+      throw new UserError(errors, this.handlerId)
+    }
 
-        return resolve(result.data || null)
-      })
-    })
+    return result.data || null
   }
 
-  public called(): Ref<boolean> {
+  public called(): Readonly<Ref<boolean>> {
     return this.operationResult.called
   }
 }

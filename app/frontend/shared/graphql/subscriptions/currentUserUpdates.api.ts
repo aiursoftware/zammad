@@ -2,9 +2,10 @@ import * as Types from '#shared/graphql/types.ts';
 
 import gql from 'graphql-tag';
 import { CurrentUserAttributesFragmentDoc } from '../fragments/currentUserAttributes.api';
+import { UserAttributesFragmentDoc } from '../fragments/userAttributes.api';
+import { UserPersonalSettingsFragmentDoc } from '../fragments/userPersonalSettings.api';
+import { ObjectAttributeValuesFragmentDoc } from '../fragments/objectAttributeValues.api';
 import * as VueApolloComposable from '@vue/apollo-composable';
-import * as VueCompositionApi from 'vue';
-export type ReactiveFunction<TParam> = () => TParam;
 
 export const CurrentUserUpdatesDocument = gql`
     subscription currentUserUpdates($userId: ID!) {
@@ -14,8 +15,11 @@ export const CurrentUserUpdatesDocument = gql`
     }
   }
 }
-    ${CurrentUserAttributesFragmentDoc}`;
-export function useCurrentUserUpdatesSubscription(variables: Types.CurrentUserUpdatesSubscriptionVariables | VueCompositionApi.Ref<Types.CurrentUserUpdatesSubscriptionVariables> | ReactiveFunction<Types.CurrentUserUpdatesSubscriptionVariables>, options: VueApolloComposable.UseSubscriptionOptions<Types.CurrentUserUpdatesSubscription, Types.CurrentUserUpdatesSubscriptionVariables> | VueCompositionApi.Ref<VueApolloComposable.UseSubscriptionOptions<Types.CurrentUserUpdatesSubscription, Types.CurrentUserUpdatesSubscriptionVariables>> | ReactiveFunction<VueApolloComposable.UseSubscriptionOptions<Types.CurrentUserUpdatesSubscription, Types.CurrentUserUpdatesSubscriptionVariables>> = {}) {
-  return VueApolloComposable.useSubscription<Types.CurrentUserUpdatesSubscription, Types.CurrentUserUpdatesSubscriptionVariables>(CurrentUserUpdatesDocument, variables, options);
+    ${CurrentUserAttributesFragmentDoc}
+${UserAttributesFragmentDoc}
+${UserPersonalSettingsFragmentDoc}
+${ObjectAttributeValuesFragmentDoc}`;
+export function useCurrentUserUpdatesSubscription(options: VueApolloComposable.useSubscription.Options<Types.CurrentUserUpdatesSubscription, Types.CurrentUserUpdatesSubscriptionVariables>) {
+  return VueApolloComposable.useSubscription<Types.CurrentUserUpdatesSubscription, Types.CurrentUserUpdatesSubscriptionVariables>(CurrentUserUpdatesDocument, options);
 }
-export type CurrentUserUpdatesSubscriptionCompositionFunctionResult = VueApolloComposable.UseSubscriptionReturn<Types.CurrentUserUpdatesSubscription, Types.CurrentUserUpdatesSubscriptionVariables>;
+export type CurrentUserUpdatesSubscriptionCompositionFunctionResult = VueApolloComposable.useSubscription.Result<Types.CurrentUserUpdatesSubscription, Types.CurrentUserUpdatesSubscriptionVariables>;

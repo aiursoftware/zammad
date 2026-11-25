@@ -2,10 +2,10 @@ import * as Types from '#shared/graphql/types.ts';
 
 import gql from 'graphql-tag';
 import { UserAttributesFragmentDoc } from '../../../../graphql/fragments/userAttributes.api';
+import { UserPersonalSettingsFragmentDoc } from '../../../../graphql/fragments/userPersonalSettings.api';
+import { ObjectAttributeValuesFragmentDoc } from '../../../../graphql/fragments/objectAttributeValues.api';
 import { ErrorsFragmentDoc } from '../../../../graphql/fragments/errors.api';
 import * as VueApolloComposable from '@vue/apollo-composable';
-import * as VueCompositionApi from 'vue';
-export type ReactiveFunction<TParam> = () => TParam;
 
 export const UserAddDocument = gql`
     mutation userAdd($input: UserInput!, $sendInvite: Boolean) {
@@ -19,8 +19,10 @@ export const UserAddDocument = gql`
   }
 }
     ${UserAttributesFragmentDoc}
+${UserPersonalSettingsFragmentDoc}
+${ObjectAttributeValuesFragmentDoc}
 ${ErrorsFragmentDoc}`;
-export function useUserAddMutation(options: VueApolloComposable.UseMutationOptions<Types.UserAddMutation, Types.UserAddMutationVariables> | ReactiveFunction<VueApolloComposable.UseMutationOptions<Types.UserAddMutation, Types.UserAddMutationVariables>> = {}) {
+export function useUserAddMutation(options: VueApolloComposable.useMutation.Options<Types.UserAddMutation, Types.UserAddMutationVariables> = {}) {
   return VueApolloComposable.useMutation<Types.UserAddMutation, Types.UserAddMutationVariables>(UserAddDocument, options);
 }
-export type UserAddMutationCompositionFunctionResult = VueApolloComposable.UseMutationReturn<Types.UserAddMutation, Types.UserAddMutationVariables>;
+export type UserAddMutationCompositionFunctionResult = VueApolloComposable.useMutation.Result<Types.UserAddMutation, Types.UserAddMutationVariables>;

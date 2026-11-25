@@ -64,10 +64,12 @@ const MENTIONS_LIMIT = 5
 const { createQueryErrorHandler } = useErrorHandler()
 
 const ticketQuery = new QueryHandler(
-  useTicketWithMentionLimitQuery(() => ({
-    ticketId: ticketId.value,
-    mentionsCount: MENTIONS_LIMIT,
-  })),
+  useTicketWithMentionLimitQuery({
+    variables: {
+      ticketId,
+      mentionsCount: MENTIONS_LIMIT,
+    },
+  }),
   {
     errorCallback: createQueryErrorHandler({
       notFound: __('Ticket with specified ID was not found. Try checking the URL for errors.'),
@@ -429,7 +431,7 @@ const showBottomBanner = computed(() => {
         :initial-values="initialTicketValue"
         :initial-entity-object="ticket"
         :form-updater-id="EnumFormUpdaterId.FormUpdaterUpdaterTicketEdit"
-        use-object-attributes
+        use-entity-attributes
         :aria-hidden="!formVisible"
         :class="formVisible ? 'visible' : 'hidden'"
         @submit="saveTicketForm($event as FormSubmitData<TicketUpdateFormData>)"

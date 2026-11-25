@@ -13,8 +13,7 @@ import {
   type TestSubscriptionHandler,
 } from '../mocks.ts'
 
-import type { DocumentNode, OperationVariables } from '@apollo/client/core'
-import type { OptionsParameter } from '@vue/apollo-composable/dist/useQuery'
+import type { DocumentNode, OperationVariables } from '@apollo/client'
 
 interface EnhancedQueryHandler<R, V extends OperationVariables> extends QueryHandler<R, V> {
   getMockedData: () => { data: R }
@@ -54,11 +53,10 @@ const getHandler = (document: DocumentNode, cb: () => any) => {
 export const getQueryHandler = <R, V extends OperationVariables = OperationVariables>(
   document: DocumentNode,
   variables?: V,
-  options?: OptionsParameter<R, V>,
 ) => {
   return getHandler(
     document,
-    () => new QueryHandler(useLazyQuery(document, variables, options)),
+    () => new QueryHandler(useLazyQuery<R, OperationVariables>(document, { variables })),
   ) as EnhancedQueryHandler<R, V>
 }
 
@@ -80,7 +78,7 @@ export const getSubscriptionHandler = <
 ) => {
   const handler = getHandler(
     document,
-    () => new SubscriptionHandler(useSubscription<R, V>(document, variables)),
+    () => new SubscriptionHandler(useSubscription<R, V>(document, { variables })),
   ) as EnhancedSubscriptionHandler<R, V>
   handler.getTestSubscriptionHandler = () => {
     return getGraphQLSubscriptionHandler(document)
