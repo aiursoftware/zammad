@@ -93,7 +93,16 @@ Rails.application.configure do
   if ENV['RAILS_LOG_TO_STDOUT'].present?
     logger           = ActiveSupport::Logger.new($stdout)
     logger.formatter = config.log_formatter
-    config.logger    = ActiveSupport::TaggedLogging.new(logger)
+
+    # WCL customization: also write the log to a file (WCL_LOG_FILE, kept to 5 x 10 MB), so admins
+    #   can read it on Admin > System > Server Files.
+    if ENV['WCL_LOG_FILE'].present?
+      file_logger           = ActiveSupport::Logger.new(ENV['WCL_LOG_FILE'], 5, 10 * 1024 * 1024)
+      file_logger.formatter = config.log_formatter
+      logger                = ActiveSupport::BroadcastLogger.new(logger, file_logger)
+    end
+
+    config.logger = ActiveSupport::TaggedLogging.new(logger)
   end
 
   # Do not dump schema after migrations.

@@ -36,6 +36,8 @@ x-zammad: &zammad
     - zammad-storage:/opt/zammad/storage
     # Admin > System > Backups makes, lists and deletes backups here (same folder as zammad-backup).
     - ./backup:/var/tmp/zammad
+    # Log files (see WCL_LOG_FILE), readable on Admin > System > Server Files.
+    - ./log:/opt/zammad/log
   depends_on:
     - zammad-postgresql
     - zammad-redis
@@ -69,14 +71,23 @@ services:
   zammad-railsserver:
     <<: *zammad
     command: ["zammad-railsserver"]
+    environment:
+      <<: *zammad-env
+      WCL_LOG_FILE: /opt/zammad/log/rails.log
 
   zammad-scheduler:
     <<: *zammad
     command: ["zammad-scheduler"]
+    environment:
+      <<: *zammad-env
+      WCL_LOG_FILE: /opt/zammad/log/scheduler.log
 
   zammad-websocket:
     <<: *zammad
     command: ["zammad-websocket"]
+    environment:
+      <<: *zammad-env
+      WCL_LOG_FILE: /opt/zammad/log/websocket.log
 
   zammad-nginx:
     <<: *zammad

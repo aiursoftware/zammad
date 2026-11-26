@@ -1,0 +1,57 @@
+/* WCL customization: Admin > System > Server Files */
+.wcl-server-files-roots {
+  margin-bottom: 16px;
+}
+
+.wcl-server-files-crumbs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.wcl-server-files .icon {
+  width: 14px;
+  height: 14px;
+  margin-right: 4px;
+  vertical-align: -2px;
+  fill: currentColor;
+}
+
+.wcl-server-files-size {
+  width: 110px;
+}
+
+.wcl-server-files-date {
+  width: 170px;
+}
+
+.wcl-server-files-actions {
+  width: 120px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.wcl-server-files-viewer-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.wcl-server-files-viewer-bar .js-filter {
+  flex: 1 1 240px;
+}
+
+.wcl-server-files-content {
+  max-height: 65vh;
+  overflow: auto;
+  padding: 12px;
+  font-size: 12px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-all;
+  background: #0f1720;
+  color: #d6e2ee;
+  border-radius: 6px;
+}

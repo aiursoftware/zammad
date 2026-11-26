@@ -310,6 +310,10 @@ msgstr ""
 msgid "%s left the conversation."
 msgstr ""
 
+#: app/assets/javascripts/app/controllers/wcl_server_files.coffee:107
+msgid "%s lines"
+msgstr ""
+
 #: app/frontend/shared/i18n/dates.ts:117
 msgid "%s minutes ago"
 msgstr ""
@@ -2571,6 +2575,7 @@ msgid "Attachment - Search for follow-up also in attachments."
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/ticket_zoom/sidebar_article_attachments.coffee:15
+#: app/assets/javascripts/app/controllers/wcl_server_files.coffee:19
 #: app/assets/javascripts/app/views/knowledge_base/_answer_attachments.jst.eco:3
 #: app/assets/javascripts/app/views/knowledge_base/sidebar/attachments.jst.eco:2
 #: app/frontend/apps/desktop/pages/knowledge-base/components/KnowledgeBaseAnswer/KnowledgeBaseAnswerAttachments.vue:29
@@ -2578,6 +2583,10 @@ msgstr ""
 #: app/frontend/apps/desktop/pages/ticket/components/TicketSidebar/plugins/ticket-article-attachment.ts:12
 #: public/assets/form/form.js:50
 msgid "Attachments"
+msgstr ""
+
+#: app/assets/javascripts/app/views/wcl_server_files/index.jst.eco:40
+msgid "Attachments are kept in the database unless Admin > System > Storage is set to \"Filesystem\"."
 msgstr ""
 
 #: app/assets/javascripts/app/views/settings/storage_provider.jst.eco:10
@@ -3022,6 +3031,7 @@ msgid "Backup started. This can take a few minutes."
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/wcl_backup.coffee:4
+#: app/assets/javascripts/app/controllers/wcl_server_files.coffee:18
 #: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:3
 msgid "Backups"
 msgstr ""
@@ -4168,6 +4178,7 @@ msgstr ""
 #: app/assets/javascripts/app/controllers/widget/error_modal.coffee:4
 #: app/assets/javascripts/app/controllers/widget/import_result.coffee:4
 #: app/assets/javascripts/app/views/generic/ticket_duplicate_detection/warning.jst.eco:1
+#: app/assets/javascripts/app/views/wcl_server_files/index.jst.eco:25
 #: app/frontend/apps/desktop/pages/chat/components/ChatWindowHeader.vue:72
 #: app/frontend/shared/form/i18n/locales.ts:102
 msgid "Close"
@@ -7083,6 +7094,7 @@ msgstr ""
 
 #: app/assets/javascripts/app/controllers/ticket_zoom/article_image_view.coffee:4
 #: app/assets/javascripts/app/views/system_report.jst.eco:20
+#: app/assets/javascripts/app/views/wcl_server_files/index.jst.eco:24
 #: app/frontend/apps/desktop/components/CommonCalendarPreviewFlyout/CommonCalendarPreviewFlyout.vue:69
 msgid "Download"
 msgstr ""
@@ -11644,6 +11656,10 @@ msgstr ""
 msgid "Location of an external chat.css file."
 msgstr ""
 
+#: app/assets/javascripts/app/views/wcl_server_files/index.jst.eco:43
+msgid "Log files appear here once the server writes them (WCL_LOG_FILE in the deployment)."
+msgstr ""
+
 #: app/assets/javascripts/app/views/login.jst.eco:4
 msgid "Log in to %s"
 msgstr ""
@@ -11684,6 +11700,10 @@ msgstr ""
 
 #: app/assets/javascripts/app/controllers/_plugin/keyboard_shortcuts.coffee:232
 msgid "Logout"
+msgstr ""
+
+#: app/assets/javascripts/app/controllers/wcl_server_files.coffee:17
+msgid "Logs"
 msgstr ""
 
 #: db/seeds/settings.rb:1172
@@ -12553,6 +12573,10 @@ msgstr ""
 msgid "Model used for vector embedding in semantic search. Required for the provider that serves semantic search."
 msgstr ""
 
+#: app/assets/javascripts/app/views/wcl_server_files/index.jst.eco:51
+msgid "Modified"
+msgstr ""
+
 #: app/assets/javascripts/app/controllers/_ui_element/core_workflow_condition.coffee:272
 #: app/assets/javascripts/app/controllers/_ui_element/core_workflow_perform.coffee:66
 msgid "Module"
@@ -12784,6 +12808,7 @@ msgstr ""
 #: app/assets/javascripts/app/views/profile/token_access.jst.eco:16
 #: app/assets/javascripts/app/views/profile/token_access_create.jst.eco:3
 #: app/assets/javascripts/app/views/tag/table.jst.eco:4
+#: app/assets/javascripts/app/views/wcl_server_files/index.jst.eco:49
 #: app/assets/javascripts/app/views/widget/organization.jst.eco:9
 #: app/assets/javascripts/app/views/widget/user.jst.eco:5
 #: app/controllers/time_accountings_controller.rb:89
@@ -15835,6 +15860,10 @@ msgstr ""
 msgid "Read"
 msgstr ""
 
+#: app/assets/javascripts/app/views/wcl_server_files/index.jst.eco:10
+msgid "Read-only view of the log files, the backups and the file storage on the server. Nothing can be changed or deleted here."
+msgstr ""
+
 #: app/assets/javascripts/app/controllers/knowledge_base/permissions_dialog.coffee:9
 #: app/frontend/apps/desktop/components/Form/fields/FieldKnowledgeBasePermissions/FieldKnowledgeBasePermissionsInput.vue:53
 msgid "Reader"
@@ -15971,6 +16000,10 @@ msgstr ""
 
 #: db/seeds/settings.rb:3513
 msgid "References - Search for follow-up also in In-Reply-To or References headers."
+msgstr ""
+
+#: app/assets/javascripts/app/views/wcl_server_files/index.jst.eco:6
+msgid "Refresh"
 msgstr ""
 
 #: app/frontend/apps/desktop/components/CommonAIFeedback/CommonAIFeedback.vue:187
@@ -17912,6 +17945,11 @@ msgstr ""
 msgid "Sequencer log level"
 msgstr ""
 
+#: app/assets/javascripts/app/controllers/wcl_server_files.coffee:6
+#: app/assets/javascripts/app/views/wcl_server_files/index.jst.eco:3
+msgid "Server Files"
+msgstr ""
+
 #: app/assets/javascripts/app/controllers/_integration/exchange.coffee:412
 #: app/assets/javascripts/app/controllers/_integration/ldap.coffee:502
 #: app/assets/javascripts/app/controllers/_integration/pgp.coffee:257
@@ -18285,6 +18323,10 @@ msgstr ""
 msgid "Show notifications"
 msgstr ""
 
+#: app/assets/javascripts/app/views/wcl_server_files/index.jst.eco:23
+msgid "Show only lines containing…"
+msgstr ""
+
 #: app/frontend/apps/desktop/pages/ticket/components/TicketDetailView/ArticleBubble/ArticleBubbleActionList.vue:63
 msgid "Show original"
 msgstr ""
@@ -18548,6 +18590,7 @@ msgid "Site key"
 msgstr ""
 
 #: app/assets/javascripts/app/views/wcl_backup/index.jst.eco:35
+#: app/assets/javascripts/app/views/wcl_server_files/index.jst.eco:50
 msgid "Size"
 msgstr ""
 
@@ -18591,6 +18634,7 @@ msgid "Some system settings have changed, please restart all Zammad processes!"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/wcl_backup.coffee:149
+#: app/assets/javascripts/app/controllers/wcl_server_files.coffee:112
 #: app/frontend/shared/errors/useErrorHandler.ts:35
 msgid "Something went wrong."
 msgstr ""
@@ -21543,6 +21587,22 @@ msgstr ""
 msgid "This file cannot be added. You can add images in these formats: %s."
 msgstr ""
 
+#: app/models/wcl/server_files.rb:27
+msgid "This file does not exist."
+msgstr ""
+
+#: app/models/wcl/server_files.rb:65
+msgid "This file is not text and can only be downloaded."
+msgstr ""
+
+#: app/assets/javascripts/app/views/wcl_server_files/index.jst.eco:38
+msgid "This folder is empty."
+msgstr ""
+
+#: app/models/wcl/server_files.rb:18
+msgid "This folder is not available."
+msgstr ""
+
 #: app/models/group.rb:87
 msgid "This group cannot be moved into itself."
 msgstr ""
@@ -21584,6 +21644,14 @@ msgstr ""
 
 #: app/assets/javascripts/app/views/widget/payload_example.jst.eco:3
 msgid "This is an example payload for your installation, including any custom objects. It is possible to further customize payload of each webhook."
+msgstr ""
+
+#: app/models/wcl/server_files.rb:58
+msgid "This is not a file."
+msgstr ""
+
+#: app/models/wcl/server_files.rb:38
+msgid "This is not a folder."
 msgstr ""
 
 #: app/controllers/integration/pgp_controller.rb:20
@@ -26455,6 +26523,10 @@ msgstr ""
 #: app/assets/javascripts/app/views/widget/organization.jst.eco:32
 #: app/assets/javascripts/app/views/widget/user.jst.eco:18
 msgid "show more"
+msgstr ""
+
+#: app/assets/javascripts/app/views/wcl_server_files/index.jst.eco:22
+msgid "showing the last 200 KB"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/_ui_element/object_manager_attribute.coffee:102

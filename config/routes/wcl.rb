@@ -1,6 +1,7 @@
 # Copyright (C) 2012-2026 Zammad Foundation, https://zammad-foundation.org/
 
-# WCL customization, see WclReportsController, WclOrganizationsController and WclBackupsController.
+# WCL customization, see WclReportsController, WclOrganizationsController, WclBackupsController and
+#   WclServerFilesController.
 Zammad::Application.routes.draw do
   scope Rails.configuration.api_path do
     get 'wcl/attachment_rules',    to: 'wcl_reports#attachment_rules'
@@ -10,5 +11,8 @@ Zammad::Application.routes.draw do
     post 'wcl/backups',         to: 'wcl_backups#create'
     post 'wcl/backups/delete',  to: 'wcl_backups#destroy_many'
     delete 'wcl/backups/:id',   to: 'wcl_backups#destroy'
+    get 'wcl/server_files',          to: 'wcl_server_files#index'
+    get 'wcl/server_files/view',     to: 'wcl_server_files#view'
+    get 'wcl/server_files/download', to: 'wcl_server_files#download'
   end
 end

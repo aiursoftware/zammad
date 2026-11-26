@@ -1,0 +1,76 @@
+<div class="page-header">
+  <div class="page-header-title">
+    <h1><%- @T('Server Files') %></h1>
+  </div>
+  <div class="page-header-meta">
+    <button class="btn js-refresh"><%- @T('Refresh') %></button>
+  </div>
+</div>
+<div class="page-content wcl-server-files">
+  <p class="text-muted"><%- @T('Read-only view of the log files, the backups and the file storage on the server. Nothing can be changed or deleted here.') %></p>
+
+  <div class="tabs tabs-wide wcl-server-files-roots">
+    <% for root in @roots: %>
+      <div class="tab js-root <% if root.key is @root: %>active<% end %>" data-root="<%= root.key %>"><%- @T(root.name) %></div>
+    <% end %>
+  </div>
+
+  <% if @viewer: %>
+    <div class="wcl-server-files-viewer">
+      <div class="wcl-server-files-viewer-bar">
+        <strong><%= @viewer.name %></strong>
+        <span class="text-muted"><%= App.Utils.humanFileSize(@viewer.size) %><% if @viewer.truncated: %> · <%- @T('showing the last 200 KB') %><% end %> · <span class="js-lineCount"></span></span>
+        <input class="form-control js-filter" placeholder="<%= @Ti('Show only lines containing…') %>">
+        <a class="btn" href="<%= @download(@viewer.path) %>"><%- @T('Download') %></a>
+        <button class="btn js-close"><%- @T('Close') %></button>
+      </div>
+      <pre class="wcl-server-files-content js-content"></pre>
+    </div>
+  <% else: %>
+    <div class="wcl-server-files-crumbs">
+      <% for crumb, i in @crumbs: %>
+        <% if i > 0: %><span class="text-muted">/</span><% end %>
+        <a href="#" class="js-crumb" data-path="<%= crumb.path %>"><%= crumb.name %></a>
+      <% end %>
+    </div>
+
+    <% if _.isEmpty(@entries): %>
+      <p><%- @T('This folder is empty.') %></p>
+      <% if @root is 'storage': %>
+        <p class="text-muted"><%- @T('Attachments are kept in the database unless Admin > System > Storage is set to "Filesystem".') %></p>
+      <% end %>
+      <% if @root is 'logs': %>
+        <p class="text-muted"><%- @T('Log files appear here once the server writes them (WCL_LOG_FILE in the deployment).') %></p>
+      <% end %>
+    <% else: %>
+      <table class="table table-hover">
+        <thead>
+          <tr>
+            <th><%- @T('Name') %></th>
+            <th class="wcl-server-files-size"><%- @T('Size') %></th>
+            <th class="wcl-server-files-date"><%- @T('Modified') %></th>
+            <th class="wcl-server-files-actions"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for entry in @entries: %>
+            <tr>
+              <td>
+                <% if entry.directory: %>
+                  <a href="#" class="js-folder" data-path="<%= entry.path %>"><%- @Icon('overviews') %> <%= entry.name %></a>
+                <% else: %>
+                  <a href="#" class="js-view" data-path="<%= entry.path %>"><%- @Icon('document') %> <%= entry.name %></a>
+                <% end %>
+              </td>
+              <td class="wcl-server-files-size"><% if !entry.directory: %><%= App.Utils.humanFileSize(entry.size) %><% end %></td>
+              <td class="wcl-server-files-date"><%- @humanTime(entry.updated_at) %></td>
+              <td class="wcl-server-files-actions">
+                <% if !entry.directory: %><a class="btn btn--small" href="<%= @download(entry.path) %>"><%- @T('Download') %></a><% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    <% end %>
+  <% end %>
+</div>
