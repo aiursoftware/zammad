@@ -1070,17 +1070,22 @@ module Wcl::Setup # rubocop:disable Metrics/ModuleLength
     [__('Amazon Kindle Fire HDX'), 800, 1280],
   ].map { |name, width, height| { 'name' => name, 'width' => width, 'height' => height }.freeze }.freeze
 
+  #   The list goes into the current value only: the initial value (settings.state_initial) is limited
+  #   to 2000 characters, which the full list exceeds.
   def self.phone_view_devices
-    Setting.create_if_not_exists(
+    setting = Setting.create_if_not_exists(
       title:       __('Phone view devices'),
       name:        'wcl_phone_view_devices',
       area:        'Wcl::PhoneView',
       description: __('The devices offered on Admin > System > Phone View.'),
       options:     {},
       preferences: { authentication: true, permission: ['admin.maintenance'] },
-      state:       PHONE_VIEW_DEVICES.map(&:dup),
+      state:       [],
       frontend:    true,
     )
+    return if Array(setting.state_current&.dig('value') || setting.state_current&.dig(:value)).any?
+
+    Setting.set('wcl_phone_view_devices', PHONE_VIEW_DEVICES.map(&:dup))
   end
 
   # Admin > Settings > Ticket > "Note - public messages only" (see Ticket::Article::WclPublicOnly).
