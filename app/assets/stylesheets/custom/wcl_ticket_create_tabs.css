@@ -1,0 +1,18 @@
+/* WCL customization: New Ticket tabs, Send Email (the default) stands out */
+.type-tabs .tab[data-type="email-out"] {
+  color: #1a7fb0;
+  font-weight: 600;
+}
+
+.type-tabs .tab[data-type="email-out"] .tab-icon {
+  fill: #1a7fb0;
+}
+
+.type-tabs .tab[data-type="email-out"].active {
+  background: #1a7fb0;
+  color: #fff;
+}
+
+.type-tabs .tab[data-type="email-out"].active .tab-icon {
+  fill: #fff;
+}

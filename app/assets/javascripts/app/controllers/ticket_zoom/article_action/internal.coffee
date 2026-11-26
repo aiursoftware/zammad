@@ -3,6 +3,9 @@ class Internal
     return actions if !ticket.editable()
     return actions if ticket.currentView() is 'customer'
 
+    # WCL customization: public messages only, so no switching (each switch re-sent emails)
+    return actions if App.Config.get('wcl_public_messages_only')
+
     if article.internal is true
       actions.push {
         name: __('set to public')

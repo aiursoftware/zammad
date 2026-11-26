@@ -38,6 +38,9 @@ class App.UiElement.select extends App.UiElement.ApplicationUiElement
 
     item = $( App.view('generic/select')(attribute: attribute) )
 
+    # WCL customization: icons in front of the ticket states
+    App.WclStateIcons.enhance(item, attribute, params)
+
     # bind event listeners
     @bindEventListeners(item, attribute, params)
 

@@ -23,6 +23,7 @@ class Ticket::Article < ApplicationModel
   include Ticket::Article::HasTicketContactAttributesImpact
   include Ticket::Article::ResetsTicketState
   include Ticket::Article::TriggersSubscriptions
+  include Ticket::Article::WclPublicOnly # WCL customization
 
   # AddsMetadataGeneral depends on AddsMetadataOriginById, so load that first
   include Ticket::Article::AddsMetadataOriginById

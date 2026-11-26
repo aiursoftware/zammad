@@ -15,7 +15,8 @@
   <div class="editControls">
     <div class="js-avatar"></div>
     <div class="editControls-item is-hidden pop-select">
-      <% if @articleTypes.length > 1: %>
+      <%# WCL customization: no Note / Phone / Email picker when wcl_hide_article_type_picker is on %>
+      <% if @articleTypes.length > 1 and !@C('wcl_hide_article_type_picker'): %>
         <div class="editControls-iconHolder centered js-selectedArticleType">
           <% for articleType in @articleTypes: %>
           <div class="editControls-icon js-selectableTypes<%- ' hide' if articleType.icon != @article.icon %>" data-type="<%- articleType.name %>">

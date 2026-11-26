@@ -1,0 +1,161 @@
+/* WCL customization: ticket State dropdown with icons (App.WclStateIcons) */
+.wcl-state-select {
+  position: relative;
+}
+
+.wcl-state-select > select {
+  display: none;
+}
+
+.wcl-state-select > .icon-arrow-down {
+  display: none;
+}
+
+.wcl-state-toggle .wcl-state-arrow {
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  margin-left: auto;
+  fill: currentColor;
+  opacity: 0.5;
+}
+
+.wcl-state-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+}
+
+.wcl-state-toggle:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.wcl-state-label {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.wcl-state-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  max-height: 320px;
+  overflow-y: auto;
+  margin: 4px 0 0;
+  padding: 4px 0;
+  list-style: none;
+  background: var(--background-primary, #fff);
+  border: 1px solid var(--border, #d4d9de);
+  border-radius: 6px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.wcl-state-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+
+.wcl-state-option:hover {
+  background: var(--background-secondary, rgba(0, 0, 0, 0.06));
+}
+
+.wcl-state-option.is-selected {
+  font-weight: 600;
+}
+
+.wcl-state-option.is-disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.wcl-state-icon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: #fff;
+}
+
+.wcl-state-icon .icon {
+  width: 12px;
+  height: 12px;
+  fill: currentColor;
+}
+
+.wcl-state-icon--none {
+  background: transparent;
+}
+
+.wcl-state-icon--new {
+  background: #e3a008;
+}
+
+.wcl-state-icon--open {
+  background: #2f80ed;
+}
+
+.wcl-state-icon--progress {
+  background: #7b61ff;
+}
+
+.wcl-state-icon--hold {
+  background: #8a94a6;
+}
+
+.wcl-state-icon--pending {
+  background: #f2994a;
+}
+
+.wcl-state-icon--closed {
+  background: #27ae60;
+}
+
+.wcl-state-icon--rejected {
+  background: #d64545;
+}
+
+.wcl-state-icon--merged {
+  background: #6c757d;
+}
+
+/* An unsaved State change (App.WclStateIcons.markUnsaved) */
+.wcl-state-unsaved .wcl-state-toggle {
+  border-color: #f2994a;
+  box-shadow: 0 0 0 1px #f2994a;
+}
+
+.wcl-state-unsaved-note {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #f2994a;
+}
+
+/* Priority (same dropdown) */
+.wcl-state-icon--low {
+  background: #6c8ebf;
+}
+
+.wcl-state-icon--normal {
+  background: #8a94a6;
+}
+
+.wcl-state-icon--high {
+  background: #f2994a;
+}
+
+.wcl-state-icon--urgent {
+  background: #d64545;
+}

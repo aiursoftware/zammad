@@ -20,6 +20,7 @@ module Wcl::Setup # rubocop:disable Metrics/ModuleLength
     Wcl::AttachmentRules.create_settings
     rejected_state
     customers_cannot_reject
+    rejected_in_customer_overviews
     customers_no_state_on_create
     urgent_priority
     settings
@@ -39,6 +40,7 @@ module Wcl::Setup # rubocop:disable Metrics/ModuleLength
     email_only_existing_users
     notifications_via_graph
     phone_view_devices
+    public_messages_only
     true
   end
 
@@ -630,6 +632,27 @@ module Wcl::Setup # rubocop:disable Metrics/ModuleLength
     end
   end
 
+  # The employee's own lists (My Tickets, My Organization Tickets) also show rejected requests, so a
+  #   request doesn't disappear for them once it is turned down.
+  CUSTOMER_OVERVIEW_LINKS = %w[my_tickets my_organization_tickets].freeze
+
+  def self.rejected_in_customer_overviews
+    rejected = Ticket::State.find_by(name: 'rejected')
+    return if !rejected
+
+    Overview.where(link: CUSTOMER_OVERVIEW_LINKS).find_each do |overview|
+      condition = overview.condition.deep_dup
+      rule      = condition['ticket.state_id']
+      next if !rule.is_a?(Hash) || rule['operator'] != 'is'
+
+      values = Array(rule['value'])
+      next if values.map(&:to_s).include?(rejected.id.to_s)
+
+      rule['value'] = values + [values.first.is_a?(String) ? rejected.id.to_s : rejected.id]
+      overview.update!(condition: condition)
+    end
+  end
+
   # Like Rejected, only agents move a ticket to In Progress or On Hold.
   def self.customers_cannot_set_work_states(ids)
     agent = Permission.find_by(name: 'ticket.agent')
@@ -1056,6 +1079,54 @@ module Wcl::Setup # rubocop:disable Metrics/ModuleLength
       options:     {},
       preferences: { authentication: true, permission: ['admin.maintenance'] },
       state:       PHONE_VIEW_DEVICES.map(&:dup),
+      frontend:    true,
+    )
+  end
+
+  # Admin > Settings > Ticket > "Note - public messages only" (see Ticket::Article::WclPublicOnly).
+  #   Off by default so the stock specs keep their internal notes; the WclPublicMessagesOnly
+  #   migration switches it on.
+  def self.public_messages_only
+    Setting.create_if_not_exists(
+      title:       __('Note - public messages only'),
+      name:        Ticket::Article::WclPublicOnly::SETTING,
+      area:        'UI::TicketZoom',
+      description: __('Messages written in the ticket are always public (sent to the customer). Internal notes and switching a message between internal and public are turned off.'),
+      options:     {
+        form: [
+          {
+            display:   '',
+            null:      true,
+            name:      Ticket::Article::WclPublicOnly::SETTING,
+            tag:       'boolean',
+            translate: true,
+            options:   { true => 'yes', false => 'no' },
+          },
+        ],
+      },
+      state:       false,
+      preferences: { prio: 101, permission: ['admin.ui'] },
+      frontend:    true,
+    )
+    Setting.create_if_not_exists(
+      title:       __('Note - hide message type picker'),
+      name:        'wcl_hide_article_type_picker',
+      area:        'UI::TicketZoom',
+      description: __('Hides the Note / Phone / Email icons in the reply box, so every reply is a note. Replying to an email with its Reply action still answers by email.'),
+      options:     {
+        form: [
+          {
+            display:   '',
+            null:      true,
+            name:      'wcl_hide_article_type_picker',
+            tag:       'boolean',
+            translate: true,
+            options:   { true => 'yes', false => 'no' },
+          },
+        ],
+      },
+      state:       false,
+      preferences: { prio: 102, permission: ['admin.ui'] },
       frontend:    true,
     )
   end

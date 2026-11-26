@@ -78,6 +78,11 @@ class App.TicketCreate extends App.Controller
     if !_.isArray(@availableTypes)
       @availableTypes = [@availableTypes]
 
+    # WCL customization: Send Email sits in the middle of the tabs (Received Call | Send Email |
+    #   Outbound Call), whatever order the setting has.
+    order = ['phone-in', 'email-out', 'phone-out']
+    @availableTypes = _.sortBy(@availableTypes, (type) -> if (index = order.indexOf(type)) is -1 then order.length else index)
+
     if !_.contains(@availableTypes, @defaultType)
       @defaultType = @availableTypes[0]
 

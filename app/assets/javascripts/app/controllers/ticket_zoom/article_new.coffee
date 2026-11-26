@@ -52,6 +52,9 @@ class App.TicketZoomArticleNew extends App.Controller
     if @ticket.currentView() is 'agent'
       @internalSelector = true
 
+    # WCL customization: public messages only, no internal notes (setting wcl_public_messages_only)
+    @internalSelector = false if App.Config.get('wcl_public_messages_only')
+
     @textareaHeight =
       open:   148
       closed: 20
@@ -482,6 +485,7 @@ class App.TicketZoomArticleNew extends App.Controller
     @el.find('.js-articleTypes').addClass('is-hidden')
 
   setArticleInternal: (internal) =>
+    internal = false if App.Config.get('wcl_public_messages_only') # WCL customization
     @articleNewEdit
       .toggleClass('is-public', !internal)
       .toggleClass('is-internal', internal)
