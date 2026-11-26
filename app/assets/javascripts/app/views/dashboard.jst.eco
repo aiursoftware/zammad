@@ -6,6 +6,10 @@
     <span class="wcl-roles">
       <% for role in App.WclUserRoles.names(): %><span class="wcl-role"><%= role %></span><% end %>
     </span>
+    <%# WCL customization: preview the mobile app (Admin > System > Phone View) %>
+    <% if App.User.current().permission('admin.maintenance'): %>
+      <a class="btn btn--small wcl-phone-view-link" href="#system/phone_view"><%- @T('Phone View') %></a>
+    <% end %>
   </div>
   <% end %>
   <% if @stats or @firstSteps: %>

@@ -3,17 +3,21 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
+import { useTicketCreateView } from '#shared/entities/ticket/composables/useTicketCreateView.ts'
 import { useSessionStore } from '#shared/stores/session.ts'
 
 import CommonInputSearch from '#mobile/components/CommonInputSearch/CommonInputSearch.vue'
 import CommonSectionMenu from '#mobile/components/CommonSectionMenu/CommonSectionMenu.vue'
 import type { MenuItem } from '#mobile/components/CommonSectionMenu/index.ts'
-import CommonTicketCreateLink from '#mobile/components/CommonTicketCreateLink/CommonTicketCreateLink.vue'
 import { useTicketOverviews } from '#mobile/entities/ticket/composables/useTicketOverviews.ts'
 
 const IS_DEV = import.meta.env.DEV
 
 const session = useSessionStore()
+
+// WCL customization: a full "New ticket" button instead of the small "+" in the corner, which sat
+//   under the status bar on tall phones (e.g. Galaxy S23 Ultra) and was easy to miss.
+const { ticketCreateEnabled } = useTicketCreateView()
 
 const menu: MenuItem[] = [
   {
@@ -55,13 +59,21 @@ const ticketOverview = computed<MenuItem[]>(() => {
 </script>
 
 <template>
-  <div class="p-4">
-    <CommonTicketCreateLink class="mt-1.5 mb-3" />
+  <div class="p-4 pt-[calc(1rem+env(safe-area-inset-top))]">
     <h1 class="mb-5 flex w-full items-center justify-center text-4xl font-bold">
       {{ $t('Home') }}
     </h1>
     <CommonLink :aria-label="$t('Search…')" link="/search">
       <CommonInputSearch aria-hidden="true" tabindex="-1" wrapper-class="mb-4" no-border />
+    </CommonLink>
+    <CommonLink
+      v-if="ticketCreateEnabled"
+      link="/tickets/create"
+      :aria-label="$t('Create new ticket')"
+      class="mb-4 flex w-full items-center justify-center gap-2 rounded-xl bg-blue px-4 py-3 text-base font-semibold text-white"
+    >
+      <CommonIcon name="add" size="small" decorative />
+      {{ $t('New ticket') }}
     </CommonLink>
     <CommonSectionMenu :items="menu" />
     <CommonSectionMenu

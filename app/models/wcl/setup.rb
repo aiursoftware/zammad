@@ -38,6 +38,7 @@ module Wcl::Setup # rubocop:disable Metrics/ModuleLength
     ticket_target_date
     email_only_existing_users
     notifications_via_graph
+    phone_view_devices
     true
   end
 
@@ -945,6 +946,117 @@ module Wcl::Setup # rubocop:disable Metrics/ModuleLength
         permission: ['admin.channel_email', 'admin.channel_google', 'admin.channel_microsoft365', 'admin.channel_microsoft_graph'],
       },
       frontend:    false,
+    )
+  end
+
+  # The phones listed on Admin > System > Phone View (WclPhoneView), where admins preview the mobile
+  #   app at each phone's screen size; admins add and remove devices there.
+  #   Sizes are the screen in CSS pixels (portrait), as browsers report them.
+  PHONE_VIEW_DEVICES = [
+    # Samsung Galaxy S
+    [__('Samsung Galaxy S23 Ultra'), 384, 824],
+    [__('Samsung Galaxy S24 Ultra'), 384, 824],
+    [__('Samsung Galaxy S24'), 360, 780],
+    [__('Samsung Galaxy S23'), 360, 780],
+    [__('Samsung Galaxy S22 Ultra'), 384, 854],
+    [__('Samsung Galaxy S22'), 360, 780],
+    [__('Samsung Galaxy S21 Ultra'), 384, 854],
+    [__('Samsung Galaxy S21'), 360, 800],
+    [__('Samsung Galaxy S20 Ultra'), 412, 915],
+    [__('Samsung Galaxy S20'), 360, 800],
+    [__('Samsung Galaxy S10+'), 412, 869],
+    [__('Samsung Galaxy S10'), 360, 760],
+    [__('Samsung Galaxy S9+'), 412, 846],
+    [__('Samsung Galaxy S9'), 360, 740],
+    [__('Samsung Galaxy S8+'), 360, 740],
+    [__('Samsung Galaxy S8'), 360, 740],
+    [__('Samsung Galaxy S7'), 360, 640],
+    [__('Samsung Galaxy S6'), 360, 640],
+    [__('Samsung Galaxy S5'), 360, 640],
+    [__('Samsung Galaxy S4'), 360, 640],
+    [__('Samsung Galaxy S3'), 360, 640],
+    # Samsung Galaxy Note
+    [__('Samsung Galaxy Note 20 Ultra'), 412, 883],
+    [__('Samsung Galaxy Note 10+'), 412, 869],
+    [__('Samsung Galaxy Note 9'), 414, 846],
+    [__('Samsung Galaxy Note 8'), 414, 846],
+    [__('Samsung Galaxy Note 3'), 360, 640],
+    [__('Samsung Galaxy Note II'), 360, 640],
+    # Samsung Galaxy A / J
+    [__('Samsung Galaxy A54'), 412, 915],
+    [__('Samsung Galaxy A53'), 412, 915],
+    [__('Samsung Galaxy A52'), 412, 915],
+    [__('Samsung Galaxy A51 / A71'), 412, 914],
+    [__('Samsung Galaxy A32'), 412, 915],
+    [__('Samsung Galaxy A12'), 360, 800],
+    [__('Samsung Galaxy A10'), 360, 760],
+    [__('Samsung Galaxy J7'), 360, 640],
+    [__('Samsung Galaxy J5'), 360, 640],
+    # Samsung foldables
+    [__('Samsung Galaxy Z Fold 5 (folded)'), 344, 882],
+    [__('Samsung Galaxy Z Fold 5 (open)'), 690, 829],
+    [__('Samsung Galaxy Z Flip 5'), 412, 1004],
+    # Apple iPhone
+    ['iPhone 16 Pro Max', 440, 956],
+    ['iPhone 16 Pro', 402, 874],
+    ['iPhone 16 Plus / 15 Plus / 15 Pro Max / 14 Pro Max', 430, 932],
+    ['iPhone 16 / 15 / 15 Pro / 14 Pro', 393, 852],
+    ['iPhone 14 Plus / 13 Pro Max / 12 Pro Max', 428, 926],
+    ['iPhone 14 / 13 / 13 Pro / 12 / 12 Pro', 390, 844],
+    ['iPhone 13 mini / 12 mini', 375, 812],
+    ['iPhone 11 Pro Max / XS Max', 414, 896],
+    ['iPhone 11 / XR', 414, 896],
+    ['iPhone 11 Pro / XS / X', 375, 812],
+    ['iPhone 8 Plus / 7 Plus / 6s Plus / 6 Plus', 414, 736],
+    ['iPhone 8 / 7 / 6s / 6', 375, 667],
+    ['iPhone SE (2nd and 3rd gen)', 375, 667],
+    ['iPhone SE (1st gen) / 5s / 5', 320, 568],
+    ['iPhone 4s / 4', 320, 480],
+    # Google
+    [__('Google Pixel 8 Pro'), 448, 998],
+    [__('Google Pixel 8'), 412, 915],
+    [__('Google Pixel 7'), 412, 915],
+    [__('Google Pixel 6'), 412, 915],
+    [__('Google Pixel 5'), 393, 851],
+    [__('Google Pixel 4'), 353, 745],
+    [__('Google Pixel 3 XL'), 412, 846],
+    [__('Google Pixel 3'), 393, 786],
+    [__('Google Pixel 2 XL'), 411, 823],
+    [__('Google Pixel 2'), 411, 731],
+    [__('Google Nexus 6P / 6'), 412, 732],
+    [__('Google Nexus 5X'), 412, 732],
+    [__('Google Nexus 5'), 360, 640],
+    [__('Google Nexus 4'), 384, 640],
+    # Other Android
+    [__('Xiaomi Redmi Note 13'), 393, 873],
+    [__('Xiaomi Redmi Note 9 / 8'), 393, 851],
+    ['OPPO A-series (typical)', 360, 800],
+    [__('Motorola Moto G Power'), 412, 823],
+    [__('Motorola Moto G4'), 360, 640],
+    [__('LG G5'), 360, 640],
+    [__('Huawei P30'), 360, 780],
+    [__('Microsoft Surface Duo'), 540, 720],
+    # Tablets
+    ['iPad mini', 744, 1133],
+    ['iPad (10th gen)', 820, 1180],
+    ['iPad Air', 820, 1180],
+    ['iPad (older, 9.7")', 768, 1024],
+    ['iPad Pro 11"', 834, 1194],
+    ['iPad Pro 12.9"', 1024, 1366],
+    [__('Samsung Galaxy Tab S7'), 800, 1280],
+    [__('Amazon Kindle Fire HDX'), 800, 1280],
+  ].map { |name, width, height| { 'name' => name, 'width' => width, 'height' => height }.freeze }.freeze
+
+  def self.phone_view_devices
+    Setting.create_if_not_exists(
+      title:       __('Phone view devices'),
+      name:        'wcl_phone_view_devices',
+      area:        'Wcl::PhoneView',
+      description: __('The devices offered on Admin > System > Phone View.'),
+      options:     {},
+      preferences: { authentication: true, permission: ['admin.maintenance'] },
+      state:       PHONE_VIEW_DEVICES.map(&:dup),
+      frontend:    true,
     )
   end
 end

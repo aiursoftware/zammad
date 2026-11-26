@@ -1,0 +1,64 @@
+<div class="page-header">
+  <div class="page-header-title">
+    <h1><%- @T('Phone View') %></h1>
+  </div>
+</div>
+<div class="page-content wcl-phone-view">
+  <p class="text-muted"><%- @T('How the mobile app looks on a phone. You are signed in inside the preview as yourself; links and buttons work as on the phone.') %></p>
+
+  <div class="wcl-phone-view-layout">
+    <div class="wcl-phone-view-stage">
+      <div class="wcl-phone-view-toolbar">
+        <div class="controls controls--select">
+          <select class="form-control js-device" aria-label="<%= @Ti('Device') %>">
+            <% for device, i in @devices: %>
+              <option value="<%= i %>" <% if i is @index: %>selected<% end %>><%= device.name %> (<%= device.width %>×<%= device.height %>)</option>
+            <% end %>
+          </select>
+          <%- @Icon('arrow-down', 'dropdown-arrow') %>
+        </div>
+        <button class="btn js-rotate"><% if @landscape: %><%- @T('Portrait') %><% else: %><%- @T('Landscape') %><% end %></button>
+        <button class="btn js-reload"><%- @T('Reload') %></button>
+        <a class="btn" href="<%= @url %>" target="_blank" rel="noopener"><%- @T('Open in new tab') %></a>
+      </div>
+
+      <div class="wcl-phone-view-holder js-phoneHolder">
+        <div class="wcl-phone js-phone" style="width: <%= @width + 24 %>px; height: <%= @height + 24 %>px">
+          <iframe class="wcl-phone-screen js-frame" src="/mobile" title="<%= @Ti('Phone View') %>" style="width: <%= @width %>px; height: <%= @height %>px"></iframe>
+        </div>
+      </div>
+      <p class="text-muted wcl-phone-view-size"><%= @width %> × <%= @height %> px</p>
+    </div>
+
+    <div class="wcl-phone-view-devices">
+      <h2><%- @T('Devices') %></h2>
+      <table class="table">
+        <tbody>
+          <% for device, i in @devices: %>
+            <tr>
+              <td><%= device.name %></td>
+              <td class="text-muted"><%= device.width %>×<%= device.height %></td>
+              <td class="wcl-phone-view-remove">
+                <% if @devices.length > 1: %>
+                  <a href="#" class="js-removeDevice" data-index="<%= i %>" title="<%= @Ti('Remove') %>"><%- @Icon('trash') %></a>
+                <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+
+      <form class="js-addDevice wcl-phone-view-add">
+        <h3><%- @T('Add a device') %></h3>
+        <input class="form-control" name="name" placeholder="<%= @Ti('Name, e.g. Galaxy S24') %>">
+        <div class="wcl-phone-view-add-size">
+          <input class="form-control" name="width" type="number" min="240" max="1400" placeholder="<%= @Ti('Width') %>">
+          <span>×</span>
+          <input class="form-control" name="height" type="number" min="320" max="2000" placeholder="<%= @Ti('Height') %>">
+        </div>
+        <p class="text-muted"><%- @T('Use the screen size in CSS pixels (search "<device> viewport size").') %></p>
+        <button class="btn btn--primary" type="submit"><%- @T('Add') %></button>
+      </form>
+    </div>
+  </div>
+</div>
