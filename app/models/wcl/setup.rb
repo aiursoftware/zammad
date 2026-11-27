@@ -982,7 +982,7 @@ module Wcl::Setup # rubocop:disable Metrics/ModuleLength
       state:       [],
       frontend:    true,
     )
-    return if Array(setting.state_current&.dig('value') || setting.state_current&.dig(:value)).any?
+    return if Array(setting.state_current.to_h.with_indifferent_access[:value]).any?
 
     Setting.set('wcl_phone_view_devices', PHONE_VIEW_DEVICES.map(&:dup))
   end

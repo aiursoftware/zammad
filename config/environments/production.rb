@@ -2,6 +2,21 @@
 
 require 'zammad/trusted_proxies'
 
+# WCL customization: also write the log to a file (WCL_LOG_FILE, kept to 5 x 10 MB), so admins can
+#   read it on Admin > System > Server Files. A folder that can't be written (e.g. created by Docker,
+#   owned by root) only costs the file.
+with_wcl_log_file = lambda do |logger, formatter|
+  path = ENV['WCL_LOG_FILE']
+  return logger if path.blank?
+
+  file_logger           = ActiveSupport::Logger.new(path, 5, 10 * 1024 * 1024)
+  file_logger.formatter = formatter
+  ActiveSupport::BroadcastLogger.new(logger, file_logger)
+rescue SystemCallError => e
+  logger.warn "WCL_LOG_FILE #{path} can't be written (#{e.message}); logging to stdout only."
+  logger
+end
+
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
@@ -94,13 +109,7 @@ Rails.application.configure do
     logger           = ActiveSupport::Logger.new($stdout)
     logger.formatter = config.log_formatter
 
-    # WCL customization: also write the log to a file (WCL_LOG_FILE, kept to 5 x 10 MB), so admins
-    #   can read it on Admin > System > Server Files.
-    if ENV['WCL_LOG_FILE'].present?
-      file_logger           = ActiveSupport::Logger.new(ENV['WCL_LOG_FILE'], 5, 10 * 1024 * 1024)
-      file_logger.formatter = config.log_formatter
-      logger                = ActiveSupport::BroadcastLogger.new(logger, file_logger)
-    end
+    logger = with_wcl_log_file.call(logger, config.log_formatter)
 
     config.logger = ActiveSupport::TaggedLogging.new(logger)
   end

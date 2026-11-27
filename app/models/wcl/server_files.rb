@@ -32,6 +32,8 @@ module Wcl::ServerFiles
     raise Error, __('This file does not exist.') if real != base && !real.to_s.start_with?("#{base}/")
 
     real
+  rescue ArgumentError # e.g. a NUL byte in the path
+    raise Error, __('This file does not exist.')
   end
 
   # The folders and files in a folder, folders first, then newest first.

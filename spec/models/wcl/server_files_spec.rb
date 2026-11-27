@@ -37,6 +37,14 @@ RSpec.describe Wcl::ServerFiles do
     expect { described_class.view('backups', 'escape') }.to raise_error(described_class::Error)
   end
 
+  it 'refuses an absolute path' do
+    expect { described_class.view('backups', '//etc/hostname') }.to raise_error(described_class::Error)
+  end
+
+  it 'refuses a path with a NUL byte' do
+    expect { described_class.view('backups', "a.log\0") }.to raise_error(described_class::Error)
+  end
+
   it 'refuses unknown folders' do
     expect { described_class.list('config') }.to raise_error(described_class::Error)
   end

@@ -89,14 +89,31 @@ App.RichtextBubbleMenu =
     render()
     ce.$element.off('focus.wcl-toolbar').on('focus.wcl-toolbar', render)
 
+    closeMenu = ->
+      $(window).off('mousedown.wcl-toolbar')
+      container.find('.text-tools-dropdown').remove()
+      container.find('.show-dropdown').removeClass('show-dropdown')
+
     container.off('mousedown.wcl-toolbar').on('mousedown.wcl-toolbar', '.js-action', (e) =>
       e.preventDefault()
 
-      key    = e.target.closest('.bubble-menu-item').dataset.key
+      key    = e.target.closest('.bubble-menu-item')?.dataset.key
       action = _.find(@allActions(), (item) -> item.key is key)
       return false if !action
 
-      action.action(e, ce, @richtextToolbarSelection(ce, action.type is 'dropup'), el, -> )
+      if action.type isnt 'dropup'
+        action.action(e, ce, @richtextToolbarSelection(ce, false), el, -> )
+        return false
+
+      # A tool picked earlier leaves its menu behind, closed; the button would only remove it.
+      container.find('.text-tools-dropdown:not(.open)').remove()
+      return false if !ce.$element.text().trim()
+
+      action.action(e, ce, @richtextToolbarSelection(ce, true), el, closeMenu)
+      if container.find('.show-dropdown').length
+        $(window).off('mousedown.wcl-toolbar').one('mousedown.wcl-toolbar', closeMenu)
+      else
+        closeMenu()
       false
     )
 
