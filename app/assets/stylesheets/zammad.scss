@@ -7535,7 +7535,7 @@ a.list-group-item.active > .badge,
   color: var(--header-primary);
 }
 
-// WCL: who the ticket is from (customer, department, organization) under the title.
+// WCL: who the ticket is from (customer, organization) under the title.
 .ticket-meta-requester {
   display: flex;
   flex-wrap: wrap;

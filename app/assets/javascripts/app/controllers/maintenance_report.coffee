@@ -79,7 +79,6 @@ class MaintenanceReport extends App.ControllerAppContent
     period    = (label) => [@column('period', label), submitted, completed, average]
 
     tables = [
-      @table(__('By department'), data.by_department, breakdown(__('Department')))
       @table(__('By location'), data.by_location, breakdown(__('Location')))
       @table(__('By category'), data.by_category, breakdown(__('Category')))
       @table(__('By person'), data.by_person, [@column('name', __('Person')), @column('completed', __('Completed'), numeric: true, bar: true), @column('open_now', __('Open now'), numeric: true), average])

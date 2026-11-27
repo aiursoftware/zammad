@@ -1,7 +1,7 @@
 # Copyright (C) 2012-2026 Zammad Foundation, https://zammad-foundation.org/
 
 # Checks a running WCL Zammad end to end, the way the HR app uses it, through real HTTP calls.
-# Leaves nothing behind (its customer, ticket, token and test departments are removed).
+# Leaves nothing behind (its customer, ticket and token are removed).
 #
 #   docker compose exec -T zammad-railsserver bundle exec rails r - < verify.rb
 #
@@ -41,8 +41,6 @@ token = Token.create!(action: 'api', name: 'WCL verify (temporary)', user_id: ad
                       preferences: { permission: %w[admin.user ticket.agent admin.overview] }, persistent: true)
 customer_email = "wcl-verify-#{SecureRandom.hex(4)}@example.invalid"
 ticket_id = nil
-# The department test adds a department; the real list is put back at the end.
-department_option_before = ObjectManager::Attribute.get(object: 'User', name: 'department')&.data_option&.deep_dup
 
 http = lambda do |method, path, body: nil, from: nil, raw: false|
   uri = URI("#{BASE}/api/v1/#{path}")
@@ -69,12 +67,9 @@ begin
     missing << 'urgent priority' if Ticket::Priority.find_by(name: '4 urgent')&.ui_color != 'urgent-priority'
     missing << 'Owners field' if !ObjectManager::Attribute.get(object: 'Ticket', name: 'assignees')
     missing << 'Show in HR app' if !ObjectManager::Attribute.get(object: 'Group', name: 'hr_portal')
-    missing << 'Departments list' if !Department.table_exists?
-    missing << 'department dropdown' if ObjectManager::Attribute.get(object: 'User', name: 'department')&.data_type != 'tree_select'
     missing << 'attachment settings' if Setting.get('hr_portal_attachment_extensions').nil?
     missing << 'open-requests overview' if !Overview.exists?(link: 'hr_portal_open')
     missing << 'In Progress / On Hold states' if Ticket::State.where(name: ['in progress', 'on hold']).count != 2
-    missing << 'ticket Department' if !ObjectManager::Attribute.get(object: 'Ticket', name: 'department')
     missing << 'Manager role' if !Role.exists?(name: 'Manager') || !Overview.exists?(link: 'wcl_team_open')
     missing << 'Category field' if !ObjectManager::Attribute.get(object: 'Ticket', name: 'category')
     missing << 'hidden state on new tickets' if !CoreWorkflow.exists?(name: 'WCL: Customers do not pick the state of a new ticket')
@@ -95,12 +90,6 @@ begin
   check('API: attachment rules endpoint') do
     code, json = http.call(:get, 'wcl/attachment_rules')
     [code == 200 && json['extensions'].is_a?(Array) && json['max_bytes'].to_i.positive?, "HTTP #{code} #{json}"]
-  end
-
-  check('department: listed in Departments, offered in the dropdown') do
-    Department.create!(name: 'WCL Verify Dept', active: true, created_by_id: 1, updated_by_id: 1)
-    options = Array(ObjectManager::Attribute.get(object: 'User', name: 'department').reload.data_option['options']).pluck('value')
-    [options.include?('WCL Verify Dept'), "options: #{options.first(5)}..."]
   end
 
   check('API: customer created with a location organization') do
@@ -239,10 +228,7 @@ ensure
   User.find_by(email: customer_email)&.destroy
   User.where('email LIKE ?', 'wcl-verify-other-%@example.invalid').find_each(&:destroy)
   User.where('login LIKE ?', 'wcl-verify-agent-%').find_each(&:destroy)
-  Department.find_by(name: 'WCL Verify Dept')&.destroy if defined?(Department) && Department.table_exists?
   Organization.find_by(name: 'ZZ: WCL Verify')&.destroy
-  attribute = ObjectManager::Attribute.get(object: 'User', name: 'department')
-  attribute.update!(data_option: department_option_before) if attribute && department_option_before
   token.destroy
 end
 

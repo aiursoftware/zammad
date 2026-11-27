@@ -332,7 +332,7 @@ class App.TicketZoomArticleNew extends App.Controller
       for attachment in @attachments
         @renderAttachment(attachment)
 
-    @richtextBubbleMenuInit(@textarea.parent(), false)
+    @richtextToolbarInit(@textarea.parent(), @$('.js-richtextToolbar'))
 
   params: =>
     params = @formParam( @$('.article-add') )
@@ -515,6 +515,8 @@ class App.TicketZoomArticleNew extends App.Controller
     @type = type
     @$('[name=type]').val(type).trigger('change')
     @articleNewEdit.attr('data-type', type)
+    # Plain-text types (SMS, Telegram, …) have no formatting.
+    @$('.js-richtextToolbar').toggleClass('hide', type not in ['note', 'email', 'phone'])
     @$('.js-selectableTypes').addClass('hide').filter("[data-type='#{type}']").removeClass('hide')
 
     @setPossibleArticleTypes()

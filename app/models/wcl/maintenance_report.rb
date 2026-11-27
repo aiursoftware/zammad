@@ -3,7 +3,7 @@
 # WCL customization: the Maintenance report (Reporting > Maintenance Report, and its Excel
 # download). For a period and a set of groups it counts tickets submitted, completed, rejected and
 # still open, the average completion time (created -> closed), and breaks that down by week,
-# month, department, location, category and person (the ticket's main owner). It also lists repeat
+# month, location, category and person (the ticket's main owner). It also lists repeat
 # issues (the same category at the same location more than once) and the oldest open ticket.
 #
 # Only tickets the user may read are counted (TicketPolicy::ReadScope).
@@ -24,17 +24,16 @@ class Wcl::MaintenanceReport
   # Everything the page shows, as plain data.
   def data
     @data ||= {
-      period:        { from: from.iso8601, to: to.iso8601 },
-      groups:        Group.where(id: scope_group_ids).reorder(:name).pluck(:name),
-      summary:       summary,
-      by_week:       by_period(:week),
-      by_month:      by_period(:month),
-      by_department: breakdown { |ticket| ticket[:department] if ticket.has_attribute?(:department) },
-      by_location:   breakdown { |ticket| location_name(ticket) },
-      by_category:   breakdown { |ticket| category_name(ticket) },
-      by_person:     by_person,
-      repeats:       repeats,
-      oldest_open:   oldest_open,
+      period:      { from: from.iso8601, to: to.iso8601 },
+      groups:      Group.where(id: scope_group_ids).reorder(:name).pluck(:name),
+      summary:     summary,
+      by_week:     by_period(:week),
+      by_month:    by_period(:month),
+      by_location: breakdown { |ticket| location_name(ticket) },
+      by_category: breakdown { |ticket| category_name(ticket) },
+      by_person:   by_person,
+      repeats:     repeats,
+      oldest_open: oldest_open,
     }
   end
 
@@ -263,7 +262,6 @@ class Wcl::MaintenanceReport
     write_table(workbook.add_worksheet(__('By week')), formats, %w[Week Submitted Completed], data[:by_week], %i[period submitted completed average_days])
     write_table(workbook.add_worksheet(__('By month')), formats, %w[Month Submitted Completed], data[:by_month], %i[period submitted completed average_days])
     breakdown_columns = %i[name submitted completed still_open average_days]
-    write_table(workbook.add_worksheet(__('By department')), formats, ['Department', 'Submitted', 'Completed', __('Still open')], data[:by_department], breakdown_columns)
     write_table(workbook.add_worksheet(__('By location')), formats, ['Location', 'Submitted', 'Completed', __('Still open')], data[:by_location], breakdown_columns)
     write_table(workbook.add_worksheet(__('By category')), formats, ['Category', 'Submitted', 'Completed', __('Still open')], data[:by_category], breakdown_columns)
     write_table(workbook.add_worksheet(__('By person')), formats, ['Person', 'Completed', __('Open now')], data[:by_person], %i[name completed open_now average_days])
@@ -320,7 +318,7 @@ class Wcl::MaintenanceReport
   end
 
   def write_tickets(sheet, formats) # rubocop:disable Metrics/AbcSize, Metrics/CyclomaticComplexity, Metrics/PerceivedComplexity
-    headers = ['Number', 'Title', 'Group', 'Category', 'Department', 'Location', 'Priority', 'State', 'Requester', 'Owner', 'Created', 'Completed', __('Days to complete')]
+    headers = ['Number', 'Title', 'Group', 'Category', 'Location', 'Priority', 'State', 'Requester', 'Owner', 'Created', 'Completed', __('Days to complete')]
     headers.each_with_index { |header, column| sheet.write(0, column, header, formats[:header]) }
     sheet.set_column(1, 1, 40)
     sheet.set_column(2, 10, 18)
@@ -328,7 +326,7 @@ class Wcl::MaintenanceReport
     tickets.each_with_index do |ticket, index|
       values = [
         ticket.number, ticket.title, ticket.group&.name, category_name(ticket),
-        (ticket.department if ticket.has_attribute?(:department)), (ticket.location if ticket.has_attribute?(:location)),
+        (ticket.location if ticket.has_attribute?(:location)),
         ticket.priority&.name.to_s.sub(%r{\A\d+\s+}, ''), ticket.state&.name, ticket.customer&.fullname, owner_name(ticket),
         local(ticket.created_at), (local(ticket.close_at) if closed_state_ids.include?(ticket.state_id)),
         (days_to_complete(ticket) if closed_state_ids.include?(ticket.state_id))

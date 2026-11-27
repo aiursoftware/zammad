@@ -44,8 +44,6 @@ organization name, **email channel** — needed for notifications and admin pass
   the ones employees may pick (HR, IT, Payroll, …); leave it off for teams tickets are only handed
   to (Dev, Network). Every agent gets access to a new group automatically.
 - **Agents** (Admin → Users → New, role _Agent_).
-- **Departments** (Admin → Objects → User → Department): add your department names; employees'
-  department is picked from this list (Admin → Manage → Departments).
 
 ## 3. Microsoft 365 sign-in for employees
 
@@ -84,7 +82,7 @@ docker compose exec -T zammad-railsserver bundle exec rails r - < verify.rb
 ```
 
 Everything WCL needs in Zammad's data (Rejected state, Urgent priority that employees can pick,
-Owners field, department dropdown, attachment settings, 30-day sessions, …) is created on the first
+Owners field, attachment settings, 30-day sessions, …) is created on the first
 start. To re-apply it: `docker compose exec zammad-railsserver bundle exec rails zammad:wcl:setup`.
 
 ## Updates

@@ -71,6 +71,51 @@ App.RichtextBubbleMenu =
           closeDropdown()
       , 100
 
+  # WCL: the same tools as a bar that is always shown above the text, instead of only on a selection.
+  richtextToolbarInit: (el, container) ->
+    container.empty()
+    return if not @bubbleMenuEnabled() and not App.WidgetTextTools.enabled()
+
+    ce = el.find('[contenteditable]').data()?.plugin_ce
+    return if !ce
+
+    # The AI tools load later, so the bar is rebuilt each time the text gets the focus.
+    render = =>
+      return if container.find('.show-dropdown').length
+
+      container.html(App.view('generic/richtext_bubble_menu')(items: @filteredActions(ce)))
+      container.children('.js-bubbleMenu').addClass('wcl-richtext-toolbar')
+
+    render()
+    ce.$element.off('focus.wcl-toolbar').on('focus.wcl-toolbar', render)
+
+    container.off('mousedown.wcl-toolbar').on('mousedown.wcl-toolbar', '.js-action', (e) =>
+      e.preventDefault()
+
+      key    = e.target.closest('.bubble-menu-item').dataset.key
+      action = _.find(@allActions(), (item) -> item.key is key)
+      return false if !action
+
+      action.action(e, ce, @richtextToolbarSelection(ce, action.type is 'dropup'), el, -> )
+      false
+    )
+
+  # The selected text; without one, the AI tools take the whole text and the formatting applies at
+  # the cursor (the end of the text if it isn't in there).
+  richtextToolbarSelection: (ce, wholeText) ->
+    selection = ce.getSelection()
+    return selection if selection.content or (selection.ranges.length and not wholeText)
+
+    editor = ce.$element.get(0)
+    editor.focus()
+    range = document.createRange()
+    range.selectNodeContents(editor)
+    range.collapse(false) if not wholeText
+    windowSelection = window.getSelection()
+    windowSelection.removeAllRanges()
+    windowSelection.addRange(range)
+    ce.getSelection()
+
   bubbleMenuEnabled: ->
     App.Config.get('ui_richtext_bubble_menu')
 

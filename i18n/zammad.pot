@@ -351,7 +351,7 @@ msgid "%s object(s) will be updated."
 msgstr ""
 
 #: app/assets/javascripts/app/views/popover/ticket_overview.jst.eco:8
-#: app/assets/javascripts/app/views/ticket_zoom/meta.jst.eco:33
+#: app/assets/javascripts/app/views/ticket_zoom/meta.jst.eco:30
 #: app/frontend/apps/desktop/components/Ticket/TicketPopoverWithTrigger/TicketContentPopover.vue:50
 #: app/frontend/apps/desktop/pages/guided-setup/views/GuidedSetupImport/GuidedSetupImportSource/GuidedSetupImportSourceStatus.vue:208
 #: app/frontend/apps/desktop/pages/ticket/components/TicketDetailView/TicketDetailTopBar/components/TicketInformationFull/TicketInformationBadgeList/ChecklistBadgeList.vue:44
@@ -371,7 +371,7 @@ msgid "%s of my tickets escalated"
 msgstr ""
 
 #: app/assets/javascripts/app/views/ticket_overview/batch_overlay_user_group.jst.eco:11
-#: app/assets/javascripts/app/views/ticket_zoom/meta.jst.eco:22
+#: app/assets/javascripts/app/views/ticket_zoom/meta.jst.eco:19
 #: app/graphql/gql/queries/autocomplete_search/generic.rb:73
 msgid "%s people"
 msgstr ""
@@ -386,7 +386,7 @@ msgstr ""
 msgid "%s recommends using OAuth. %s announced it's going to drop Basic Authentication support in the future."
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:111
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:110
 msgid "%s requests submitted between %s and %s in %s."
 msgstr ""
 
@@ -433,7 +433,7 @@ msgstr ""
 msgid "%s ticket(s) selected, selection limit reached"
 msgstr ""
 
-#: app/assets/javascripts/app/views/ticket_zoom/meta.jst.eco:44
+#: app/assets/javascripts/app/views/ticket_zoom/meta.jst.eco:41
 #: app/frontend/apps/desktop/pages/ticket/components/TicketDetailView/TicketDetailTopBar/components/TicketInformationFull/TicketInformationBadgeList/ReferencingTicketsBadgePopover.vue:63
 #: app/frontend/apps/mobile/components/Organization/OrganizationItem.vue:51
 #: app/frontend/apps/mobile/components/User/UserItem.vue:31
@@ -732,7 +732,7 @@ msgstr ""
 msgid "A test ticket has been created, you can find it in your overview \"%s\" %l."
 msgstr ""
 
-#: app/models/ticket.rb:306
+#: app/models/ticket.rb:305
 msgid "A ticket cannot be merged into itself."
 msgstr ""
 
@@ -1001,7 +1001,7 @@ msgstr ""
 msgid "Accept chat"
 msgstr ""
 
-#: app/models/wcl/setup.rb:850
+#: app/models/wcl/setup.rb:756
 msgid "Accept email only from existing users"
 msgstr ""
 
@@ -1217,7 +1217,6 @@ msgstr ""
 #: app/assets/javascripts/app/models/chat.coffee:257
 #: app/assets/javascripts/app/models/checklist_template.coffee:9
 #: app/assets/javascripts/app/models/core_workflow.coffee:14
-#: app/assets/javascripts/app/models/department.coffee:10
 #: app/assets/javascripts/app/models/email_address.coffee:37
 #: app/assets/javascripts/app/models/group.coffee:16
 #: app/assets/javascripts/app/models/job.coffee:16
@@ -1315,7 +1314,6 @@ msgstr ""
 #: app/assets/javascripts/app/views/channel/email_account_overview.jst.eco:143
 #: app/assets/javascripts/app/views/channel/topics.jst.eco:37
 #: app/assets/javascripts/app/views/channel_account/list.jst.eco:113
-#: app/assets/javascripts/app/views/department/members.jst.eco:3
 #: app/assets/javascripts/app/views/generic/application_selector_row.jst.eco:32
 #: app/assets/javascripts/app/views/generic/checklist_item.jst.eco:26
 #: app/assets/javascripts/app/views/generic/object_attribute_options_context.jst.eco:58
@@ -1529,10 +1527,6 @@ msgstr ""
 #: app/frontend/apps/desktop/components/Form/fields/FieldEditor/useEditorActions.ts:244
 #: app/frontend/apps/mobile/components/Form/fields/FieldEditor/useEditorActions.ts:235
 msgid "Add ordered list"
-msgstr ""
-
-#: app/assets/javascripts/app/views/department/members.jst.eco:3
-msgid "Add people"
 msgstr ""
 
 #: app/frontend/shared/entities/ticket-article/action/plugins/phone.ts:13
@@ -1755,7 +1749,7 @@ msgstr ""
 msgid "Agent limit exceeded, please check your account settings."
 msgstr ""
 
-#: app/models/wcl/setup.rb:910
+#: app/models/wcl/setup.rb:816
 msgid "Agent notifications, invitations and password resets are sent through the Microsoft 365 Graph email account instead of the SMTP notification account. Falls back to the notification account when there is no active Graph account."
 msgstr ""
 
@@ -1983,7 +1977,7 @@ msgstr ""
 msgid "Always"
 msgstr ""
 
-#: app/models/wcl/setup.rb:1024
+#: app/models/wcl/setup.rb:930
 msgid "Amazon Kindle Fire HDX"
 msgstr ""
 
@@ -2910,11 +2904,11 @@ msgstr ""
 msgid "Avatar with initials %s"
 msgstr ""
 
-#: app/models/wcl/maintenance_report.rb:283
+#: app/models/wcl/maintenance_report.rb:281
 msgid "Average completion (days)"
 msgstr ""
 
-#: app/models/wcl/maintenance_report.rb:271
+#: app/models/wcl/maintenance_report.rb:269
 msgid "Average completion time (days)"
 msgstr ""
 
@@ -2931,7 +2925,7 @@ msgstr ""
 msgid "Average: %s%"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:119
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:118
 msgid "Avg. completion"
 msgstr ""
 
@@ -3098,7 +3092,7 @@ msgstr ""
 msgid "Begin forwarded message"
 msgstr ""
 
-#: app/models/wcl/setup.rb:562
+#: app/models/wcl/setup.rb:548
 msgid "Being worked on (WCL)."
 msgstr ""
 
@@ -3142,7 +3136,7 @@ msgstr ""
 msgid "Blocked countries"
 msgstr ""
 
-#: app/models/wcl/setup.rb:872
+#: app/models/wcl/setup.rb:778
 msgid "Blocked email addresses"
 msgstr ""
 
@@ -3247,8 +3241,8 @@ msgstr ""
 msgid "But it's only available in these languages:"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:84
-#: app/models/wcl/maintenance_report.rb:254
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:83
+#: app/models/wcl/maintenance_report.rb:252
 msgid "By category"
 msgstr ""
 
@@ -3257,12 +3251,7 @@ msgid "By default, the follow-up check is done via the subject of an email. This
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/maintenance_report.coffee:82
-#: app/models/wcl/maintenance_report.rb:252
-msgid "By department"
-msgstr ""
-
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:83
-#: app/models/wcl/maintenance_report.rb:253
+#: app/models/wcl/maintenance_report.rb:251
 msgid "By location"
 msgstr ""
 
@@ -3274,18 +3263,18 @@ msgstr ""
 msgid "By mapping your agents' sipgate users to their Zammad user accounts, Zammad can support your agents by opening either a new ticket dialogue or the user profile upon picking up a new call."
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:92
-#: app/models/wcl/maintenance_report.rb:250
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:91
+#: app/models/wcl/maintenance_report.rb:249
 msgid "By month"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:85
-#: app/models/wcl/maintenance_report.rb:255
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:84
+#: app/models/wcl/maintenance_report.rb:253
 msgid "By person"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:91
-#: app/models/wcl/maintenance_report.rb:249
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:90
+#: app/models/wcl/maintenance_report.rb:248
 msgid "By week"
 msgstr ""
 
@@ -3587,13 +3576,13 @@ msgstr ""
 msgid "Categories"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:84
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:83
 #: app/assets/javascripts/app/models/knowledge_base_answer.coffee:51
 #: app/assets/javascripts/app/views/popover/kb_generic.jst.eco:36
 #: app/assets/javascripts/app/views/ticket_zoom/knowledge_base_ai_draft_modal.jst.eco:78
 #: app/frontend/apps/desktop/components/KnowledgeBase/KnowledgeBaseAnswer/KnowledgeBaseAnswerAttributes.vue:85
 #: app/frontend/apps/desktop/entities/knowledge-base/composables/useAnswerFormSchema.ts:170
-#: app/models/wcl/setup.rb:359
+#: app/models/wcl/setup.rb:349
 msgid "Category"
 msgstr ""
 
@@ -4365,7 +4354,7 @@ msgstr ""
 msgid "Completed Tasks"
 msgstr ""
 
-#: app/models/wcl/maintenance_report.rb:268
+#: app/models/wcl/maintenance_report.rb:266
 msgid "Completed in period"
 msgstr ""
 
@@ -5372,7 +5361,7 @@ msgstr ""
 msgid "Customer tickets of the user will get deleted on execution of the task. No rollback possible."
 msgstr ""
 
-#: app/models/wcl/setup.rb:47
+#: app/models/wcl/setup.rb:46
 msgid "Customers can create tickets here"
 msgstr ""
 
@@ -5528,7 +5517,7 @@ msgstr ""
 msgid "Days"
 msgstr ""
 
-#: app/models/wcl/maintenance_report.rb:309
+#: app/models/wcl/maintenance_report.rb:307
 msgid "Days to complete"
 msgstr ""
 
@@ -5637,7 +5626,7 @@ msgstr ""
 
 #: app/assets/javascripts/app/models/ticket_priority.coffee:26
 #: app/assets/javascripts/app/models/ticket_state.coffee:28
-#: app/models/wcl/setup.rb:755
+#: app/models/wcl/setup.rb:661
 msgid "Default for new tickets"
 msgstr ""
 
@@ -6026,7 +6015,7 @@ msgstr ""
 msgid "Defines postmaster filter to check if the email is a self-created notification email, then ignore it to prevent email loops."
 msgstr ""
 
-#: app/models/wcl/setup.rb:896
+#: app/models/wcl/setup.rb:802
 msgid "Defines postmaster filter to drop email from senders without a user account."
 msgstr ""
 
@@ -6118,7 +6107,7 @@ msgstr ""
 msgid "Defines postmaster filter which sets the articles visibility to internal if it is a rely to an internal article or the last outgoing email is internal."
 msgstr ""
 
-#: app/models/wcl/setup.rb:893
+#: app/models/wcl/setup.rb:799
 #: db/seeds/settings.rb:4484
 msgid "Defines postmaster filter."
 msgstr ""
@@ -6682,19 +6671,8 @@ msgstr ""
 msgid "Delivery failed: \"%s\""
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/department.coffee:3
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:82
-#: app/models/wcl/setup.rb:164
 #: db/seeds/object_manager_attributes.rb:1234
 msgid "Department"
-msgstr ""
-
-#: app/models/wcl/setup.rb:164
-msgid "Department of the requester when the ticket was created; filled in automatically."
-msgstr ""
-
-#: app/assets/javascripts/app/controllers/department.coffee:3
-msgid "Departments"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/_application_controller/_modal_generic_description.coffee:5
@@ -7082,7 +7060,6 @@ msgstr ""
 msgid "Don't synchronize"
 msgstr ""
 
-#: app/assets/javascripts/app/lib/app_post/wcl_department_members.coffee:5
 #: app/frontend/apps/desktop/components/Form/fields/FieldDate/FieldDatePanel.vue:273
 #: app/frontend/apps/mobile/components/CommonDialog/CommonDialog.vue:141
 #: app/frontend/apps/mobile/components/Form/fields/FieldAutoComplete/FieldAutoCompleteInputDialog.vue:243
@@ -7468,7 +7445,6 @@ msgstr ""
 #: app/assets/javascripts/app/controllers/_ui_element/object_perform_action.coffee:59
 #: app/assets/javascripts/app/controllers/agent_ticket_create.coffee:66
 #: app/assets/javascripts/app/controllers/getting_started/channel.coffee:15
-#: app/assets/javascripts/app/models/department.coffee:8
 #: app/assets/javascripts/app/models/email_address.coffee:2
 #: app/assets/javascripts/app/models/group.coffee:12
 #: app/assets/javascripts/app/models/user.coffee:20
@@ -7570,11 +7546,11 @@ msgstr ""
 msgid "Email could not be verified. Please contact your administrator."
 msgstr ""
 
-#: app/models/wcl/setup.rb:853
+#: app/models/wcl/setup.rb:759
 msgid "Email from senders without a user account is dropped, and addresses in To/Cc are not added as users. Create the user first to let them email in."
 msgstr ""
 
-#: app/models/wcl/setup.rb:875
+#: app/models/wcl/setup.rb:781
 msgid "Email from these addresses is always dropped, one address per line. Deleting a user can add their address here; remove a line to unblock it."
 msgstr ""
 
@@ -7648,7 +7624,7 @@ msgstr ""
 msgid "Embedding provider returned no usable vector"
 msgstr ""
 
-#: app/models/wcl/setup.rb:48
+#: app/models/wcl/setup.rb:47
 msgid "Employees can pick this group when they create a ticket (and later in the HR app). Switch off for teams tickets are only handed to (e.g. Dev, Network)."
 msgstr ""
 
@@ -8272,7 +8248,7 @@ msgstr ""
 msgid "Escape pressed. No item selected."
 msgstr ""
 
-#: app/models/wcl/setup.rb:727
+#: app/models/wcl/setup.rb:633
 msgid "Every Monday at 07:00, send each user with the Manager role a summary of last week's tickets for their groups, with the Excel report attached."
 msgstr ""
 
@@ -8284,7 +8260,7 @@ msgstr ""
 msgid "Every time a customer creates a new ticket, they automatically receive a confirmation email to assure them that their issue has been submitted successfully. This behavior is built into Zammad, but it’s also highly customizable, and you can set up other automated actions just like it.\n\nMaybe you want to set a higher priority on any ticket with the word “urgent” in the title. Maybe you want to avoid sending auto-reply emails to customers from certain organizations. Maybe you want mark a ticket as “pending” whenever someone adds an internal note to a ticket.\n\nWhatever it is, you can do it with triggers: actions that watch tickets for certain changes, and then fire off whenever those changes occur."
 msgstr ""
 
-#: app/models/wcl/setup.rb:126
+#: app/models/wcl/setup.rb:125
 msgid "Everyone working on the ticket. The first is its main owner (\"My Assigned Tickets\"); all of them are notified, and the others find it under \"My Subscribed Tickets\"."
 msgstr ""
 
@@ -8725,7 +8701,7 @@ msgstr ""
 msgid "First article (oldest)"
 msgstr ""
 
-#: app/models/wcl/setup.rb:371
+#: app/models/wcl/setup.rb:361
 msgid "First level: the name of a group. Under it: the categories offered for that group."
 msgstr ""
 
@@ -9068,7 +9044,7 @@ msgstr ""
 msgid "General communication error, maybe internet is not available!"
 msgstr ""
 
-#: app/models/wcl/setup.rb:318
+#: app/models/wcl/setup.rb:308
 msgid "General facility repairs"
 msgstr ""
 
@@ -9331,59 +9307,59 @@ msgstr ""
 msgid "Google Email"
 msgstr ""
 
-#: app/models/wcl/setup.rb:1006
+#: app/models/wcl/setup.rb:912
 msgid "Google Nexus 4"
 msgstr ""
 
-#: app/models/wcl/setup.rb:1004
+#: app/models/wcl/setup.rb:910
 msgid "Google Nexus 5"
 msgstr ""
 
-#: app/models/wcl/setup.rb:1004
+#: app/models/wcl/setup.rb:910
 msgid "Google Nexus 5X"
 msgstr ""
 
-#: app/models/wcl/setup.rb:1003
+#: app/models/wcl/setup.rb:909
 msgid "Google Nexus 6P / 6"
 msgstr ""
 
-#: app/models/wcl/setup.rb:1001
+#: app/models/wcl/setup.rb:907
 msgid "Google Pixel 2"
 msgstr ""
 
-#: app/models/wcl/setup.rb:1001
+#: app/models/wcl/setup.rb:907
 msgid "Google Pixel 2 XL"
 msgstr ""
 
-#: app/models/wcl/setup.rb:999
+#: app/models/wcl/setup.rb:905
 msgid "Google Pixel 3"
 msgstr ""
 
-#: app/models/wcl/setup.rb:999
+#: app/models/wcl/setup.rb:905
 msgid "Google Pixel 3 XL"
 msgstr ""
 
-#: app/models/wcl/setup.rb:998
+#: app/models/wcl/setup.rb:904
 msgid "Google Pixel 4"
 msgstr ""
 
-#: app/models/wcl/setup.rb:997
+#: app/models/wcl/setup.rb:903
 msgid "Google Pixel 5"
 msgstr ""
 
-#: app/models/wcl/setup.rb:996
+#: app/models/wcl/setup.rb:902
 msgid "Google Pixel 6"
 msgstr ""
 
-#: app/models/wcl/setup.rb:995
+#: app/models/wcl/setup.rb:901
 msgid "Google Pixel 7"
 msgstr ""
 
-#: app/models/wcl/setup.rb:993
+#: app/models/wcl/setup.rb:899
 msgid "Google Pixel 8"
 msgstr ""
 
-#: app/models/wcl/setup.rb:993
+#: app/models/wcl/setup.rb:899
 msgid "Google Pixel 8 Pro"
 msgstr ""
 
@@ -9541,7 +9517,7 @@ msgstr ""
 msgid "HR app: maximum attachments per message"
 msgstr ""
 
-#: app/models/wcl/setup.rb:294
+#: app/models/wcl/setup.rb:284
 msgid "HR portal – open requests"
 msgstr ""
 
@@ -9783,7 +9759,7 @@ msgstr ""
 msgid "Hide notification"
 msgstr ""
 
-#: app/models/wcl/setup.rb:1068
+#: app/models/wcl/setup.rb:978
 msgid "Hides the Note / Phone / Email icons in the reply box, so every reply is a note. Replying to an email with its Reply action still answers by email."
 msgstr ""
 
@@ -9941,7 +9917,7 @@ msgstr ""
 msgid "How to use it"
 msgstr ""
 
-#: app/models/wcl/setup.rb:1014
+#: app/models/wcl/setup.rb:920
 msgid "Huawei P30"
 msgstr ""
 
@@ -10261,10 +10237,6 @@ msgstr ""
 
 #: app/models/ai/agent/type/ticket_text_extractor.rb:128
 msgid "In the trigger context, the last article will always be the one that activated the trigger."
-msgstr ""
-
-#: app/assets/javascripts/app/views/department/members.jst.eco:26
-msgid "In this department"
 msgstr ""
 
 #: app/frontend/apps/desktop/pages/personal-setting/views/PersonalSettingOutOfOffice.vue:74
@@ -10853,7 +10825,7 @@ msgstr ""
 msgid "It is not possible to delete your current account."
 msgstr ""
 
-#: app/models/ticket.rb:304
+#: app/models/ticket.rb:303
 msgid "It is not possible to merge into an already merged ticket."
 msgstr ""
 
@@ -10927,7 +10899,7 @@ msgid "Kayako"
 msgstr ""
 
 #: app/assets/javascripts/app/views/settings/dashboard_views.jst.eco:22
-#: app/models/wcl/setup.rb:801
+#: app/models/wcl/setup.rb:707
 msgid "Keep activities for"
 msgstr ""
 
@@ -11123,7 +11095,7 @@ msgstr ""
 msgid "LDAP integration for user management."
 msgstr ""
 
-#: app/models/wcl/setup.rb:1013
+#: app/models/wcl/setup.rb:919
 msgid "LG G5"
 msgstr ""
 
@@ -11642,13 +11614,13 @@ msgstr ""
 msgid "Localization of execution changes"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:83
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:82
 #: app/assets/javascripts/app/views/generic/calender_preview.jst.eco:6
 #: app/assets/javascripts/app/views/profile/devices.jst.eco:13
 #: app/assets/javascripts/app/views/session.jst.eco:10
 #: app/frontend/apps/desktop/components/CommonCalendarPreviewFlyout/CommonCalendarPreviewFlyoutEvent.vue:23
 #: app/frontend/apps/desktop/pages/personal-setting/views/PersonalSettingDevices.vue:71
-#: app/models/wcl/setup.rb:422
+#: app/models/wcl/setup.rb:412
 msgid "Location"
 msgstr ""
 
@@ -11801,7 +11773,7 @@ msgstr ""
 msgid "Maintenance mode enabled!"
 msgstr ""
 
-#: app/models/wcl/maintenance_report.rb:263
+#: app/models/wcl/maintenance_report.rb:261
 msgid "Maintenance report"
 msgstr ""
 
@@ -12399,7 +12371,7 @@ msgstr ""
 msgid "Messages"
 msgstr ""
 
-#: app/models/wcl/setup.rb:1047
+#: app/models/wcl/setup.rb:957
 msgid "Messages written in the ticket are always public (sent to the customer). Internal notes and switching a message between internal and public are turned off."
 msgstr ""
 
@@ -12456,7 +12428,7 @@ msgstr ""
 msgid "Microsoft Authenticator"
 msgstr ""
 
-#: app/models/wcl/setup.rb:1015
+#: app/models/wcl/setup.rb:921
 msgid "Microsoft Surface Duo"
 msgstr ""
 
@@ -12611,7 +12583,7 @@ msgstr ""
 msgid "Monitoring Token"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:92
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:91
 #: app/assets/javascripts/app/views/report/time_range_picker.jst.eco:3
 #: app/frontend/apps/desktop/components/Form/fields/FieldDate/FieldDateInput.vue:87
 msgid "Month"
@@ -12643,11 +12615,11 @@ msgstr ""
 msgid "Most recent activity"
 msgstr ""
 
-#: app/models/wcl/setup.rb:1011
+#: app/models/wcl/setup.rb:917
 msgid "Motorola Moto G Power"
 msgstr ""
 
-#: app/models/wcl/setup.rb:1012
+#: app/models/wcl/setup.rb:918
 msgid "Motorola Moto G4"
 msgstr ""
 
@@ -12767,7 +12739,6 @@ msgstr ""
 #: app/assets/javascripts/app/models/checklist_template_item.coffee:5
 #: app/assets/javascripts/app/models/core_workflow.coffee:6
 #: app/assets/javascripts/app/models/core_workflow_custom_module.coffee:4
-#: app/assets/javascripts/app/models/department.coffee:7
 #: app/assets/javascripts/app/models/group.coffee:7
 #: app/assets/javascripts/app/models/job.coffee:6
 #: app/assets/javascripts/app/models/knowledge_base_answer_translation.coffee:6
@@ -12969,10 +12940,6 @@ msgstr ""
 msgid "New Deletion Task"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/department.coffee:19
-msgid "New Department"
-msgstr ""
-
 #: app/assets/javascripts/app/controllers/group.coffee:33
 msgid "New Group"
 msgstr ""
@@ -13152,7 +13119,7 @@ msgstr ""
 msgid "New ticket: %s"
 msgstr ""
 
-#: app/models/wcl/setup.rb:746
+#: app/models/wcl/setup.rb:652
 msgid "New tickets start in this group (for everyone who may create tickets in it). Only one group can be the default."
 msgstr ""
 
@@ -13496,10 +13463,6 @@ msgstr ""
 msgid "No members found"
 msgstr ""
 
-#: app/assets/javascripts/app/views/department/members.jst.eco:9
-msgid "No one else matches."
-msgstr ""
-
 #: app/frontend/apps/desktop/components/CommonSimpleEntityList/plugins/organization.ts:9
 msgid "No organizations found"
 msgstr ""
@@ -13538,11 +13501,11 @@ msgstr ""
 msgid "No related knowledge base answer links."
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:89
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:88
 msgid "No repeat issues in this period."
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:109
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:108
 msgid "No requests were submitted between %s and %s in %s."
 msgstr ""
 
@@ -13659,7 +13622,7 @@ msgstr ""
 msgid "No translation service is configured."
 msgstr ""
 
-#: app/models/ticket.rb:441
+#: app/models/ticket.rb:440
 msgid "No triggers active"
 msgstr ""
 
@@ -13711,10 +13674,6 @@ msgstr ""
 
 #: app/frontend/shared/composables/form/useCheckBodyAttachmentReference.ts:54
 msgid "No, thanks"
-msgstr ""
-
-#: app/assets/javascripts/app/views/department/members.jst.eco:28
-msgid "Nobody yet. Search above to add people."
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/knowledge_base/permissions_dialog.coffee:9
@@ -13830,7 +13789,6 @@ msgstr ""
 #: app/assets/javascripts/app/models/ai_agent.coffee:9
 #: app/assets/javascripts/app/models/ai_text_tool.coffee:29
 #: app/assets/javascripts/app/models/chat.coffee:252
-#: app/assets/javascripts/app/models/department.coffee:9
 #: app/assets/javascripts/app/models/email_address.coffee:35
 #: app/assets/javascripts/app/models/group.coffee:14
 #: app/assets/javascripts/app/models/job.coffee:15
@@ -13859,11 +13817,11 @@ msgstr ""
 msgid "Note - default visibility"
 msgstr ""
 
-#: app/models/wcl/setup.rb:1065
+#: app/models/wcl/setup.rb:975
 msgid "Note - hide message type picker"
 msgstr ""
 
-#: app/models/wcl/setup.rb:1044
+#: app/models/wcl/setup.rb:954
 msgid "Note - public messages only"
 msgstr ""
 
@@ -13990,7 +13948,7 @@ msgstr ""
 msgid "Number"
 msgstr ""
 
-#: app/models/wcl/setup.rb:804
+#: app/models/wcl/setup.rb:710
 msgid "Number of days the activity stream keeps its entries. Older entries are deleted once a day."
 msgstr ""
 
@@ -14117,7 +14075,7 @@ msgstr ""
 msgid "October"
 msgstr ""
 
-#: app/models/wcl/setup.rb:317
+#: app/models/wcl/setup.rb:307
 msgid "Office maintenance"
 msgstr ""
 
@@ -14133,11 +14091,11 @@ msgstr ""
 msgid "Older activities are deleted automatically once a day. Tickets and their history are not affected."
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:120
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:119
 msgid "Oldest open"
 msgstr ""
 
-#: app/models/wcl/maintenance_report.rb:273
+#: app/models/wcl/maintenance_report.rb:271
 #: app/models/wcl/manager_summary.rb:68
 msgid "Oldest open ticket"
 msgstr ""
@@ -14349,8 +14307,8 @@ msgstr ""
 msgid "Open note box"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:85
-#: app/models/wcl/maintenance_report.rb:255
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:84
+#: app/models/wcl/maintenance_report.rb:253
 msgid "Open now"
 msgstr ""
 
@@ -14684,8 +14642,8 @@ msgstr ""
 msgid "Outdent text"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:118
-#: app/models/wcl/maintenance_report.rb:270
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:117
+#: app/models/wcl/maintenance_report.rb:268
 #: app/models/wcl/manager_summary.rb:66
 msgid "Outstanding now"
 msgstr ""
@@ -15008,13 +14966,7 @@ msgid "Pending till"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:128
-#: app/assets/javascripts/app/controllers/department.coffee:25
-#: app/assets/javascripts/app/lib/app_post/wcl_department_members.coffee:6
 msgid "People"
-msgstr ""
-
-#: app/assets/javascripts/app/lib/app_post/wcl_department_members.coffee:16
-msgid "People in %s"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:136
@@ -15064,7 +15016,7 @@ msgstr ""
 msgid "Persistent Node.js (V8)"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:85
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:84
 msgid "Person"
 msgstr ""
 
@@ -15129,17 +15081,13 @@ msgstr ""
 msgid "Phone number is already in use by another WhatsApp account."
 msgstr ""
 
-#: app/models/wcl/setup.rb:1029
+#: app/models/wcl/setup.rb:936
 msgid "Phone view devices"
 msgstr ""
 
 #: app/assets/javascripts/app/views/profile/token_access.jst.eco:7
 #: app/frontend/apps/desktop/pages/personal-setting/views/PersonalSettingTokenAccess.vue:143
 msgid "Pick a name for the application, and we'll give you a unique token."
-msgstr ""
-
-#: app/models/wcl/setup.rb:163
-msgid "Pick the department. The list is managed in Admin > Manage > Departments."
 msgstr ""
 
 #: app/frontend/apps/desktop/pages/ticket/components/TicketDetailView/ArticleReplyPanel.vue:143
@@ -16034,11 +15982,11 @@ msgstr ""
 msgid "Registration successful!"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:101
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:100
 msgid "Rejected"
 msgstr ""
 
-#: app/models/wcl/maintenance_report.rb:269
+#: app/models/wcl/maintenance_report.rb:267
 msgid "Rejected in period"
 msgstr ""
 
@@ -16130,7 +16078,6 @@ msgstr ""
 #: app/assets/javascripts/app/views/calendar/holiday_selector.jst.eco:23
 #: app/assets/javascripts/app/views/calendar/holiday_selector_placeholder.jst.eco:12
 #: app/assets/javascripts/app/views/channel/topics.jst.eco:32
-#: app/assets/javascripts/app/views/department/members.jst.eco:37
 #: app/assets/javascripts/app/views/generic/application_selector_row.jst.eco:28
 #: app/assets/javascripts/app/views/generic/application_selector_subclause.jst.eco:15
 #: app/assets/javascripts/app/views/generic/object_attribute_options_context.jst.eco:34
@@ -16212,10 +16159,6 @@ msgstr ""
 #: app/frontend/apps/desktop/components/Form/fields/FieldEditor/useEditorActions.ts:208
 #: app/frontend/apps/mobile/components/Form/fields/FieldEditor/useEditorActions.ts:199
 msgid "Remove formatting"
-msgstr ""
-
-#: app/assets/javascripts/app/views/department/members.jst.eco:37
-msgid "Remove from department"
 msgstr ""
 
 #: app/frontend/apps/desktop/pages/ticket/components/TicketDetailView/TicketDetailTopBar/components/HighlightMenu.vue:93
@@ -16338,8 +16281,8 @@ msgstr ""
 msgid "Reorder"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:86
-#: app/models/wcl/maintenance_report.rb:256
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:85
+#: app/models/wcl/maintenance_report.rb:254
 msgid "Repeat issues"
 msgstr ""
 
@@ -16434,7 +16377,7 @@ msgstr ""
 msgid "Request the password login here."
 msgstr ""
 
-#: app/models/wcl/setup.rb:224
+#: app/models/wcl/setup.rb:214
 msgid "Request turned down (WCL). Shown to the employee as \"Rejected\" in the HR app."
 msgstr ""
 
@@ -16886,163 +16829,163 @@ msgstr ""
 msgid "STARTTLS"
 msgstr ""
 
-#: app/models/wcl/setup.rb:969
+#: app/models/wcl/setup.rb:875
 msgid "Samsung Galaxy A10"
 msgstr ""
 
-#: app/models/wcl/setup.rb:968
+#: app/models/wcl/setup.rb:874
 msgid "Samsung Galaxy A12"
 msgstr ""
 
-#: app/models/wcl/setup.rb:967
+#: app/models/wcl/setup.rb:873
 msgid "Samsung Galaxy A32"
 msgstr ""
 
-#: app/models/wcl/setup.rb:966
+#: app/models/wcl/setup.rb:872
 msgid "Samsung Galaxy A51 / A71"
 msgstr ""
 
-#: app/models/wcl/setup.rb:965
+#: app/models/wcl/setup.rb:871
 msgid "Samsung Galaxy A52"
 msgstr ""
 
-#: app/models/wcl/setup.rb:964
+#: app/models/wcl/setup.rb:870
 msgid "Samsung Galaxy A53"
 msgstr ""
 
-#: app/models/wcl/setup.rb:963
+#: app/models/wcl/setup.rb:869
 msgid "Samsung Galaxy A54"
 msgstr ""
 
-#: app/models/wcl/setup.rb:971
+#: app/models/wcl/setup.rb:877
 msgid "Samsung Galaxy J5"
 msgstr ""
 
-#: app/models/wcl/setup.rb:970
+#: app/models/wcl/setup.rb:876
 msgid "Samsung Galaxy J7"
 msgstr ""
 
-#: app/models/wcl/setup.rb:957
+#: app/models/wcl/setup.rb:863
 msgid "Samsung Galaxy Note 10+"
 msgstr ""
 
-#: app/models/wcl/setup.rb:956
+#: app/models/wcl/setup.rb:862
 msgid "Samsung Galaxy Note 20 Ultra"
 msgstr ""
 
-#: app/models/wcl/setup.rb:960
+#: app/models/wcl/setup.rb:866
 msgid "Samsung Galaxy Note 3"
 msgstr ""
 
-#: app/models/wcl/setup.rb:959
+#: app/models/wcl/setup.rb:865
 msgid "Samsung Galaxy Note 8"
 msgstr ""
 
-#: app/models/wcl/setup.rb:958
+#: app/models/wcl/setup.rb:864
 msgid "Samsung Galaxy Note 9"
 msgstr ""
 
-#: app/models/wcl/setup.rb:961
+#: app/models/wcl/setup.rb:867
 msgid "Samsung Galaxy Note II"
 msgstr ""
 
-#: app/models/wcl/setup.rb:944
+#: app/models/wcl/setup.rb:850
 msgid "Samsung Galaxy S10"
 msgstr ""
 
-#: app/models/wcl/setup.rb:944
+#: app/models/wcl/setup.rb:850
 msgid "Samsung Galaxy S10+"
 msgstr ""
 
-#: app/models/wcl/setup.rb:942
+#: app/models/wcl/setup.rb:848
 msgid "Samsung Galaxy S20"
 msgstr ""
 
-#: app/models/wcl/setup.rb:942
+#: app/models/wcl/setup.rb:848
 msgid "Samsung Galaxy S20 Ultra"
 msgstr ""
 
-#: app/models/wcl/setup.rb:940
+#: app/models/wcl/setup.rb:846
 msgid "Samsung Galaxy S21"
 msgstr ""
 
-#: app/models/wcl/setup.rb:940
+#: app/models/wcl/setup.rb:846
 msgid "Samsung Galaxy S21 Ultra"
 msgstr ""
 
-#: app/models/wcl/setup.rb:938
+#: app/models/wcl/setup.rb:844
 msgid "Samsung Galaxy S22"
 msgstr ""
 
-#: app/models/wcl/setup.rb:938
+#: app/models/wcl/setup.rb:844
 msgid "Samsung Galaxy S22 Ultra"
 msgstr ""
 
-#: app/models/wcl/setup.rb:934
+#: app/models/wcl/setup.rb:840
 msgid "Samsung Galaxy S23"
 msgstr ""
 
-#: app/models/wcl/setup.rb:934
+#: app/models/wcl/setup.rb:840
 msgid "Samsung Galaxy S23 Ultra"
 msgstr ""
 
-#: app/models/wcl/setup.rb:935
+#: app/models/wcl/setup.rb:841
 msgid "Samsung Galaxy S24"
 msgstr ""
 
-#: app/models/wcl/setup.rb:935
+#: app/models/wcl/setup.rb:841
 msgid "Samsung Galaxy S24 Ultra"
 msgstr ""
 
-#: app/models/wcl/setup.rb:954
+#: app/models/wcl/setup.rb:860
 msgid "Samsung Galaxy S3"
 msgstr ""
 
-#: app/models/wcl/setup.rb:953
+#: app/models/wcl/setup.rb:859
 msgid "Samsung Galaxy S4"
 msgstr ""
 
-#: app/models/wcl/setup.rb:952
+#: app/models/wcl/setup.rb:858
 msgid "Samsung Galaxy S5"
 msgstr ""
 
-#: app/models/wcl/setup.rb:951
+#: app/models/wcl/setup.rb:857
 msgid "Samsung Galaxy S6"
 msgstr ""
 
-#: app/models/wcl/setup.rb:950
+#: app/models/wcl/setup.rb:856
 msgid "Samsung Galaxy S7"
 msgstr ""
 
-#: app/models/wcl/setup.rb:948
+#: app/models/wcl/setup.rb:854
 msgid "Samsung Galaxy S8"
 msgstr ""
 
-#: app/models/wcl/setup.rb:948
+#: app/models/wcl/setup.rb:854
 msgid "Samsung Galaxy S8+"
 msgstr ""
 
-#: app/models/wcl/setup.rb:946
+#: app/models/wcl/setup.rb:852
 msgid "Samsung Galaxy S9"
 msgstr ""
 
-#: app/models/wcl/setup.rb:946
+#: app/models/wcl/setup.rb:852
 msgid "Samsung Galaxy S9+"
 msgstr ""
 
-#: app/models/wcl/setup.rb:1023
+#: app/models/wcl/setup.rb:929
 msgid "Samsung Galaxy Tab S7"
 msgstr ""
 
-#: app/models/wcl/setup.rb:975
+#: app/models/wcl/setup.rb:881
 msgid "Samsung Galaxy Z Flip 5"
 msgstr ""
 
-#: app/models/wcl/setup.rb:973
+#: app/models/wcl/setup.rb:879
 msgid "Samsung Galaxy Z Fold 5 (folded)"
 msgstr ""
 
-#: app/models/wcl/setup.rb:974
+#: app/models/wcl/setup.rb:880
 msgid "Samsung Galaxy Z Fold 5 (open)"
 msgstr ""
 
@@ -17310,10 +17253,6 @@ msgstr ""
 
 #: app/assets/javascripts/app/controllers/checklist_template.coffee:32
 msgid "Search for checklist templates"
-msgstr ""
-
-#: app/assets/javascripts/app/controllers/department.coffee:16
-msgid "Search for departments"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/group.coffee:23
@@ -17852,7 +17791,7 @@ msgstr ""
 msgid "Send mails via"
 msgstr ""
 
-#: app/models/wcl/setup.rb:907
+#: app/models/wcl/setup.rb:813
 msgid "Send notifications through Microsoft 365 Graph"
 msgstr ""
 
@@ -18956,7 +18895,7 @@ msgid "Sticker file"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/maintenance_report.coffee:77
-#: app/models/wcl/maintenance_report.rb:252
+#: app/models/wcl/maintenance_report.rb:251
 msgid "Still open"
 msgstr ""
 
@@ -19078,11 +19017,11 @@ msgstr ""
 msgid "Submitted"
 msgstr ""
 
-#: app/models/wcl/maintenance_report.rb:267
+#: app/models/wcl/maintenance_report.rb:265
 msgid "Submitted in period"
 msgstr ""
 
-#: app/models/wcl/maintenance_report.rb:272
+#: app/models/wcl/maintenance_report.rb:270
 msgid "Submitted in period and completed (%)"
 msgstr ""
 
@@ -19387,7 +19326,7 @@ msgstr ""
 msgid "Target Language"
 msgstr ""
 
-#: app/models/wcl/setup.rb:820
+#: app/models/wcl/setup.rb:726
 msgid "Target date"
 msgstr ""
 
@@ -19399,19 +19338,19 @@ msgstr ""
 msgid "Target ticket"
 msgstr ""
 
-#: app/models/wcl/setup.rb:544
+#: app/models/wcl/setup.rb:530
 msgid "Team: closed in the last 7 days"
 msgstr ""
 
-#: app/models/wcl/setup.rb:540
+#: app/models/wcl/setup.rb:526
 msgid "Team: no update for 3 days"
 msgstr ""
 
-#: app/models/wcl/setup.rb:533
+#: app/models/wcl/setup.rb:519
 msgid "Team: open tickets by agent"
 msgstr ""
 
-#: app/models/wcl/setup.rb:536
+#: app/models/wcl/setup.rb:522
 msgid "Team: unassigned tickets"
 msgstr ""
 
@@ -20076,10 +20015,6 @@ msgstr ""
 msgid "The definition is a JSON object that defines the action to be performed by the AI agent."
 msgstr ""
 
-#: app/assets/javascripts/app/models/department.coffee
-msgid "The departments of your company. The **Department** of a user (and of a ticket) is picked from the active departments here.\n\nRenaming a department renames it on its users and tickets. Set a department inactive to stop offering it; users keep it."
-msgstr ""
-
 #: app/models/ai/agent/type/custom_ai_agent.rb:29
 msgid "The description defines the role of the AI agent. It is used to describe its purpose and behavior."
 msgstr ""
@@ -20092,7 +20027,7 @@ msgstr ""
 msgid "The device could not be deleted."
 msgstr ""
 
-#: app/models/wcl/setup.rb:1032
+#: app/models/wcl/setup.rb:939
 msgid "The devices offered on Admin > System > Phone View."
 msgstr ""
 
@@ -20814,7 +20749,7 @@ msgstr ""
 msgid "The rules instruct the AI agent on when to generate new tags and when to prefer tags from existing tags list."
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:88
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:87
 msgid "The same category reported at the same location more than once."
 msgstr ""
 
@@ -22194,8 +22129,8 @@ msgstr ""
 msgid "Ticket number or title"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:86
-#: app/models/wcl/maintenance_report.rb:298
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:85
+#: app/models/wcl/maintenance_report.rb:296
 msgid "Ticket numbers"
 msgstr ""
 
@@ -22311,7 +22246,7 @@ msgstr ""
 
 #: app/assets/javascripts/app/controllers/_dashboard/activity_stream.coffee:127
 #: app/assets/javascripts/app/controllers/_plugin/keyboard_shortcuts.coffee:456
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:86
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:85
 #: app/assets/javascripts/app/controllers/widget/user.coffee:87
 #: app/assets/javascripts/app/views/import/freshdesk.jst.eco:94
 #: app/assets/javascripts/app/views/import/kayako.jst.eco:98
@@ -22699,7 +22634,7 @@ msgstr ""
 msgid "Tracked as checklist item in"
 msgstr ""
 
-#: app/models/wcl/setup.rb:516
+#: app/models/wcl/setup.rb:502
 msgid "Tracks the work of the agents in the groups set on each manager (Admin > Users > Group permissions: Read, Overview, Change): Reporting and the \"Team\" overviews. Not offered as an owner unless the user is also an Agent."
 msgstr ""
 
@@ -22833,7 +22768,7 @@ msgstr ""
 msgid "Triggers activated by actions are executed whenever a ticket is created or updated, while triggers activated by time events are executed when certain times are reached (e.g. pending time, escalation)."
 msgstr ""
 
-#: app/models/wcl/setup.rb:316
+#: app/models/wcl/setup.rb:306
 msgid "Trucking / vehicle maintenance"
 msgstr ""
 
@@ -23029,10 +22964,6 @@ msgstr ""
 #: app/frontend/apps/desktop/pages/ticket/components/TicketSidebar/TicketSidebarExternalReferences/TicketSidebarIdoit/TicketSidebarIdoitContent.vue:237
 #: db/seeds/object_manager_attributes.rb:129
 msgid "Type"
-msgstr ""
-
-#: app/assets/javascripts/app/views/department/members.jst.eco:4
-msgid "Type a name or email (at least 2 letters)"
 msgstr ""
 
 #: app/assets/javascripts/app/views/ticket_zoom/sidebar_idoit.jst.eco:17
@@ -23371,7 +23302,6 @@ msgstr ""
 #: app/assets/javascripts/app/models/chat_sessions.coffee:11
 #: app/assets/javascripts/app/models/core_workflow.coffee:15
 #: app/assets/javascripts/app/models/data_privacy_task.coffee:10
-#: app/assets/javascripts/app/models/department.coffee:11
 #: app/assets/javascripts/app/models/email_address.coffee:36
 #: app/assets/javascripts/app/models/group.coffee:15
 #: app/assets/javascripts/app/models/job.coffee:24
@@ -24136,7 +24066,7 @@ msgstr ""
 msgid "Waiting in %s"
 msgstr ""
 
-#: app/models/wcl/setup.rb:563
+#: app/models/wcl/setup.rb:549
 msgid "Waiting, e.g. for parts or a supplier; does not escalate (WCL)."
 msgstr ""
 
@@ -24144,7 +24074,7 @@ msgstr ""
 msgid "Want to join the BETA UI feedback program?"
 msgstr ""
 
-#: app/models/wcl/setup.rb:315
+#: app/models/wcl/setup.rb:305
 msgid "Warehouse maintenance"
 msgstr ""
 
@@ -24241,7 +24171,7 @@ msgstr ""
 msgid "Wednesday"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:91
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:90
 #: app/assets/javascripts/app/views/report/time_range_picker.jst.eco:4
 msgid "Week"
 msgstr ""
@@ -24250,7 +24180,7 @@ msgstr ""
 msgid "Week(s)"
 msgstr ""
 
-#: app/models/wcl/setup.rb:724
+#: app/models/wcl/setup.rb:630
 msgid "Weekly summary email to managers"
 msgstr ""
 
@@ -24347,7 +24277,7 @@ msgstr ""
 msgid "When should the job run?"
 msgstr ""
 
-#: app/models/wcl/setup.rb:822
+#: app/models/wcl/setup.rb:728
 msgid "When this needs to be done by (optional)."
 msgstr ""
 
@@ -24359,7 +24289,7 @@ msgstr ""
 msgid "Where"
 msgstr ""
 
-#: app/models/wcl/setup.rb:401
+#: app/models/wcl/setup.rb:391
 msgid "Where is it? e.g. Warehouse A, Office 2nd floor, Truck 51C-12345"
 msgstr ""
 
@@ -24497,11 +24427,11 @@ msgstr ""
 msgid "Writing assistant could not generate text. Please try again or contact your administrator."
 msgstr ""
 
-#: app/models/wcl/setup.rb:1008
+#: app/models/wcl/setup.rb:914
 msgid "Xiaomi Redmi Note 13"
 msgstr ""
 
-#: app/models/wcl/setup.rb:1009
+#: app/models/wcl/setup.rb:915
 msgid "Xiaomi Redmi Note 9 / 8"
 msgstr ""
 
@@ -25301,7 +25231,7 @@ msgstr ""
 msgid "closed"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:116
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:115
 msgid "closed in this period"
 msgstr ""
 
@@ -25390,10 +25320,6 @@ msgstr ""
 
 #: app/frontend/apps/desktop/pages/personal-setting/views/PersonalSetting/plugins/password.ts:28
 msgid "current,new,confirm,change,current password,new password,confirm password,change password"
-msgstr ""
-
-#: app/assets/javascripts/app/views/department/members.jst.eco:17
-msgid "currently: %s"
 msgstr ""
 
 #: app/assets/javascripts/app/controllers/translation.coffee:280
@@ -26306,7 +26232,7 @@ msgstr ""
 msgid "open tickets"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:118
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:117
 msgid "open today, any date"
 msgstr ""
 
@@ -26818,7 +26744,7 @@ msgstr ""
 msgid "yes"
 msgstr ""
 
-#: app/assets/javascripts/app/controllers/maintenance_report.coffee:105
+#: app/assets/javascripts/app/controllers/maintenance_report.coffee:104
 msgid "your groups"
 msgstr ""
 

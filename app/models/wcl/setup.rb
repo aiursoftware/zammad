@@ -16,7 +16,7 @@ module Wcl::Setup # rubocop:disable Metrics/ModuleLength
     customer_priority
     ticket_assignees_attribute
     owners_core_workflow
-    department_dropdown
+    remove_departments
     Wcl::AttachmentRules.create_settings
     rejected_state
     customers_cannot_reject
@@ -32,7 +32,6 @@ module Wcl::Setup # rubocop:disable Metrics/ModuleLength
     without_hr_app
     manager_role
     work_states
-    ticket_department
     manager_summary
     activity_stream_retention
     default_group
@@ -168,62 +167,51 @@ module Wcl::Setup # rubocop:disable Metrics/ModuleLength
     )
   end
 
-  DEPARTMENT_NOTE        = __('Pick the department. The list is managed in Admin > Manage > Departments.')
-  TICKET_DEPARTMENT_NOTE = __('Department of the requester when the ticket was created; filled in automatically.')
-
-  # The user's Department (and the ticket's): a dropdown of the active departments of Admin >
-  # Manage > Departments; no new names are typed here, and nothing is synced with the HR app.
-  # Also turns the earlier text field / dropdown into this one; the values are kept.
-  def self.department_dropdown
-    Department::DROPDOWNS.each { |object, name| department_dropdown_field(object, name) }
-    Department.refresh_dropdowns
+  # No departments: the ticket's Department field is removed and the user's (a stock field) is
+  # hidden, its values kept. Undoes the earlier departments list and dropdowns.
+  def self.remove_departments
+    overviews_without_department
+    remove_ticket_department
+    hide_user_department
   end
 
-  # Settings from earlier versions of the field: free typing (unknown), the HR app sync, suggestions.
-  RETIRED_DEPARTMENT_OPTIONS = %w[unknown hr_departments suggestions].freeze
+  def self.overviews_without_department
+    Overview.find_each do |overview|
+      view    = overview.view.to_h.deep_stringify_keys
+      cleaned = view.transform_values { |columns| columns.is_a?(Array) ? columns - ['department'] : columns }
+      changes = {}
+      changes[:view]     = cleaned if cleaned != view
+      changes[:group_by] = nil if overview.group_by == 'department'
+      changes[:order]    = { by: 'created_at', direction: 'DESC' } if overview.order.to_h.stringify_keys['by'] == 'department'
+      overview.update!(changes) if changes.any?
+    end
+  end
 
-  def self.department_dropdown_field(object, name)
-    attribute = ObjectManager::Attribute.get(object: object, name: name)
+  def self.remove_ticket_department
+    attribute = ObjectManager::Attribute.get(object: 'Ticket', name: 'department')
     return if !attribute
 
-    if attribute.data_type == 'tree_select'
-      retired = attribute.data_option.to_h.stringify_keys.keys & RETIRED_DEPARTMENT_OPTIONS
-      return if retired.empty?
-
-      # No new names typed into the dropdown: only Admin > Manage > Departments adds them.
-      attribute.update_columns(data_option: attribute.data_option.to_h.stringify_keys.except(*retired), updated_at: Time.zone.now) # rubocop:disable Rails/SkipsModelValidations
+    # Still in a condition an admin set up: hidden instead, so the update doesn't stop on it.
+    if ObjectManager::Attribute.attribute_used_by_references?('Ticket', 'department')
+      attribute.update_columns(active: false, updated_at: Time.zone.now) # rubocop:disable Rails/SkipsModelValidations
+      Rails.logger.warn "WCL: Ticket.department is hidden, not removed: it is used by #{ObjectManager::Attribute.attribute_used_by_references_humaniced('Ticket', 'department')}."
       return
     end
 
-    # The column stays a string; only the way it is edited changes.
-    attribute.update_columns( # rubocop:disable Rails/SkipsModelValidations
-      data_type:   'tree_select',
-      data_option: department_data_option(object == 'User' ? DEPARTMENT_NOTE : TICKET_DEPARTMENT_NOTE, half: object == 'User'),
-      updated_at:  Time.zone.now,
-    )
+    ObjectManager::Attribute.remove(object: 'Ticket', name: 'department', force: true)
+    ObjectManager::Attribute.migration_execute
+    Ticket.reset_column_information
   end
 
-  def self.department_data_option(note, half: false)
-    {
-      'options'    => Department.options,
-      'default'    => '',
-      'null'       => true,
-      'nulloption' => true,
-      'multiple'   => false,
-      'translate'  => false,
-      'maxlength'  => 200,
-      'note'       => note,
-      **(half ? { 'item_class' => 'formGroup--halfSize' } : {}),
-    }
-  end
+  USER_DEPARTMENT_DATA_OPTION = { 'type' => 'text', 'maxlength' => 200, 'null' => true, 'item_class' => 'formGroup--halfSize' }.freeze
 
-  # Older migrations call it by its earlier names.
-  def self.department_text_field
-    department_dropdown
-  end
+  # Back to the stock text field (it was a dropdown of the departments list), and hidden; an admin
+  # can show it again in Admin > Objects. The data type can't be changed through the model.
+  def self.hide_user_department
+    attribute = ObjectManager::Attribute.get(object: 'User', name: 'department')
+    return if !attribute || (!attribute.active && attribute.data_type == 'input')
 
-  def self.user_department_dropdown
-    department_dropdown
+    attribute.update_columns(data_type: 'input', data_option: USER_DEPARTMENT_DATA_OPTION, active: false, updated_at: Time.zone.now) # rubocop:disable Rails/SkipsModelValidations
   end
 
   # A closed state the HR app shows as "Rejected".
@@ -512,11 +500,6 @@ module Wcl::Setup # rubocop:disable Metrics/ModuleLength
     Overview.find_by(link: 'hr_portal_open')&.update!(active: false)
   end
 
-  # Older migrations call it by its earlier name.
-  def self.department_free_entry
-    department_text_field
-  end
-
   # { key => name } of a select's options, stored as a hash or (after editing in Admin > Objects)
   # as a list of { value:, name: }.
   def self.option_names(attribute)
@@ -558,7 +541,7 @@ module Wcl::Setup # rubocop:disable Metrics/ModuleLength
   def self.manager_overviews(role)
     open    = Ticket::State.by_category_ids(:work_on_all)
     closed  = Ticket::State.where(state_type: Ticket::StateType.where(name: 'closed')).pluck(:id)
-    columns = %w[number title customer department group owner state priority updated_at]
+    columns = %w[number title customer group owner state priority updated_at]
 
     {
       'wcl_team_open'       => [__('Team: open tickets by agent'), 1200,
@@ -671,90 +654,6 @@ module Wcl::Setup # rubocop:disable Metrics/ModuleLength
       created_by_id:      1,
       updated_by_id:      1,
     )
-  end
-
-  # The requester's department, stored on the ticket (Ticket::StampsDepartment). Agents see and
-  # can correct it; it isn't on the new-ticket form, as it comes from the employee's profile.
-  def self.ticket_department
-    ticket_department_attribute
-    ticket_department_backfill
-    ticket_department_in_team_overviews
-  end
-
-  def self.ticket_department_attribute
-    return if ObjectManager::Attribute.get(object: 'Ticket', name: 'department')
-
-    ObjectManager::Attribute.add(
-      force:         true,
-      object:        'Ticket',
-      name:          'department',
-      display:       __('Department'),
-      data_type:     'tree_select',
-      data_option:   department_data_option(TICKET_DEPARTMENT_NOTE),
-      editable:      true,
-      active:        true,
-      screens:       {
-        create_middle: {
-          'ticket.customer' => { 'shown' => false, 'required' => false },
-          'ticket.agent'    => { 'shown' => false, 'required' => false },
-        },
-        edit:          { 'ticket.agent' => { 'shown' => true, 'required' => false } },
-      },
-      to_create:     true,
-      to_migrate:    false,
-      to_delete:     false,
-      position:      33,
-      created_by_id: 1,
-      updated_by_id: 1,
-    )
-    ObjectManager::Attribute.migration_execute
-    Ticket.reset_column_information
-  end
-
-  # Tickets from before the field existed get their requester's current department.
-  def self.ticket_department_backfill
-    return if Ticket.column_names.exclude?('department')
-
-    Ticket.where(department: [nil, '']).includes(:customer).find_each do |ticket|
-      department = ticket.customer&.department.presence
-      next if !department
-
-      ticket.update_columns(department: department) # rubocop:disable Rails/SkipsModelValidations
-      SearchIndexJob.perform_later('Ticket', ticket.id)
-    end
-  end
-
-  # Managers see each ticket's department in their Team overviews.
-  def self.ticket_department_in_team_overviews
-    Overview.where(link: %w[wcl_team_open wcl_team_unassigned wcl_team_stale wcl_team_closed]).find_each do |overview|
-      view = overview.view.to_h.deep_stringify_keys
-      changed = false
-      %w[d s m].each do |mode|
-        columns = Array(view[mode]).dup
-        next if columns.empty? || columns.include?('department')
-
-        index = columns.index('customer')
-        columns.insert(index ? index + 1 : columns.size, 'department')
-        view[mode] = columns
-        changed = true
-      end
-      overview.update!(view: view) if changed
-    end
-  end
-
-  # Admin > Manage > Departments starts with the departments people already have. Run once, when
-  # the list is created (CreateDepartments), so a department deleted later stays deleted.
-  def self.departments
-    return if !Department.table_exists?
-
-    names = User.where.not(department: [nil, '']).distinct.pluck(:department).map { |name| name.strip.squeeze(' ') }
-    known = Department.pluck(:name).map(&:downcase)
-    names.compact_blank.uniq(&:downcase).each do |name|
-      next if known.include?(name.downcase)
-
-      Department.create!(name: name, active: true, created_by_id: 1, updated_by_id: 1)
-    end
-    Department.refresh_dropdowns
   end
 
   # The weekly summary email to managers (Wcl::ManagerSummary): a switch in Admin > Settings >

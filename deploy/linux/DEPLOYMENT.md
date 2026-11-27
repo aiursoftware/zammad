@@ -190,7 +190,7 @@ Report and the weekly email), with:
   _closed in the last 7 days_ (grouped by agent);
 - **Reporting**: charts and Excel exports of tickets by agent, group, state and time;
 - **Maintenance Report** (left menu): submitted, completed, rejected, outstanding, average
-  completion time, by week/month/department/location/category/person, repeat issues (same
+  completion time, by week/month/location/category/person, repeat issues (same
   category at the same location), and an Excel download;
 - a **weekly summary email** every Monday at 07:00 (server time zone) with last week's numbers
   and the Excel attached. It goes out through the notification email channel (Admin → Channels →
@@ -198,16 +198,6 @@ Report and the weekly email), with:
   Weekly summary email to managers**.
 
 A new group isn't added to managers automatically: add it to the managers who should see it.
-
-### Departments
-
-**Admin → Manage → Departments** lists your departments (name, email, note, active).
-
-- On a user (and on a ticket), **Department** is a dropdown of the active departments here. Add new
-  departments here first.
-- **Rename** a department here and it's renamed on its users and tickets.
-- Set a department **inactive** to stop suggesting it (users keep it).
-- Nothing is synced with the HR app.
 
 ### Categories (per group)
 
@@ -299,7 +289,7 @@ docker compose restart          # or: restart everything as is
 
 ### 4.3 Re-apply the WCL setup
 
-The WCL setup creates the Rejected state, the Urgent priority, the Owners field, the departments,
+The WCL setup creates the Rejected state, the Urgent priority, the Owners field,
 attachment settings and 30-day sessions. It is safe to run any time:
 
 ```bash

@@ -471,7 +471,7 @@ body {
 
 /* [avatar]  Title
              Ticket#… · created …
-             customer · department · organization                  */
+             customer · organization                               */
 .ticketZoom-header > .flex.vertical.center {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);

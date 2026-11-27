@@ -1,0 +1,21 @@
+/* WCL customization: the formatting bar above the text of a new ticket message. */
+
+.article-add:not(.is-open) .wcl-richtext-toolbar-holder {
+  display: none;
+}
+
+.wcl-richtext-toolbar-holder {
+  margin: -4px 0 8px;
+}
+
+.bubble-wrapper.wcl-richtext-toolbar {
+  position: relative;
+  display: inline-flex;
+  max-width: 100%;
+}
+
+.bubble-wrapper.wcl-richtext-toolbar .bubble-menu {
+  flex-wrap: wrap;
+  height: auto;
+  min-height: 28px;
+}

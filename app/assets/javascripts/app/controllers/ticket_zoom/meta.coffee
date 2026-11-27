@@ -43,7 +43,6 @@ class App.TicketZoomMeta extends App.ControllerObserver
 
     {
       customer:     customer?.displayName()
-      department:   customer?.department
       organization: organization?.displayName()
       members:      organization?.member_ids?.length
     }
